@@ -1,14 +1,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <bochs.h>
-#include <config.h>
+#include "bochs.h"
+//#include "config.h"
+#include "elfloader/ElfLoader.h"
 
 void cpu(void);
 
-int main(void) {
- printf("Hello World!\n");
+int main(int argc, char **argv, char **envp) {
+	printf("Hello World!\n");
  
- cpu();
- return 0;
+	ElfLoader loader(argv[0]);
+
+	cpu();
+
+	return 0;
 }
