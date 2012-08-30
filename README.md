@@ -1,5 +1,5 @@
-Box
+Box: An IA32 Process Emulator
 Date: 30 - 08 - 2012
 ===
 
-An x86 Process Emulator
+Box is an experimental process emulator based on Bochs, for Linux IA32 binaries.
