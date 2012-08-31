@@ -156,7 +156,6 @@ box@EXE@: cpu/libcpu.a memory/libmemory.a fpu/libfpu.a \
 		iodev/libiodev.a \
 		elfparser/libelfparser.a \
 		elfloader/libelfloader.a \
-		elfloader/libelfloader.a \
 		runtime/libbox.a \
 		$(MCH_LINK_FLAGS) \
 		$(SIMX86_LINK_FLAGS) \
