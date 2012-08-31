@@ -148,7 +148,7 @@ all: @PRIMARY_TARGET@
 
 box@EXE@: cpu/libcpu.a memory/libmemory.a fpu/libfpu.a \
           elfparser/libelfparser.a elfloader/libelfloader.a \
-	  runtime/libbox.a
+	  runtime/libbox.a iodev/libiodev
 	@LINK@ @EXPORT_DYNAMIC@ $(BX_OBJS) \
 		cpu/libcpu.a \
 		memory/libmemory.a \
