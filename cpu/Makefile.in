@@ -40,7 +40,6 @@ BX_INCDIRS = -I.. -I$(srcdir)/.. -I../@INSTRUMENT_DIR@ -I$(srcdir)/../@INSTRUMEN
 # Objects which are synced between the cpu and cpu64 code and
 # are used for either compile.
 OBJS = \
-	test.o \
 	init.o \
 	cpu.o \
 	event.o \

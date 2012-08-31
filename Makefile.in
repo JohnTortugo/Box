@@ -121,7 +121,6 @@ BX_INCDIRS = -I. -I$(srcdir)/. -I@INSTRUMENT_DIR@ -I$(srcdir)/@INSTRUMENT_DIR@
 #CFLAGS  = -ansi -O -g -Wunused -Wuninitialized
 
 NONINLINE_OBJS = \
-	box.o \
 	@EXTRA_BX_OBJS@
 
 EXTERN_ENVIRONMENT_OBJS = \
