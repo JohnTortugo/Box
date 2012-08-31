@@ -185,6 +185,11 @@ fpu/libfpu.a::
 	$(MAKE) $(MDEFINES) libfpu.a
 	@CD_UP_ONE@
 
+iodev/libiodev.a::
+	cd iodev @COMMAND_SEPARATOR@
+	$(MAKE) $(MDEFINES) libiodev.a
+	@CD_UP_ONE@
+
 elfparser/libelfparser.a::
 	cd elfparser @COMMAND_SEPARATOR@
 	$(MAKE) $(MDEFINES) libelfparser.a
