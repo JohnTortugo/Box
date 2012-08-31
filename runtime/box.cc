@@ -3,7 +3,7 @@
 
 #include "bochs.h"
 #include "config.h"
-#include <elfloader/ElfLoader.h>
+#include "elfloader/ElfLoader.h"
 
 void cpu(void);
 

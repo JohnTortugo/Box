@@ -36,7 +36,8 @@ X_PRE_LIBS = @X_PRE_LIBS@
 RANLIB = @RANLIB@
 
 
-BX_INCDIRS = -I.. -I$(srcdir)/.. -I../elfparser -I$(srcdir)/../elfparser
+BX_INCDIRS = -I.. -I$(srcdir)/.. -I../elfparser -I$(srcdir)/../elfparser \
+	     -I../@INSTRUMENT_DIR@ -I$(srcdir)/../@INSTRUMENT_DIR@
 
 BX_OBJS = \
 	box.o 

@@ -184,14 +184,24 @@ memory/libmemory.a::
 	$(MAKE) $(MDEFINES) libmemory.a
 	@CD_UP_ONE@
 
+fpu/libfpu.a::
+	cd fpu @COMMAND_SEPARATOR@
+	$(MAKE) $(MDEFINES) libfpu.a
+	@CD_UP_ONE@
+
 elfparser/libelfparser.a::
-	cd memory @COMMAND_SEPARATOR@
+	cd elfparser @COMMAND_SEPARATOR@
 	$(MAKE) $(MDEFINES) libelfparser.a
 	@CD_UP_ONE@
 
-elfparser/libelfloader.a::
-	cd memory @COMMAND_SEPARATOR@
+elfloader/libelfloader.a::
+	cd elfloader @COMMAND_SEPARATOR@
 	$(MAKE) $(MDEFINES) libelfloader.a
+	@CD_UP_ONE@
+
+runtime/libbox.a::
+	cd runtime @COMMAND_SEPARATOR@
+	$(MAKE) $(MDEFINES) libbox.a
 	@CD_UP_ONE@
 
 
