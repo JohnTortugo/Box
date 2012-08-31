@@ -117,19 +117,8 @@ BXIMAGE_LINK_OPTS = @BXIMAGE_LINK_OPTS@
 
 BX_INCDIRS = -I. -I$(srcdir)/. -I@INSTRUMENT_DIR@ -I$(srcdir)/@INSTRUMENT_DIR@
 
-#SUBDIRS = iodev bx_debug
-
-#all install uninstall: config.h#
-#        for subdir in $(SUBDIRS); do #
-#          echo making $@ in $$subdir; #
-#          ($(MAKE) -C $$subdir $(MDEFINES) $@) || exit 1; #
-#        done#
-
-
-
 # gnu flags for clean up
 #CFLAGS  = -ansi -O -g -Wunused -Wuninitialized
-
 
 NONINLINE_OBJS = \
 	box.o \
@@ -161,43 +150,21 @@ all: @PRIMARY_TARGET@
 
 @EXTERNAL_DEPENDENCY@
 
-box@EXE@: cpu/libcpu.a $(BX_OBJS)
+box@EXE@: cpu/libcpu.a memory/libmemory.a fpu/libfpu.a \
+          elfparser/libelfparser.a elfloader/libelfloader.a \
+	  runtime/libbox.a
 	@LINK@ @EXPORT_DYNAMIC@ $(BX_OBJS) \
 		cpu/libcpu.a \
+		memory/libmemory.a \
+		fpu/libfpu.a \
+		elfparser/libelfparser.a \
+		elfloader/libelfloader.a \
+		runtime/libbox.a \
 		$(MCH_LINK_FLAGS) \
 		$(SIMX86_LINK_FLAGS) \
 		$(READLINE_LIB) \
 		$(EXTRA_LINK_OPTS) \
 		$(LIBS)
-
-# Special make target for cygwin/mingw using dlltool instead of
-# libtool.  This creates a .DEF file, and exports file, an import library,
-# and then links bochs.exe with the exports file.
-.win32_dll_plugin_target: @IODEV_LIB_VAR@ @HDIMAGE_LIB_VAR@ @USB_LIB_VAR@ @NETWORK_LIB_VAR@ \
-		@SOUND_LIB_VAR@ @DEBUGGER_VAR@ cpu/libcpu.a cpu/cpudb/libcpudb.a \
-		memory/libmemory.a gui/libgui.a @DISASM_VAR@ @INSTRUMENT_VAR@ \
-		$(BX_OBJS) $(SIMX86_OBJS) @FPU_VAR@ @GDBSTUB_VAR@ @PLUGIN_VAR@
-	$(DLLTOOL) --export-all-symbols --output-def bochs.def \
-		$(BX_OBJS) $(SIMX86_OBJS) \
-		@IODEV_LIB_VAR@ @HDIMAGE_LIB_VAR@ @USB_LIB_VAR@ @NETWORK_LIB_VAR@ @SOUND_LIB_VAR@ \
-		cpu/libcpu.a cpu/cpudb/libcpudb.a memory/libmemory.a gui/libgui.a \
-		@DEBUGGER_VAR@ @DISASM_VAR@ @INSTRUMENT_VAR@ @PLUGIN_VAR@ \
-		@GDBSTUB_VAR@ @FPU_VAR@
-	$(DLLTOOL) --dllname bochs.exe --def bochs.def --output-lib dllexports.a
-	$(DLLTOOL) --dllname bochs.exe --output-exp bochs.exp --def bochs.def
-	$(CXX) -o bochs.exe $(CXXFLAGS) $(LDFLAGS) -export-dynamic \
-	    $(BX_OBJS) bochs.exp $(SIMX86_OBJS) \
-		@IODEV_LIB_VAR@ @HDIMAGE_LIB_VAR@ @USB_LIB_VAR@ @NETWORK_LIB_VAR@ @SOUND_LIB_VAR@ \
-		cpu/libcpu.a cpu/cpudb/libcpudb.a memory/libmemory.a gui/libgui.a \
-		@DEBUGGER_VAR@ @DISASM_VAR@ @INSTRUMENT_VAR@ @PLUGIN_VAR@ \
-		@GDBSTUB_VAR@ @FPU_VAR@ \
-		$(GUI_LINK_OPTS) \
-		$(MCH_LINK_FLAGS) \
-		$(SIMX86_LINK_FLAGS) \
-		$(READLINE_LIB) \
-		$(EXTRA_LINK_OPTS) \
-		$(LIBS)
-	touch .win32_dll_plugin_target
 
 $(BX_OBJS): $(BX_INCLUDES)
 
@@ -216,6 +183,17 @@ memory/libmemory.a::
 	cd memory @COMMAND_SEPARATOR@
 	$(MAKE) $(MDEFINES) libmemory.a
 	@CD_UP_ONE@
+
+elfparser/libelfparser.a::
+	cd memory @COMMAND_SEPARATOR@
+	$(MAKE) $(MDEFINES) libelfparser.a
+	@CD_UP_ONE@
+
+elfparser/libelfloader.a::
+	cd memory @COMMAND_SEPARATOR@
+	$(MAKE) $(MDEFINES) libelfloader.a
+	@CD_UP_ONE@
+
 
 #####################################################################
 # Install target for all platforms.
