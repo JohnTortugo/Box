@@ -7,10 +7,10 @@
 
 void cpu(void);
 
-int main(int argc, char **argv, char **envp) {
+int main(int argc, char **argv) {
 	printf("Hello World!\n");
- 
-	ElfLoader loader(argv[0]);
+
+	ElfLoader loader(argv[0], getenv("LD_LIBRARY_PATH"));
 
 	cpu();
 

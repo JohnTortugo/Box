@@ -34,6 +34,9 @@ class ElfParser {
 		// content of .dynamic sections
 		vector<string> needed_libraries;
 
+		// onde procurar bibliotecas compartilhadas
+		string rPath;
+
 	// private methods
 
 	// public methods
@@ -61,7 +64,7 @@ class ElfParser {
 
 			extractSections();
 
-			printDynamicSection();
+			parseDynamicEntries();
 
 			// close elf file
 			fclose(felf);
@@ -105,7 +108,7 @@ class ElfParser {
 			fread(sec_hdr_table, hdrt.sh_size, 1, felf);
 		}
 
-		void parseDynamicSections() {
+		void parseDynamicEntries() {
 			for (int i=0; i<dynSecEntries.size(); i++) {
 				Elf32_Dyn dyn = dynSecEntries[i];
 
@@ -114,6 +117,7 @@ class ElfParser {
 						/* nothing needed */
 						break;
 					case DT_NEEDED:
+						needed_libraries.push_back((char *)&dyn_str_table[dyn.d_un.d_val]);
 						break;
 					case DT_PLTRELSZ:
 						break;
@@ -142,6 +146,7 @@ class ElfParser {
 					case DT_SONAME:
 						break;
 					case DT_RPATH:
+						rPath = string((char *) &dyn_str_table[dyn.d_un.d_val]);
 						break;
 					case DT_SYMBOLIC:
 						break;
@@ -168,6 +173,7 @@ class ElfParser {
 		}
 
 		void printDynamicSection() {
+			// iterate over all entries in .dynamic section
 			for (int i=0; i<dynSecEntries.size(); i++) {
 				Elf32_Dyn dyn = dynSecEntries[i];
 
@@ -230,7 +236,7 @@ class ElfParser {
 			}
 		}
 
-		// extract the content of dynamic section
+		// extract each entry of .dynamic section and store in dynSecEntries
 		void extractDynamicSection(Elf32_Shdr dSec) {
 			fseek(felf, dSec.sh_offset, SEEK_SET);
 
@@ -267,6 +273,7 @@ class ElfParser {
 			}
 		}
 
+		// iterate over Section Header entries and extract the content of each section
 		// extract the content of all sections
 		void extractSections() {
 			for (int i=0; i<shEntries.size(); i++) {
@@ -377,6 +384,16 @@ class ElfParser {
 			printf("e_shentsize: 	0x%x\n", hdr.e_shentsize);
 			printf("e_shnum: 		0x%x\n", hdr.e_shnum);
 			printf("e_shstrndx: 	0x%x\n", hdr.e_shstrndx);
+		}
+
+
+		// accessor methods
+		vector<string> getNeededLibraries() {
+			return this->needed_libraries;
+		}
+
+		string getRpath() {
+			return this->rPath;
 		}
 };
 
