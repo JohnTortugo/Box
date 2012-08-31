@@ -146,20 +146,40 @@ all: libcpu.a
 	$(CXX) @DASH@c $(BX_INCDIRS) $(CXXFLAGS) @CXXFP@$< @OFP@$@
 
 
-libcpu.a: $(OBJS) @OBJS64@ 
+libcpu.a: $(OBJS) @OBJS64@ cpudb/libcpudb.a
 	@RMCOMMAND@ libcpu.a
-	@MAKELIB@ $(OBJS) @OBJS64@
+	@MAKELIB@ $(OBJS) @OBJS64@ cpudb/libcpudb.a
 	$(RANLIB) libcpu.a
 
 $(OBJS): $(BX_INCLUDES)
 
 $(OBJS64): $(BX_INCLUDES)
 
-clean:
+cpudb/libcpudb.a:
+	cd cpudb @COMMAND_SEPARATOR@
+	$(MAKE) $(MDEFINES) libcpudb.a
+	@CD_UP_ONE@
+
+	
+SUBDIRS = cpudb
+
+clean: local-clean
+	for subdir in $(SUBDIRS); do \
+	    echo making $@ in $$subdir; \
+	    ($(MAKE) -C $$subdir $(MDEFINES) $@) || exit 1; \
+	done
+
+dist-clean: local-dist-clean
+	for subdir in $(SUBDIRS); do \
+	    echo making $@ in $$subdir; \
+	    ($(MAKE) -C $$subdir $(MDEFINES) $@) || exit 1; \
+	done
+
+local-clean:
 	@RMCOMMAND@ *.o
 	@RMCOMMAND@ *.a
 
-dist-clean: clean
+local-dist-clean: 
 	@RMCOMMAND@ Makefile
 
 ###########################################

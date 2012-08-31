@@ -117,9 +117,6 @@ BXIMAGE_LINK_OPTS = @BXIMAGE_LINK_OPTS@
 
 BX_INCDIRS = -I. -I$(srcdir)/. -I@INSTRUMENT_DIR@ -I$(srcdir)/@INSTRUMENT_DIR@
 
-# gnu flags for clean up
-#CFLAGS  = -ansi -O -g -Wunused -Wuninitialized
-
 NONINLINE_OBJS = \
 	@EXTRA_BX_OBJS@
 
@@ -217,26 +214,6 @@ install: all @INSTALL_TARGET@
 # tools.
 #####################################################################
 
-install_win32: download_dlx @INSTALL_DOCBOOK_VAR@
-	-mkdir -p $(prefix)
-	cp obj-release/*.exe .
-	for i in $(INSTALL_LIST_WIN32); do if test -f $$i; then cp $$i $(prefix); else cp $(srcdir)/$$i $(prefix); fi; done
-	cp $(srcdir)/misc/sb16/sb16ctrl.example $(prefix)/sb16ctrl.txt
-	cp $(srcdir)/misc/sb16/sb16ctrl.exe $(prefix)
-	#cat $(srcdir)/build/win32/DOC-win32.htm | $(SED) -e 's/@VERSION@/$(VERSION)/g' > $(prefix)/DOC-win32.htm
-	cp $(srcdir)/.bochsrc $(prefix)/bochsrc-sample.txt
-	-mkdir $(prefix)/keymaps
-	cp $(srcdir)/gui/keymaps/*.map $(prefix)/keymaps
-	cat $(DLXLINUX_TAR) | (cd $(prefix) && tar xzvf -)
-	echo '..\bochs' > $(prefix)/dlxlinux/start.bat
-	dlxrc=$(prefix)/dlxlinux/bochsrc.txt; mv $$dlxrc $$dlxrc.orig && sed < $$dlxrc.orig 's/\/usr\/local\/bochs\/latest/../' > $$dlxrc && rm -f $$dlxrc.orig
-	mv $(prefix)/README $(prefix)/README.orig
-	cat $(srcdir)/build/win32/README.win32-binary $(prefix)/README.orig > $(prefix)/README
-	rm -f $(prefix)/README.orig
-	for i in $(TEXT_FILE_LIST); do mv $(prefix)/$$i $(prefix)/$$i.txt; done
-	cd $(prefix); $(UNIX2DOS) *.txt */*.txt
-	cd $(prefix); NAME=`pwd|$(SED) 's/.*\///'`; (cd ..; $(ZIP) $$NAME.zip -r $$NAME); ls -l ../$$NAME.zip
-
 #####################################################################
 # install target for unix
 #####################################################################
@@ -280,19 +257,6 @@ install_doc::
 	$(CAT) $(srcdir)/build/linux/README.linux-binary $(srcdir)/README > $(DESTDIR)$(docdir)/README
 	install -m 644 $(srcdir)/.bochsrc $(DESTDIR)$(docdir)/bochsrc-sample.txt
 
-
-# docbook section: the -C option can be used here
-build_docbook::
-	$(MAKE) -C doc/docbook
-
-dl_docbook::
-	$(MAKE) -C doc/docbook dl_docs
-
-install_docbook: build_docbook
-	$(MAKE) -C doc/docbook install
-
-clean_docbook::
-	$(MAKE) -C doc/docbook clean
 
 install_man::
 	-mkdir -p $(DESTDIR)$(man1dir)
@@ -352,137 +316,33 @@ tar:
 zip:
 	NAME=`pwd|$(SED) 's/.*\///'`; (cd ..; $(RM) -f $$NAME-msvc-src.zip; $(ZIP) $$NAME-msvc-src.zip -r $$NAME -x \*CVS\* -x \*.cvsignore -x \*.svn\* ); ls -l ../$$NAME-msvc-src.zip
 
-clean:
+SUBDIRS = cpu fpu memory runtime elfparser elfloader
+
+clean: local-clean
+	for subdir in $(SUBDIRS); do \
+	    echo making $@ in $$subdir; \
+	    ($(MAKE) -C $$subdir $(MDEFINES) $@) || exit 1; \
+	done
+
+dist-clean: local-dist-clean
+	for subdir in $(SUBDIRS); do \
+	    echo making $@ in $$subdir; \
+	    ($(MAKE) -C $$subdir $(MDEFINES) $@) || exit 1; \
+	done
+
+local-clean:
 	@RMCOMMAND@ *.o
 	@RMCOMMAND@ *.a
-	@RMCOMMAND@ bochs
-	@RMCOMMAND@ bochs.exe
-	@RMCOMMAND@ bximage
-	@RMCOMMAND@ bximage.exe
-	@RMCOMMAND@ bxcommit
-	@RMCOMMAND@ bxcommit.exe
-	@RMCOMMAND@ niclist
-	@RMCOMMAND@ niclist.exe
-	@RMCOMMAND@ bochs.out
-	@RMCOMMAND@ bochsout.txt
-	@RMCOMMAND@ bochs.exp
-	@RMCOMMAND@ bochs.def
-	@RMCOMMAND@ bochs.scpt
+	@RMCOMMAND@ box@EXE@
 	@RMCOMMAND@ -rf bochs.app
 	@RMCOMMAND@ -rf .libs
-	@RMCOMMAND@ .win32_dll_plugin_target
 
-local-dist-clean: clean
+local-dist-clean: local-clean
 	@RMCOMMAND@ config.h config.status config.log config.cache
 	@RMCOMMAND@ .dummy `find . -name '*.dsp' -o -name '*.dsw' -o -name '*.opt' -o -name '.DS_Store'`
 	@RMCOMMAND@ bxversion.h bxversion.rc build/linux/bochs-dlx _rpm_top *.rpm
-	@RMCOMMAND@ build/win32/nsis/Makefile build/win32/nsis/bochs.nsi
-	@RMCOMMAND@ build/macosx/Info.plist build/macosx/script_compiled.rsrc
-	@RMCOMMAND@ libtool
+	@RMCOMMAND@ Makefile configure libtool
 	@RMCOMMAND@ ltdlconf.h
-
-clean_pcidev::
-	cd host/linux/pcidev @COMMAND_SEPARATOR@
-	$(MAKE) clean
-	@CD_UP_THREE@
-
-all-clean: clean @CLEAN_DOCBOOK_VAR@ @CLEAN_PCIDEV_VAR@
-	cd iodev @COMMAND_SEPARATOR@
-	$(MAKE) clean
-	@CD_UP_ONE@
-	cd iodev/hdimage @COMMAND_SEPARATOR@
-	$(MAKE) clean
-	@CD_UP_TWO@
-	cd iodev/usb @COMMAND_SEPARATOR@
-	$(MAKE) clean
-	@CD_UP_TWO@
-	cd iodev/network @COMMAND_SEPARATOR@
-	$(MAKE) clean
-	@CD_UP_TWO@
-	cd iodev/sound @COMMAND_SEPARATOR@
-	$(MAKE) clean
-	@CD_UP_TWO@
-	cd bx_debug @COMMAND_SEPARATOR@
-	$(MAKE) clean
-	@CD_UP_ONE@
-	cd cpu @COMMAND_SEPARATOR@
-	$(MAKE) clean
-	@CD_UP_ONE@
-	cd cpu/cpudb @COMMAND_SEPARATOR@
-	$(MAKE) clean
-	@CD_UP_TWO@
-	cd memory @COMMAND_SEPARATOR@
-	$(MAKE) clean
-	@CD_UP_ONE@
-	cd gui @COMMAND_SEPARATOR@
-	$(MAKE) clean
-	@CD_UP_ONE@
-	cd disasm @COMMAND_SEPARATOR@
-	$(MAKE) clean
-	@CD_UP_ONE@
-	cd @INSTRUMENT_DIR@ @COMMAND_SEPARATOR@
-	$(MAKE) clean
-	@CD_UP_TWO@
-	cd misc @COMMAND_SEPARATOR@
-	$(MAKE) clean
-	@CD_UP_ONE@
-	cd fpu @COMMAND_SEPARATOR@
-	$(MAKE) clean
-	@CD_UP_ONE@
-
-dist-clean: local-dist-clean
-	cd iodev @COMMAND_SEPARATOR@
-	$(MAKE) dist-clean
-	@CD_UP_ONE@
-	cd iodev/hdimage @COMMAND_SEPARATOR@
-	$(MAKE) dist-clean
-	@CD_UP_TWO@
-	cd iodev/usb @COMMAND_SEPARATOR@
-	$(MAKE) dist-clean
-	@CD_UP_TWO@
-	cd iodev/network @COMMAND_SEPARATOR@
-	$(MAKE) dist-clean
-	@CD_UP_TWO@
-	cd iodev/sound @COMMAND_SEPARATOR@
-	$(MAKE) dist-clean
-	@CD_UP_TWO@
-	cd bx_debug @COMMAND_SEPARATOR@
-	$(MAKE) dist-clean
-	@CD_UP_ONE@
-	cd bios @COMMAND_SEPARATOR@
-	$(MAKE) dist-clean
-	@CD_UP_ONE@
-	cd cpu @COMMAND_SEPARATOR@
-	$(MAKE) dist-clean
-	@CD_UP_ONE@
-	cd cpu/cpudb @COMMAND_SEPARATOR@
-	$(MAKE) dist-clean
-	@CD_UP_TWO@
-	cd memory @COMMAND_SEPARATOR@
-	$(MAKE) dist-clean
-	@CD_UP_ONE@
-	cd gui @COMMAND_SEPARATOR@
-	$(MAKE) dist-clean
-	@CD_UP_ONE@
-	cd disasm @COMMAND_SEPARATOR@
-	$(MAKE) dist-clean
-	@CD_UP_ONE@
-	cd @INSTRUMENT_DIR@ @COMMAND_SEPARATOR@
-	$(MAKE) dist-clean
-	@CD_UP_TWO@
-	cd misc @COMMAND_SEPARATOR@
-	$(MAKE) dist-clean
-	@CD_UP_ONE@
-	cd fpu @COMMAND_SEPARATOR@
-	$(MAKE) dist-clean
-	@CD_UP_ONE@
-	cd doc/docbook @COMMAND_SEPARATOR@
-	$(MAKE) dist-clean
-	@CD_UP_TWO@
-	cd host/linux/pcidev @COMMAND_SEPARATOR@
-	$(MAKE) dist-clean
-	@CD_UP_THREE@
-	@RMCOMMAND@ Makefile
 
 ###########################################
 # Build app on MacOS X
