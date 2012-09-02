@@ -309,16 +309,16 @@ class ElfParser {
 			printf("-------------------------\n");
 
 			for (int i=0; i<shEntries.size(); i++) {
-				printf("sh_name: 		0x%x\n", shEntries[i].sh_name);
-				printf("sh_type: 		0x%x\n", shEntries[i].sh_type);
-				printf("sh_flags: 		0x%x\n", shEntries[i].sh_flags);
-				printf("sh_addr: 		0x%x\n", shEntries[i].sh_addr);
-				printf("sh_offset: 		0x%x\n", shEntries[i].sh_offset);
-				printf("sh_size: 		0x%x\n", shEntries[i].sh_size);
-				printf("sh_link: 		0x%x\n", shEntries[i].sh_link);
-				printf("sh_info: 		0x%x\n", shEntries[i].sh_info);
-				printf("sh_addralign: 	0x%x\n", shEntries[i].sh_addralign);
-				printf("sh_entsize: 	0x%x\n", shEntries[i].sh_entsize);
+				printf("sh_name:      0x%04x\n", shEntries[i].sh_name);
+				printf("sh_type:      0x%04x\n", shEntries[i].sh_type);
+				printf("sh_flags:     0x%04x\n", shEntries[i].sh_flags);
+				printf("sh_addr:      0x%04x\n", shEntries[i].sh_addr);
+				printf("sh_offset:    0x%04x\n", shEntries[i].sh_offset);
+				printf("sh_size:      0x%04x\n", shEntries[i].sh_size);
+				printf("sh_link:      0x%04x\n", shEntries[i].sh_link);
+				printf("sh_info:      0x%04x\n", shEntries[i].sh_info);
+				printf("sh_addralign: 0x%04x\n", shEntries[i].sh_addralign);
+				printf("sh_entsize:   0x%04x\n", shEntries[i].sh_entsize);
 				printf("\n");
 			}
 
@@ -345,14 +345,14 @@ class ElfParser {
 			printf("-------------------------\n");
 
 			for (int i=0; i<phEntries.size(); i++) {
-				printf("p_type: 	0x%x\n", phEntries[i].p_type);
-				printf("p_offset: 	0x%x\n", phEntries[i].p_offset);
-				printf("p_vaddr: 	0x%x\n", phEntries[i].p_vaddr);
-				printf("p_paddr: 	0x%x\n", phEntries[i].p_paddr);
-				printf("p_filesz: 	0x%x\n", phEntries[i].p_filesz);
-				printf("p_memsz: 	0x%x\n", phEntries[i].p_memsz);
-				printf("p_flags: 	0x%x\n", phEntries[i].p_flags);
-				printf("p_align: 	0x%x\n", phEntries[i].p_align);
+				printf("p_type:   0x%04x\n", phEntries[i].p_type);
+				printf("p_offset: 0x%04x\n", phEntries[i].p_offset);
+				printf("p_vaddr:  0x%04x\n", phEntries[i].p_vaddr);
+				printf("p_paddr:  0x%04x\n", phEntries[i].p_paddr);
+				printf("p_filesz: 0x%04x\n", phEntries[i].p_filesz);
+				printf("p_memsz:  0x%04x\n", phEntries[i].p_memsz);
+				printf("p_flags:  0x%04x\n", phEntries[i].p_flags);
+				printf("p_align:  0x%04x\n", phEntries[i].p_align);
 				printf("\n");
 			}
 		}
@@ -368,22 +368,22 @@ class ElfParser {
 			printf("\nELF HEADER\n");
 			printf("-------------------------\n");
 
-			printf("e_ident: 		[");
-			for (int i=0; i<EI_NIDENT; i++) printf("%x ", hdr.e_ident[i]);
+			printf("e_ident:     [");
+			for (int i=0; i<EI_NIDENT; i++) printf("0x%02x ", hdr.e_ident[i]);
 			printf("]\n");
-			printf("e_type: 		0x%x\n", hdr.e_type);
-			printf("e_machine: 		0x%x\n", hdr.e_machine);
-			printf("e_version: 		0x%x\n", hdr.e_version);
-			printf("e_entry: 		0x%x\n", hdr.e_entry);
-			printf("e_phoff: 		0x%x\n", hdr.e_phoff);
-			printf("e_shoff: 		0x%x\n", hdr.e_shoff);
-			printf("e_flags: 		0x%x\n", hdr.e_flags);
-			printf("e_ehsize: 		0x%x\n", hdr.e_ehsize);
-			printf("e_phentsize: 	0x%x\n", hdr.e_phentsize);
-			printf("e_phnum: 		0x%x\n", hdr.e_phnum);
-			printf("e_shentsize: 	0x%x\n", hdr.e_shentsize);
-			printf("e_shnum: 		0x%x\n", hdr.e_shnum);
-			printf("e_shstrndx: 	0x%x\n", hdr.e_shstrndx);
+			printf("e_type:      0x%04x\n", hdr.e_type);
+			printf("e_machine:   0x%04x\n", hdr.e_machine);
+			printf("e_version:   0x%08x\n", hdr.e_version);
+			printf("e_entry:     0x%08x\n", hdr.e_entry);
+			printf("e_phoff:     0x%08x\n", hdr.e_phoff);
+			printf("e_shoff:     0x%08x\n", hdr.e_shoff);
+			printf("e_flags:     0x%08x\n", hdr.e_flags);
+			printf("e_ehsize:    0x%04x\n", hdr.e_ehsize);
+			printf("e_phentsize: 0x%04x\n", hdr.e_phentsize);
+			printf("e_phnum:     0x%04x\n", hdr.e_phnum);
+			printf("e_shentsize: 0x%04x\n", hdr.e_shentsize);
+			printf("e_shnum:     0x%04x\n", hdr.e_shnum);
+			printf("e_shstrndx:  0x%04x\n", hdr.e_shstrndx);
 		}
 
 
