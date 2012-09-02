@@ -322,7 +322,7 @@ tar:
 zip:
 	NAME=`pwd|$(SED) 's/.*\///'`; (cd ..; $(RM) -f $$NAME-msvc-src.zip; $(ZIP) $$NAME-msvc-src.zip -r $$NAME -x \*CVS\* -x \*.cvsignore -x \*.svn\* ); ls -l ../$$NAME-msvc-src.zip
 
-SUBDIRS = cpu fpu memory runtime elfparser elfloader
+SUBDIRS = cpu fpu iodev memory runtime elfparser elfloader
 
 clean: local-clean
 	for subdir in $(SUBDIRS); do \
@@ -345,6 +345,7 @@ local-clean:
 
 local-dist-clean: local-clean
 	@RMCOMMAND@ config.h config.status config.log config.cache
+	@RMCOMMAND@ -rf autom4te.cache
 	@RMCOMMAND@ .dummy `find . -name '*.dsp' -o -name '*.dsw' -o -name '*.opt' -o -name '.DS_Store'`
 	@RMCOMMAND@ bxversion.h bxversion.rc build/linux/bochs-dlx _rpm_top *.rpm
 	@RMCOMMAND@ Makefile configure libtool
