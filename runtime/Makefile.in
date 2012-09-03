@@ -40,20 +40,23 @@ BX_INCDIRS = -I.. -I$(srcdir)/.. -I../elfparser -I$(srcdir)/../elfparser \
 	     -I../@INSTRUMENT_DIR@ -I$(srcdir)/../@INSTRUMENT_DIR@
 
 BX_OBJS = \
-	box.o 
+	osdep.o \
+	pc_system.o \
+	config.o \
+	logio.o
 
 BX_INCLUDES = ../bochs.h ../config.h
 
-all: libbox.a
+all: libruntime.a main.o box.o
 
 .@CPP_SUFFIX@.o:
 	$(CXX) @DASH@c $(BX_INCDIRS) $(CXXFLAGS) @CXXFP@$< @OFP@$@
 
 
-libbox.a: $(BX_OBJS)
-	@RMCOMMAND@ libbox.a
+libruntime.a: $(BX_OBJS)
+	@RMCOMMAND@ libruntime.a
 	@MAKELIB@ $(BX_OBJS)
-	$(RANLIB) libbox.a
+	$(RANLIB) libruntime.a
 
 $(BX_OBJS): $(BX_INCLUDES)
 
@@ -69,3 +72,8 @@ dist-clean: clean
 #  gcc -MM -I.. -I../instrument/stubs *.cc | sed 's/\.cc/.@CPP_SUFFIX@/g'
 ###########################################
 box.o: box.@CPP_SUFFIX@ 
+main.o: box.@CPP_SUFFIX@ 
+osdep.o: osdep.@CPP_SUFFIX@ 
+logio.o: logio.@CPP_SUFFIX@ 
+config.o: config.@CPP_SUFFIX@ 
+pc_system.o: pc_system.@CPP_SUFFIX@ 

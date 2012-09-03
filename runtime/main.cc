@@ -1,15 +1,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "bochs.h"
-#include "config.h"
-#include "elfloader/ElfLoader.h"
+#include "../bochs.h"
+#include "../config.h"
+#include "../elfloader/ElfLoader.h"
 
-void cpu(void);
+int bxmain(void);
 
 int main(int argc, char **argv) {
-	printf("Hello World!\n");
+  printf("Hello World!\n");
 
-	ElfLoader loader(argv[0], getenv("LD_LIBRARY_PATH"));
-	return 0;
+  ElfLoader loader(argv[0], getenv("LD_LIBRARY_PATH"));
+
+  bx_startup_flags.argc = argc;
+  bx_startup_flags.argv = argv;
+  return bxmain();
 }
