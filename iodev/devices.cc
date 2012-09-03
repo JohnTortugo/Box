@@ -160,6 +160,7 @@ void bx_devices_c::init(BX_MEM_C *newmem)
   // "by hand" in this file.  Basically, we're using core plugins when we
   // want to control the init order.
   //
+  /* BOX:REMOVE
   PLUG_load_plugin(hdimage, PLUGTYPE_CORE);
 #if BX_NETWORKING
   network_enabled = is_network_enabled();
@@ -219,7 +220,7 @@ void bx_devices_c::init(BX_MEM_C *newmem)
     }
 #endif
   }
-
+ */
   // system hardware
   register_io_read_handler(this, &read_handler, 0x0092,
                            "Port 92h System Control", 1);
@@ -263,7 +264,7 @@ void bx_devices_c::init(BX_MEM_C *newmem)
   bulkIOQuantumsRequested = 0;
   bulkIOQuantumsTransferred = 0;
 
-  bx_init_plugins();
+  //BOX:REMOVE bx_init_plugins();
 
   /* now perform checksum of CMOS memory */
   DEV_cmos_checksum();
@@ -272,20 +273,20 @@ void bx_devices_c::init(BX_MEM_C *newmem)
 void bx_devices_c::reset(unsigned type)
 {
   mem->disable_smram();
-  bx_reset_plugins(type);
+  //BOX:REMOVE bx_reset_plugins(type);
 }
 
 void bx_devices_c::register_state()
 {
   bx_virt_timer.register_state();
-  bx_plugins_register_state();
+  //BOX:REMOVE bx_plugins_register_state();
 }
 
 void bx_devices_c::after_restore_state()
 {
   bx_slowdown_timer.after_restore_state();
   bx_virt_timer.set_realtime_delay();
-  bx_plugins_after_restore_state();
+  //BOX:REMOVE bx_plugins_after_restore_state();
 }
 
 void bx_devices_c::exit()
@@ -314,6 +315,7 @@ void bx_devices_c::exit()
   bx_virt_timer.setup();
   bx_slowdown_timer.exit();
 
+  /*BOX:REMOVE
   // unload optional and user plugins first
   bx_unload_plugins();
   bx_unload_core_plugins();
@@ -330,6 +332,7 @@ void bx_devices_c::exit()
   if (usb_enabled)
     PLUG_unload_plugin(usb_common);
 #endif
+  */
   init_stubs();
 }
 
@@ -895,34 +898,11 @@ bx_bool bx_devices_c::is_harddrv_enabled(void)
   return 0;
 }
 
-bx_bool bx_devices_c::is_network_enabled(void)
-{
-  if (PLUG_device_present("e1000") ||
-      PLUG_device_present("ne2k") ||
-      PLUG_device_present("pcipnic")) {
-    return 1;
-  }
-  return 0;
-}
+bx_bool bx_devices_c::is_network_enabled(void) { return 0; }
 
-bx_bool bx_devices_c::is_sound_enabled(void)
-{
-  if (PLUG_device_present("es1370") ||
-      PLUG_device_present("sb16")) {
-    return 1;
-  }
-  return 0;
-}
+bx_bool bx_devices_c::is_sound_enabled(void) { return 0; }
 
-bx_bool bx_devices_c::is_usb_enabled(void)
-{
-  if (PLUG_device_present("usb_ohci") ||
-      PLUG_device_present("usb_uhci") ||
-      PLUG_device_present("usb_xhci")) {
-    return 1;
-  }
-  return 0;
-}
+bx_bool bx_devices_c::is_usb_enabled(void) { return 0; }
 
 // removable keyboard/mouse registration
 void bx_devices_c::register_removable_keyboard(void *dev, bx_keyb_enq_t keyb_enq)
