@@ -565,22 +565,6 @@ bx_bool load_and_init_display_lib(void)
   const char *ci_name = ci_param->get_selected();
   bx_param_enum_c *gui_param = SIM->get_param_enum(BXPN_SEL_DISPLAY_LIBRARY);
   const char *gui_name = gui_param->get_selected();
-  if (!strcmp(ci_name, "wx")) {
-    BX_ERROR(("change of the config interface to wx not implemented yet"));
-  }
-  if (!strcmp(gui_name, "wx")) {
-    // they must not have used wx as the configuration interface, or bx_gui
-    // would already be initialized.  Sorry, it doesn't work that way.
-    BX_ERROR(("wxWidgets was not used as the configuration interface, so it cannot be used as the display library"));
-    // choose another, hopefully different!
-    gui_param->set (0);
-    gui_name = gui_param->get_selected();
-    if (!strcmp (gui_name, "wx")) {
-      BX_PANIC(("no alternative display libraries are available"));
-      return false;
-    }
-    BX_ERROR(("changing display library to '%s' instead", gui_name));
-  }
 
 #if BX_GUI_SIGHANDLER
   // set the flag for guis requiring a GUI sighandler.
@@ -590,6 +574,8 @@ bx_bool load_and_init_display_lib(void)
     bx_gui_sighandler = 1;
   }
 #endif
+
+  PLUG_load_plugin (nogui, PLUGTYPE_OPTIONAL);
 
   BX_ASSERT(bx_gui != NULL);
   return true;

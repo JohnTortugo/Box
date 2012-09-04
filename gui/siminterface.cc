@@ -324,8 +324,8 @@ void bx_init_siminterface()
     SIM = new bx_real_sim_c();
   if (root_param == NULL) {
     root_param = new bx_list_c(NULL,
-      "bochs",
-      "list of top level bochs parameters"
+      "box",
+      "list of top level box parameters"
       );
   }
 }

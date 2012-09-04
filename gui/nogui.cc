@@ -87,6 +87,7 @@ void bx_nogui_gui_c::specific_init(int argc, char **argv, unsigned headerbar_y)
 
 void bx_nogui_gui_c::handle_events(void)
 {
+  put("NGUI");
 }
 
 
