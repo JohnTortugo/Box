@@ -566,15 +566,6 @@ bx_bool load_and_init_display_lib(void)
   bx_param_enum_c *gui_param = SIM->get_param_enum(BXPN_SEL_DISPLAY_LIBRARY);
   const char *gui_name = gui_param->get_selected();
 
-#if BX_GUI_SIGHANDLER
-  // set the flag for guis requiring a GUI sighandler.
-  // useful when guis are compiled as plugins
-  // only term for now
-  if (!strcmp(gui_name, "term")) {
-    bx_gui_sighandler = 1;
-  }
-#endif
-
   PLUG_load_plugin (nogui, PLUGTYPE_OPTIONAL);
 
   BX_ASSERT(bx_gui != NULL);
@@ -1064,15 +1055,6 @@ void CDECL bx_signal_handler(int signum)
     BX_INFO (("bx_signal_handler: ignored sig %d because it wasn't called from the simulator thread", signum));
     return;
   }
-#if BX_GUI_SIGHANDLER
-  if (bx_gui_sighandler) {
-    // GUI signal handler gets first priority, if the mask says it's wanted
-    if ((1<<signum) & bx_gui->get_sighandler_mask()) {
-      bx_gui->sighandler(signum);
-      return;
-    }
-  }
-#endif
 
 #if BX_SHOW_IPS
   static Bit64u ticks_count = 0;
@@ -1092,24 +1074,12 @@ void CDECL bx_signal_handler(int signum)
         fflush(stdout);
       }
     }
-#if !defined(WIN32)
-    if (!SIM->is_wx_selected()) {
-      signal(SIGALRM, bx_signal_handler);
-      alarm(1);
-    }
-#endif
     return;
   }
 #endif
 
-#if BX_GUI_SIGHANDLER
-  if (bx_gui_sighandler) {
-    if ((1<<signum) & bx_gui->get_sighandler_mask ()) {
-      bx_gui->sighandler(signum);
-      return;
-    }
-  }
-#endif
-
-  BX_PANIC(("SIGNAL %u caught", signum));
+  if ( signum == 2 ) 
+   exit(0);
+  else
+   BX_PANIC(("SIGNAL %u caught", signum));
 }

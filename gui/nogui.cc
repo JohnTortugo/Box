@@ -85,10 +85,7 @@ void bx_nogui_gui_c::specific_init(int argc, char **argv, unsigned headerbar_y)
 // the gui code can poll for keyboard, mouse, and other
 // relevant events.
 
-void bx_nogui_gui_c::handle_events(void)
-{
-  put("NGUI");
-}
+void bx_nogui_gui_c::handle_events(void) {  }
 
 
 // ::FLUSH()
