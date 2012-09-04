@@ -2442,7 +2442,7 @@ AC_PATH_PROG(TAR, tar)
 AC_OUTPUT(Makefile cpu/Makefile cpu/cpudb/Makefile memory/Makefile \
           fpu/Makefile elfparser/Makefile elfloader/Makefile \
 	  iodev/Makefile runtime/Makefile disasm/Makefile \
-          gui/Makefile bxversion.h bxversion.rc)
+          gui/Makefile bxversion.h)
 # gui/Makefile disasm/Makefile ${INSTRUMENT_DIR}/Makefile misc/Makefile \
 # fpu/Makefile doc/docbook/Makefile build/linux/bochs-dlx \
 # bxversion.h bxversion.rc build/macosx/Info.plist \

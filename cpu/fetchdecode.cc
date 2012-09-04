@@ -1301,6 +1301,8 @@ fetch_b1:
   b1 = *iptr++;
   remain--;
 
+  printf("IP %lx\n" ,iptr);
+
   switch (b1) {
     case 0x0f: // 2-byte escape
       if (remain != 0) {

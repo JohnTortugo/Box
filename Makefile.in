@@ -216,7 +216,7 @@ elfloader/libelfloader.a::
 	$(MAKE) $(MDEFINES) libelfloader.a
 	@CD_UP_ONE@
 
-runtime/libruntime.a::
+runtime/libruntime.a:
 	cd runtime @COMMAND_SEPARATOR@
 	$(MAKE) $(MDEFINES) all
 	@CD_UP_ONE@
