@@ -1878,56 +1878,7 @@ CD_UP_THREE="echo done"
 INSTALL_TARGET=install_unix
 INSTALL_LIST_FOR_PLATFORM=
 
-# check for existence of and usable version of wxWidgets.  This comes
-# early so that it could affect which one gets chosen.
-if test x$WX_CONFIG = x; then
-  AC_CHECK_PROG(WX_CONFIG, [ wx-config --version ], wx-config, not_found)
-fi
-AC_MSG_CHECKING(for wxWidgets configuration script)
-AC_MSG_RESULT($WX_CONFIG)
-
-ok_wx_version=0
-wx_multi_lib=0
-needs_gtk2=0
-wx_needs_gdk2=0
-AC_MSG_CHECKING(for wxWidgets library version)
-if test x$WX_CONFIG != xnot_found; then
-  WX_VERSION=`$WX_CONFIG --version`
-  WX_BASENAME=`$WX_CONFIG --basename`
-  [
-  # test that version >= 2.3.2.  Anybody have a better way to do this? Yuck.
-  case x$WX_VERSION in
-    x2.[012]*) ;; # less than version 2.3.x
-    x2.3.[01]) ;; # less than version 2.3.2
-    x2.3.[2-4]*) ok_wx_version=1 ;;  # 2.3.2 or greater
-    x2.[4-5]*) ok_wx_version=1 ;;  # version 2.4 / 2.5
-    x2.[6-9]*)  # version 2.6 or greater
-      ok_wx_version=1
-      wx_multi_lib=1
-      case x$WX_BASENAME in
-        xwx_gtk2|xwx_gtk2u) wx_needs_gdk2=1 ;;
-        *) ;;
-      esac
-      ;;
-    x[3-9]*) ok_wx_version=1 ;;  # version 3 or greater
-    *) ;; # who knows?
-  esac
-  ]
-fi
-AC_MSG_RESULT($WX_VERSION)
-if test "$cross_configure" = 0; then
-  if test "$ok_wx_version" = 1; then
-    # detected a usable version
-    if test "$with_all_libs" = yes; then
-      with_wx=yes
-    fi
-  else
-    if test "$with_wx" = yes; then
-      AC_MSG_WARN([Bochs for wxWidgets cannot be compiled here, disabling it])
-    fi
-    with_wx=no
-  fi
-fi
+with_wx=no
 
 AC_MSG_CHECKING(for default gui on this platform)
 AC_MSG_RESULT($DEFAULT_GUI)
@@ -1938,252 +1889,25 @@ display_libs=""
 # indicate the platform.  Settings that depend on the platform should be
 # handled later.
 
-XPM_LIB=''
-if test "$with_x11" = yes; then
-  display_libs="$display_libs X11"
-  if test "$no_x" = yes; then
-    echo ERROR: X windows gui was selected, but X windows libraries were not found.
-    exit 1
-  fi
+check_xpm=0
+AC_DEFINE(BX_WITH_X11, 0)
+AC_DEFINE(BX_WITH_SDL, 0)
+AC_DEFINE(BX_WITH_SVGA, 0)
+AC_DEFINE(BX_WITH_RFB, 0)
+AC_DEFINE(BX_WITH_AMIGAOS, 0)
+AC_DEFINE(BX_WITH_WIN32, 0)
+AC_DEFINE(BX_WITH_MACOS, 0)
+AC_DEFINE(BX_WITH_CARBON, 0)
+AC_DEFINE(BX_WITH_TERM, 0)
+AC_DEFINE(BX_WITH_WX, 0)
+AC_DEFINE(BX_WITH_NOGUI, 1)
 
-  check_xpm=0
-  AC_MSG_CHECKING(whether user wants XPM support)
-  AC_ARG_ENABLE(xpm,
-    [  --enable-xpm                      enable the check for XPM support],
-    [if test "$enableval" = yes; then
-      check_xpm=0
-      AC_MSG_RESULT(yes)
-      check_xpm=1
-     else
-      AC_MSG_RESULT(no)
-      check_xpm=0
-     fi],
-    [
-      AC_MSG_RESULT(yes)
-      check_xpm=1
-      ]
-    )
-  if test $check_xpm = 1; then
-    AC_CHECK_HEADER(X11/xpm.h, [
-        AC_DEFINE(BX_HAVE_XPM_H)
-        XPM_LIB='-lXpm'
-      ])
-  fi
-
-  if test "$PKGCONFIG" != not_found; then
-    X_CFLAGS="`pkg-config --cflags x11`"
-    X_LIBS="`pkg-config --libs x11` $XPM_LIB -lXrandr"
-  else
-    X_LIBS="$X_LIBS -lX11 $XPM_LIB -lXrandr"
-  fi
-
-  AC_DEFINE(BX_WITH_X11, 1)
-  SPECIFIC_GUI_OBJS="$SPECIFIC_GUI_OBJS \$(GUI_OBJS_X11)"
-  GUI_CFLAGS="$GUI_CFLAGS \$(X_CFLAGS)"
-  GUI_CXXFLAGS="$GUI_CXXFLAGS \$(X_CFLAGS)"
-  GUI_LINK_OPTS="$GUI_LINK_OPTS \$(GUI_LINK_OPTS_X)"
-  # The enhanced X debugger depends on GTK2
-  if test "$gui_debugger" = 1; then
-    needs_gtk2=1
-  fi
-fi
-AC_SUBST(X_CFLAGS)
-AC_SUBST(X_LIBS)
-
-if test "$with_sdl" = yes; then
-  display_libs="$display_libs sdl"
-  AC_DEFINE(BX_WITH_SDL, 1)
-  SPECIFIC_GUI_OBJS="$SPECIFIC_GUI_OBJS \$(GUI_OBJS_SDL)"
-  # GUI_*FLAGS are added to the compilation of every bochs file, not just
-  # the files in gui/*.cc.
-  SDL_CFLAGS=`sdl-config --cflags`
-  GUI_CFLAGS="$GUI_CFLAGS $SDL_CFLAGS"
-  GUI_CXXFLAGS="$GUI_CXXFLAGS $SDL_CFLAGS"
-  GUI_LINK_OPTS="$GUI_LINK_OPTS \$(GUI_LINK_OPTS_SDL)"
-  # The enhanced X debugger depends on GTK2
-  if test "$gui_debugger" = 1 -a "$DEFAULT_GUI" != win32; then
-    needs_gtk2=1
-  fi
-  if test "$with_win32" != yes -a "$with_wx" != yes; then
-    case $target in
-      *-pc-windows*)
-         RC_CMD="rc /fo"
-         EXTRA_BX_OBJS="$EXTRA_BX_OBJS win32res.o"
-         ;;
-      *-cygwin* | *-mingw32*)
-         RC_CMD="windres -I. -o "
-         EXTRA_BX_OBJS="$EXTRA_BX_OBJS win32res.o"
-         ;;
-    esac
-  fi
-fi
-
-if test "$with_svga" = yes; then
-  display_libs="$display_libs svga"
-  AC_DEFINE(BX_WITH_SVGA, 1)
-  SPECIFIC_GUI_OBJS="$SPECIFIC_GUI_OBJS \$(GUI_OBJS_SVGA)"
-  # GUI_*FLAGS are added to the compilation of every bochs file, not just
-  # the files in gui/*.cc.
-  GUI_CFLAGS="$GUI_CFLAGS"
-  GUI_CXXFLAGS="$GUI_CXXFLAGS"
-  GUI_LINK_OPTS="$GUI_LINK_OPTS \$(GUI_LINK_OPTS_SVGA)"
-fi
-
-if test "$with_rfb" = yes; then
-  display_libs="$display_libs rfb"
-  AC_DEFINE(BX_WITH_RFB, 1)
-  SPECIFIC_GUI_OBJS="$SPECIFIC_GUI_OBJS \$(GUI_OBJS_RFB)"
-  GUI_LINK_OPTS="$GUI_LINK_OPTS \$(GUI_LINK_OPTS_RFB)"
-fi
-
-if test "$with_amigaos" = yes; then
-  display_libs="$display_libs amigaos"
-  AC_DEFINE(BX_WITH_AMIGAOS, 1)
-  SPECIFIC_GUI_OBJS="$SPECIFIC_GUI_OBJS \$(GUI_OBJS_AMIGAOS)"
-  GUI_LINK_OPTS="$GUI_LINK_OPTS \$(GUI_LINK_OPTS_AMIGAOS)"
-fi
-
-if test "$with_win32" = yes; then
-  display_libs="$display_libs win32"
-  AC_DEFINE(BX_WITH_WIN32, 1)
-  SPECIFIC_GUI_OBJS="$SPECIFIC_GUI_OBJS \$(GUI_OBJS_WIN32)"
-  case $target in
-    *-pc-windows*)
-       if test "$with_wx" != yes; then
-         RC_CMD="rc /fo"
-         EXTRA_BX_OBJS="$EXTRA_BX_OBJS win32res.o"
-       fi
-       GUI_LINK_OPTS="$GUI_LINK_OPTS \$(GUI_LINK_OPTS_WIN32_VCPP)"
-       ;;
-    *-cygwin* | *-mingw32*)
-       if test "$with_wx" != yes; then
-         RC_CMD="windres -I. -o "
-         EXTRA_BX_OBJS="$EXTRA_BX_OBJS win32res.o"
-       fi
-       GUI_LINK_OPTS="$GUI_LINK_OPTS \$(GUI_LINK_OPTS_WIN32)"
-       ;;
-    *) echo Unsupported compile setup: GUI library is win32, but target is neither windows nor cygwin.
-       ;;
-  esac
-fi
-
-if test "$with_macos" = yes; then
-  display_libs="$display_libs macos"
-  AC_DEFINE(BX_WITH_MACOS, 1)
-  SPECIFIC_GUI_OBJS="$SPECIFIC_GUI_OBJS \$(GUI_OBJS_MACOS)"
-  GUI_LINK_OPTS="$GUI_LINK_OPTS \$(GUI_LINK_OPTS_MACOS)"
-fi
-
-if test "$with_carbon" = yes; then
-  display_libs="$display_libs carbon"
-  AC_DEFINE(BX_WITH_CARBON, 1)
-  SPECIFIC_GUI_OBJS="$SPECIFIC_GUI_OBJS \$(GUI_OBJS_CARBON)"
-  GUI_LINK_OPTS="$GUI_LINK_OPTS \$(GUI_LINK_OPTS_CARBON)"
-  if test "$bx_plugins" = 1; then
-    PRIMARY_TARGET=bochs.app/.build_plugins   # only for carbon application
-  else
-    PRIMARY_TARGET=bochs.app/.build   # only for carbon application
-  fi
-  INSTALL_TARGET='install_macosx'
-fi
-
-if test "$with_term" = yes; then
-  display_libs="$display_libs term"
-  AC_DEFINE(BX_WITH_TERM, 1)
-  SPECIFIC_GUI_OBJS="$SPECIFIC_GUI_OBJS \$(GUI_OBJS_TERM)"
-  GUI_LINK_OPTS="$GUI_LINK_OPTS \$(GUI_LINK_OPTS_TERM)"
-  use_curses=yes
-fi
-
-if test "$with_wx" = yes; then
-  display_libs="$display_libs wxWidgets"
-  if test "$cross_configure" = 1; then
-    true  # do not insist, if configuring for another machine
-  else
-    if test x$ok_wx_version != x1; then
-      echo ERROR: A usable version of wxWidgets was not found.
-      echo Upgrade the library or choose another gui.
-      exit 1
-    fi
-  fi
-  AC_DEFINE(BX_WITH_WX, 1)
-  SPECIFIC_GUI_OBJS="$SPECIFIC_GUI_OBJS \$(GUI_OBJS_WX)"
-  SPECIFIC_GUI_SUPPORT_OBJS="$SPECIFIC_GUI_SUPPORT_OBJS \$(GUI_OBJS_WX_SUPPORT)"
-  WX_CFLAGS="`$WX_CONFIG --cflags`"
-  WX_CXXFLAGS="`$WX_CONFIG --cxxflags`"
-  if test "$wx_needs_gdk2" = 1; then
-    GDK_CFLAGS="`pkg-config --cflags gdk-2.0`"
-    WX_CFLAGS="$WX_CFLAGS $GDK_CFLAGS"
-    WX_CXXFLAGS="$WX_CXXFLAGS $GDK_CFLAGS"
-  fi
-  if test "$wx_multi_lib" = 1; then
-    GUI_LINK_OPTS_WX="`$WX_CONFIG --libs core,base`"
-  else
-    GUI_LINK_OPTS_WX="`$WX_CONFIG --libs`"
-  fi
-  # GUI_C*FLAGS are added to the compilation of every bochs file, not just
-  # the files in gui/*.cc.  They are not used when building other things
-  # such as bximage.
-  GUI_CFLAGS="$GUI_CFLAGS $WX_CFLAGS"
-  GUI_CXXFLAGS="$GUI_CXXFLAGS $WX_CXXFLAGS"
-  GUI_LINK_OPTS="$GUI_LINK_OPTS \$(GUI_LINK_OPTS_WX)"
-  # using debugger with readline is failing due to thread/signal handler
-  # problems.
-  case $target in
-    *-pc-windows* | *-cygwin* | *-mingw32*)
-       EXTRA_BX_OBJS="$EXTRA_BX_OBJS wxbochs_resources.o"
-	   GUI_LINK_OPTS_WX="$GUI_LINK_OPTS_WX --subsystem,windows -mwindows"
-       ;;
-  esac
-fi
-
-if test "$with_nogui" = yes; then
-  display_libs="$display_libs nogui"
-  AC_DEFINE(BX_WITH_NOGUI, 1)
-  SPECIFIC_GUI_OBJS="$SPECIFIC_GUI_OBJS \$(GUI_OBJS_NOGUI)"
-fi
+SPECIFIC_GUI_OBJS="$SPECIFIC_GUI_OBJS \$(GUI_OBJS_NOGUI)"
 
 AC_MSG_CHECKING(for display libraries)
 AC_MSG_RESULT($display_libs)
 
-if test "$display_libs" = ""; then
-  echo "No display libraries were selected. Use --with-* options to enable"
-  echo "individual display libraries, or --with-all-libs to detect the ones"
-  echo "that Bochs supports."
-  exit 1
-fi
-
-# some display libraries and the enhanced debugger may depend on the GTK+ software package
-if test "$needs_gtk2" = 1; then
-  # pkg-config is required to set TOOLKIT_CXXFLAGS and LIBS
-  if test "$PKGCONFIG" != not_found; then
-    TOOLKIT_CXXFLAGS="`pkg-config --cflags gtk+-2.0`"
-    LIBS="$LIBS `pkg-config --libs gtk+-2.0`"
-  else
-    echo "ERROR: pkg-config was not found, or unable to access the gtk+-2.0 package."
-    echo "Install pkg-config and the gtk+ development package,"
-    echo "or disable the gui debugger, or the wxWidgets display library (whichever is being used)."
-    exit 1
-  fi
-fi
-
-dnl To use wxWidgets you must select it as both the configuration interface
-dnl and the display library.  In the simplest case where the user has
-dnl only configured with --with-wx, set both defaults to wxWidgets.
-dnl Without this setting, the config interface would default to the text
-dnl mode config interface, and then the wxWidgets display library would not
-dnl be usable.
-if test "$display_libs" = " wxWidgets"; then
-  AC_MSG_CHECKING(for default configuration interface)
-  AC_MSG_RESULT(wxWidgets)
-  AC_MSG_CHECKING(for default display library)
-  AC_MSG_RESULT(wxWidgets)
-  AC_DEFINE(BX_DEFAULT_CONFIG_INTERFACE, "wx")
-  AC_DEFINE(BX_DEFAULT_DISPLAY_LIBRARY, "wx")
-  AC_DEFINE(BX_USE_TEXTCONFIG, 0)
-else
-  AC_DEFINE(BX_USE_TEXTCONFIG, 1)
-fi
+AC_DEFINE(BX_USE_TEXTCONFIG, 1)
 
 if test "$bx_plugins" = 1; then
   # every item in this list will be compiled as a plugin. Do not include
@@ -2196,10 +1920,6 @@ fi
 
 AC_SUBST(GUI_CFLAGS)
 AC_SUBST(GUI_CXXFLAGS)
-AC_SUBST(WX_CONFIG)
-AC_SUBST(WX_CFLAGS)
-AC_SUBST(WX_CXXFLAGS)
-AC_SUBST(TOOLKIT_CXXFLAGS)
 
 AC_CHECK_PROGS(WGET, wget curl fetch, not_found)
 if test "$WGET" = not_found; then
