@@ -121,6 +121,7 @@ void bx_gui_c::cleanup(void)
 
 void bx_gui_c::update_drive_status_buttons(void)
 {
+/* BOX:REMOVE
   BX_GUI_THIS floppyA_status = SIM->get_param_bool(BXPN_FLOPPYA_STATUS)->get();
   BX_GUI_THIS floppyB_status = SIM->get_param_bool(BXPN_FLOPPYB_STATUS)->get();
   Bit32u handle = DEV_hd_get_first_cd_handle();
@@ -152,6 +153,7 @@ void bx_gui_c::update_drive_status_buttons(void)
   else {
     replace_bitmap(BX_GUI_THIS cdrom1_hbar_id, BX_GUI_THIS cdrom1_eject_bmap_id);
   }
+*/
 }
 
 void bx_gui_c::make_text_snapshot(char **snapshot, Bit32u *length)
@@ -171,9 +173,6 @@ void bx_gui_c::make_text_snapshot(char **snapshot, Bit32u *length)
       clean_snap[txt_addr++] = raw_snap[line_addr+j];
     }
     while ((txt_addr > 0) && (clean_snap[txt_addr-1] == ' ')) txt_addr--;
-#ifdef WIN32
-    clean_snap[txt_addr++] = 13;
-#endif
     clean_snap[txt_addr++] = 10;
   }
   clean_snap[txt_addr] = 0;
@@ -476,6 +475,7 @@ int bx_gui_c::register_statusitem(const char *text, bx_bool auto_off)
 
 void bx_gui_c::statusbar_setitem(int element, bx_bool active, bx_bool w)
 {
+/* BOX:REMOVE
   if (element < 0) {
     for (unsigned i = 0; i < statusitem_count; i++) {
       statusbar_setitem_specific(i, 0, 0);
@@ -491,6 +491,7 @@ void bx_gui_c::statusbar_setitem(int element, bx_bool active, bx_bool w)
       statusitem[element].counter = 5;
     }
   }
+*/
 }
 
 void bx_gui_c::led_timer_handler(void *this_ptr)

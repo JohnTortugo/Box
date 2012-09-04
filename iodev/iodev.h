@@ -178,16 +178,16 @@ public:
 class BOCHSAPI bx_cmos_stub_c : public bx_devmodel_c {
 public:
   virtual Bit32u get_reg(unsigned reg) {
-    STUBFUNC(cmos, get_reg); return 0;
+   /* BOX:REMOVE STUBFUNC(cmos, get_reg); */ return 0;
   }
   virtual void set_reg(unsigned reg, Bit32u val) {
-    STUBFUNC(cmos, set_reg);
+  /* BOX:REMOVE  STUBFUNC(cmos, set_reg); */
   }
   virtual time_t get_timeval() {
     return 0;
   }
   virtual void checksum_cmos(void) {
-    STUBFUNC(cmos, checksum);
+  /* BOX:REMOVE  STUBFUNC(cmos, checksum); */
   }
 };
 

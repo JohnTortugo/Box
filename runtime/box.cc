@@ -102,72 +102,6 @@ void bx_print_header()
   printf("%s\n", divider);
 }
 
-#if BX_WITH_CARBON
-/* Original code by Darrell Walisser - dwaliss1@purdue.edu */
-
-static void setupWorkingDirectory(char *path)
-{
-  char parentdir[MAXPATHLEN];
-  char *c;
-
-  strncpy (parentdir, path, MAXPATHLEN);
-  c = (char*) parentdir;
-
-  while (*c != '\0')     /* go to end */
-      c++;
-
-  while (*c != '/')      /* back up to parent */
-      c--;
-
-  *c = '\0';             /* cut off last part (binary name) */
-
-  /* chdir to the binary app's parent */
-  int n;
-  n = chdir (parentdir);
-  if (n) BX_PANIC (("failed to change dir to parent"));
-  /* chdir to the .app's parent */
-  n = chdir ("../../../");
-  if (n) BX_PANIC (("failed to change to ../../.."));
-}
-
-/* Panic button to display fatal errors.
-  Completely self contained, can't rely on carbon.cc being available */
-static void carbonFatalDialog(const char *error, const char *exposition)
-{
-  DialogRef                     alertDialog;
-  CFStringRef                   cfError;
-  CFStringRef                   cfExposition;
-  DialogItemIndex               index;
-  AlertStdCFStringAlertParamRec alertParam = {0};
-  fprintf(stderr, "Entering carbonFatalDialog: %s\n", error);
-
-  // Init libraries
-  InitCursor();
-  // Assemble dialog
-  cfError = CFStringCreateWithCString(NULL, error, kCFStringEncodingASCII);
-  if(exposition != NULL)
-  {
-    cfExposition = CFStringCreateWithCString(NULL, exposition, kCFStringEncodingASCII);
-  }
-  else { cfExposition = NULL; }
-  alertParam.version       = kStdCFStringAlertVersionOne;
-  alertParam.defaultText   = CFSTR("Quit");
-  alertParam.position      = kWindowDefaultPosition;
-  alertParam.defaultButton = kAlertStdAlertOKButton;
-  // Display Dialog
-  CreateStandardAlert(
-    kAlertStopAlert,
-    cfError,
-    cfExposition,       /* can be NULL */
-    &alertParam,             /* can be NULL */
-    &alertDialog);
-  RunStandardAlert(alertDialog, NULL, &index);
-  // Cleanup
-  CFRelease(cfError);
-  if(cfExposition != NULL) { CFRelease(cfExposition); }
-}
-#endif
-
 #if BX_DEBUGGER
 void print_tree(bx_param_c *node, int level)
 {
@@ -256,18 +190,6 @@ int bxmain(void)
       BX_PANIC(("configuration interface 'textconfig' not present"));
 #endif
     }
-    else if (!strcmp(ci_name, "win32config")) {
-#if BX_USE_TEXTCONFIG && defined(WIN32) && (BX_WITH_WIN32 || BX_WITH_SDL)
-      init_win32_config_interface();
-#else
-      BX_PANIC(("configuration interface 'win32config' not present"));
-#endif
-    }
-#if BX_WITH_WX
-    else if (!strcmp(ci_name, "wx")) {
-      PLUG_load_plugin(wx, PLUGTYPE_CORE);
-    }
-#endif
     else {
       BX_PANIC(("unsupported configuration interface '%s'", ci_name));
     }
@@ -280,146 +202,9 @@ int bxmain(void)
     // quit via longjmp
   }
   SIM->set_quit_context(NULL);
-#if defined(WIN32)
-  if (!bx_user_quit) {
-    // ask user to press ENTER before exiting, so that they can read messages
-    // before the console window is closed. This isn't necessary after pressing
-    // the power button.
-    fprintf(stderr, "\nBochs is exiting. Press ENTER when you're ready to close this window.\n");
-    char buf[16];
-    fgets(buf, sizeof(buf), stdin);
-  }
-#endif
   BX_INSTR_EXIT_ENV();
   return SIM->get_exit_code();
 }
-
-#if defined(__WXMSW__)
-
-// win32 applications get the whole command line in one long string.
-// This function is used to split up the string into argc and argv,
-// so that the command line can be used on win32 just like on every
-// other platform.
-//
-// I'm sure other people have written this same function, and they may have
-// done it better, but I don't know where to find it. -BBD
-#ifndef MAX_ARGLEN
-#define MAX_ARGLEN 80
-#endif
-int split_string_into_argv(char *string, int *argc_out, char **argv, int max_argv)
-{
-  char *buf0 = new char[strlen(string)+1];
-  strcpy (buf0, string);
-  char *buf = buf0;
-  int in_double_quote = 0, in_single_quote = 0;
-  for (int i=0; i<max_argv; i++)
-    argv[i] = NULL;
-  argv[0] = new char[6];
-  strcpy (argv[0], "bochs");
-  int argc = 1;
-  argv[argc] = new char[MAX_ARGLEN];
-  char *outp = &argv[argc][0];
-  // trim leading and trailing spaces
-  while (*buf==' ') buf++;
-  char *p;
-  char *last_nonspace = buf;
-  for (p=buf; *p; p++) {
-    if (*p!=' ') last_nonspace = p;
-  }
-  if (last_nonspace != buf) *(last_nonspace+1) = 0;
-  p = buf;
-  bx_bool done = false;
-  while (!done) {
-    //fprintf (stderr, "parsing '%c' with singlequote=%d, dblquote=%d\n", *p, in_single_quote, in_double_quote);
-    switch (*p) {
-    case '\0':
-      done = true;
-      // fall through into behavior for space
-    case ' ':
-      if (in_double_quote || in_single_quote)
-        goto do_default;
-      *outp = 0;
-      //fprintf (stderr, "completed arg %d = '%s'\n", argc, argv[argc]);
-      argc++;
-      if (argc >= max_argv) {
-        fprintf (stderr, "too many arguments. Increase MAX_ARGUMENTS\n");
-        return -1;
-      }
-      argv[argc] = new char[MAX_ARGLEN];
-      outp = &argv[argc][0];
-      while (*p==' ') p++;
-      break;
-    case '"':
-      if (in_single_quote) goto do_default;
-      in_double_quote = !in_double_quote;
-      p++;
-      break;
-    case '\'':
-      if (in_double_quote) goto do_default;
-      in_single_quote = !in_single_quote;
-      p++;
-      break;
-    do_default:
-    default:
-      if (outp-&argv[argc][0] >= MAX_ARGLEN) {
-        //fprintf (stderr, "command line arg %d exceeded max size %d\n", argc, MAX_ARGLEN);
-        return -1;
-      }
-      *(outp++) = *(p++);
-    }
-  }
-  if (in_single_quote) {
-    fprintf (stderr, "end of string with mismatched single quote (')\n");
-    return -1;
-  }
-  if (in_double_quote) {
-    fprintf (stderr, "end of string with mismatched double quote (\")\n");
-    return -1;
-  }
-  *argc_out = argc;
-  return 0;
-}
-#endif /* if defined(__WXMSW__) */
-
-#if defined(__WXMSW__) || (BX_WITH_SDL && defined(WIN32))
-// The RedirectIOToConsole() function is copied from an article called "Adding
-// Console I/O to a Win32 GUI App" in Windows Developer Journal, December 1997.
-// It creates a console window.
-//
-// NOTE: It could probably be written so that it can safely be called for all
-// win32 builds.
-int RedirectIOToConsole()
-{
-  int hConHandle;
-  long lStdHandle;
-  FILE *fp;
-  // allocate a console for this app
-  FreeConsole();
-  if (!AllocConsole()) {
-    MessageBox(NULL, "Failed to create text console", "Error", MB_ICONERROR);
-    return 0;
-  }
-  // redirect unbuffered STDOUT to the console
-  lStdHandle = (long)GetStdHandle(STD_OUTPUT_HANDLE);
-  hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-  fp = _fdopen(hConHandle, "w");
-  *stdout = *fp;
-  setvbuf(stdout, NULL, _IONBF, 0);
-  // redirect unbuffered STDIN to the console
-  lStdHandle = (long)GetStdHandle(STD_INPUT_HANDLE);
-  hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-  fp = _fdopen(hConHandle, "r");
-  *stdin = *fp;
-  setvbuf(stdin, NULL, _IONBF, 0);
-  // redirect unbuffered STDERR to the console
-  lStdHandle = (long)GetStdHandle(STD_ERROR_HANDLE);
-  hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-  fp = _fdopen(hConHandle, "w");
-  *stderr = *fp;
-  setvbuf(stderr, NULL, _IONBF, 0);
-  return 1;
-}
-#endif  /* if defined(__WXMSW__) || (BX_WITH_SDL && defined(WIN32)) */
 
 void print_usage(void)
 {
