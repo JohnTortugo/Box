@@ -220,9 +220,6 @@ void print_usage(void)
     "  -rc filename     execute debugger commands stored in file\n"
     "  -dbglog filename specify Bochs internal debugger log file name\n"
 #endif
-#ifdef WIN32
-    "  -noconsole       disable console window\n"
-#endif
     "  --help           display this help and exit\n"
     "  --help features  display available features / devices and exit\n"
 #if BX_CPU_LEVEL > 4

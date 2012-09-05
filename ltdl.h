@@ -104,59 +104,6 @@ LT_BEGIN_C_DECLS
 #define LT_STRLEN(s)	(((s) && (s)[0]) ? strlen (s) : 0)
 
 
-
-/* --- WINDOWS SUPPORT --- */
-
-
-/* Canonicalise Windows and Cygwin recognition macros.  */
-#ifdef __CYGWIN32__
-#  ifndef __CYGWIN__
-#    define __CYGWIN__ __CYGWIN32__
-#  endif
-#endif
-#if defined(_WIN32) || defined(WIN32)
-#  ifndef __WINDOWS__
-#    ifdef _WIN32
-#      define __WINDOWS__ _WIN32
-#    else
-#      ifdef WIN32
-#        define __WINDOWS__ WIN32
-#      endif
-#    endif
-#  endif
-#endif
-
-#ifdef __WINDOWS__
-#  ifndef __CYGWIN__
-/* LT_DIRSEP_CHAR is accepted *in addition* to '/' as a directory
-   separator when it is set. */
-#    define LT_DIRSEP_CHAR	'\\'
-#    define LT_PATHSEP_CHAR	';'
-#  endif
-#endif
-#ifndef LT_PATHSEP_CHAR
-#  define LT_PATHSEP_CHAR	':'
-#endif
-
-/* DLL building support on win32 hosts;  mostly to workaround their
-   ridiculous implementation of data symbol exporting. */
-#ifndef LT_SCOPE
-#  ifdef __WINDOWS__
-#    ifdef DLL_EXPORT		/* defined by libtool (if required) */
-#      define LT_SCOPE	__declspec(dllexport)
-#    endif
-#    ifdef LIBLTDL_DLL_IMPORT	/* define if linking with this dll */
-#      define LT_SCOPE	extern __declspec(dllimport)
-#    endif
-#  endif
-#  ifndef LT_SCOPE		/* static linking or !__WINDOWS__ */
-#    define LT_SCOPE	extern
-#  endif
-#endif
-
-
-
-
 /* --- DYNAMIC MODULE LOADING API --- */
 
 

@@ -57,11 +57,7 @@ extern "C" {
 #include <assert.h>
 #include <errno.h>
 
-#ifndef WIN32
-#  include <unistd.h>
-#else
-#  include <io.h>
-#endif
+#include <unistd.h>
 #include <time.h>
 #if BX_WITH_MACOS
 #  include <types.h>
@@ -75,9 +71,7 @@ extern "C" {
 #  include <sys/time.h>
 #  include <utime.h>
 #else
-#  ifndef WIN32
-#    include <sys/time.h>
-#  endif
+#  include <sys/time.h>
 #  include <sys/types.h>
 #  include <sys/stat.h>
 #endif

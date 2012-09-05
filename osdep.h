@@ -38,79 +38,6 @@
 extern "C" {
 #endif   /* __cplusplus */
 
-//////////////////////////////////////////////////////////////////////
-// Hacks for win32, but exclude MINGW32 because it doesn't need them.
-//////////////////////////////////////////////////////////////////////
-#ifdef WIN32
-
-// Definitions that are needed for all WIN32 compilers.
-#  define ssize_t long
-
-#ifndef __MINGW32__
-
-// Definitions that are needed for WIN32 compilers EXCEPT FOR
-// cygwin compiling with -mno-cygwin.  e.g. VC++.
-
-#if !defined(_MSC_VER)		// gcc without -mno-cygwin
-#define FMT_LL "%ll"
-#define FMT_TICK "%011llu"
-#define FMT_ADDRX64 "%016llx"
-#else
-#define FMT_LL "%I64"
-#define FMT_TICK "%011I64u"
-#define FMT_ADDRX64 "%016I64x"
-#endif
-
-// always return regular file.
-#ifndef S_ISREG
-#  define S_ISREG(m)      (((m) & S_IFMT) == S_IFREG)
-#endif
-#ifndef S_ISCHR
-#  define S_ISCHR(m)      (((m) & S_IFMT) == S_IFCHR)
-#endif
-
-// win32 has snprintf though with different name.
-#define snprintf _snprintf
-#define vsnprintf _vsnprintf
-#undef BX_HAVE_SNPRINTF
-#undef BX_HAVE_VSNPRINTF
-#define BX_HAVE_SNPRINTF 1
-#define BX_HAVE_VSNPRINTF 1
-
-#if defined(_MSC_VER)
-#define access _access
-#define fdopen _fdopen
-#define mktemp _mktemp
-#define off_t __int64
-#define lseek _lseeki64
-#define fstat _fstati64
-#define stat  _stati64
-#define read _read
-#define write _write
-#define open _open
-#define close _close
-#define unlink _unlink
-#define strdup _strdup
-#define strrev _strrev
-#define stricmp _stricmp
-#define getch _getch
-#define strtoull _strtoui64
-#endif
-
-#else   /* __MINGW32__ defined */
-// Definitions for cygwin compiled with -mno-cygwin
-#define FMT_LL "%I64"
-#define FMT_TICK "%011I64u"
-#define FMT_ADDRX64 "%016I64x"
-
-#define off_t __int64
-// mingw gcc 4.6.1 already has lseek defined
-#ifndef lseek
-#define lseek _lseeki64
-#endif
-#endif  /* __MINGW32__ defined */
-
-#else    /* not WIN32 definitions */
 #if SIZEOF_UNSIGNED_LONG == 8
 #define FMT_LL "%l"
 #define FMT_TICK "%011lu"
@@ -120,7 +47,6 @@ extern "C" {
 #define FMT_TICK "%011llu"
 #define FMT_ADDRX64 "%016llx"
 #endif
-#endif   /* not WIN32 definitions */
 
 #define FMT_ADDRX32 "%08x"
 
@@ -225,16 +151,6 @@ typedef long ssize_t ;
 #if BX_HAVE_REALTIME_USEC
 // 64-bit time in useconds.
 extern Bit64u bx_get_realtime64_usec (void);
-#endif
-
-#ifdef WIN32
-#undef BX_HAVE_MSLEEP
-#define BX_HAVE_MSLEEP 1
-#if !defined(__MINGW32__) && !defined(_MSC_VER)
-#define msleep(msec)	_sleep(msec)
-#else
-#define msleep(msec)	Sleep(msec)
-#endif
 #endif
 
 #ifdef __cplusplus

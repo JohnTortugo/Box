@@ -1658,9 +1658,7 @@ char *bx_find_bochsrc()
     case 0: strcpy (rcfile, ".bochsrc"); break;
     case 1: strcpy (rcfile, "bochsrc"); break;
     case 2: strcpy (rcfile, "bochsrc.txt"); break;
-#ifdef WIN32
-    case 3: strcpy (rcfile, "bochsrc.bxrc"); break;
-#elif !BX_WITH_MACOS
+#if !BX_WITH_MACOS
       // only try this on unix
     case 3:
       {
@@ -1722,38 +1720,10 @@ static int parse_bochsrc(const char *rcfile)
 
 static const char *get_builtin_variable(const char *varname)
 {
-#ifdef WIN32
-  int code;
-  DWORD size;
-  DWORD type = 0;
-  HKEY hkey;
-  char keyname[80];
-  static char data[MAX_PATH];
-#endif
-
   if (strlen(varname)<1) return NULL;
   else {
     if (!strcmp(varname, "BXSHARE")) {
-#ifdef WIN32
-      wsprintf(keyname, "Software\\Bochs %s", VER_STRING);
-      code = RegOpenKeyEx(HKEY_LOCAL_MACHINE, keyname, 0, KEY_READ, &hkey);
-      if (code == ERROR_SUCCESS) {
-        data[0] = 0;
-        size = MAX_PATH;
-        if (RegQueryValueEx(hkey, "", NULL, (LPDWORD)&type, (LPBYTE)data,
-                            (LPDWORD)&size) == ERROR_SUCCESS) {
-          RegCloseKey(hkey);
-          return data;
-        } else {
-          RegCloseKey(hkey);
-          return NULL;
-        }
-      } else {
-        return NULL;
-      }
-#else
       return BX_SHARE_PATH;
-#endif
     }
     return NULL;
   }
