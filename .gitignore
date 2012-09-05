@@ -9,4 +9,4 @@ libtool
 *.swp
 *~
 *.o
-
+*.a
