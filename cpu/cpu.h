@@ -472,11 +472,7 @@ extern const char* cpu_mode_string(unsigned cpu_mode);
 
 #define IsValidPhyAddr(addr) ((addr & BX_PHY_ADDRESS_RESERVED_BITS) == 0)
 
-#if BX_SUPPORT_APIC
-  #define BX_CPU_INTR  (BX_CPU_THIS_PTR INTR || BX_CPU_THIS_PTR lapic.INTR)
-#else
   #define BX_CPU_INTR  (BX_CPU_THIS_PTR INTR)
-#endif
 
 #define CACHE_LINE_SIZE 64
 
@@ -667,9 +663,6 @@ BOCHSAPI extern BX_CPU_C   bx_cpu;
 #if BX_CPU_LEVEL >= 5
 typedef struct
 {
-#if BX_SUPPORT_APIC
-  bx_phy_address apicbase;
-#endif
 
 #define MSR_STAR   (BX_CPU_THIS_PTR msr.star)
 
@@ -849,10 +842,6 @@ typedef struct {
 
 #endif  // #if BX_SUPPORT_X86_64
 
-#if BX_SUPPORT_APIC
-#include "apic.h"
-#endif
-
 #if BX_SUPPORT_FPU
 #include "i387.h"
 #include "xmm.h"
@@ -886,7 +875,8 @@ struct monitor_addr_t {
 
 class BX_SMM_State;
 
-class BOCHSAPI BX_CPU_C : public logfunctions {
+//class BOCHSAPI BX_CPU_C : public logfunctions {
+class BOCHSAPI BX_CPU_C {
 
 public: // for now...
 
@@ -1040,9 +1030,6 @@ public: // for now...
   monitor_addr_t monitor;
 #endif
 
-#if BX_SUPPORT_APIC
-  bx_local_apic_c lapic;
-#endif
 
 #if BX_SUPPORT_VMX
   bx_bool in_vmx;
@@ -1370,15 +1357,6 @@ public: // for now...
   void initialize(void);
   void after_restore_state(void);
   void register_state(void);
-#if BX_WITH_WX
-  void register_wx_state(void);
-#endif
-  static Bit64s param_save_handler(void *devptr, bx_param_c *param);
-  static void param_restore_handler(void *devptr, bx_param_c *param, Bit64s val);
-#if !BX_USE_CPU_SMF
-  Bit64s param_save(bx_param_c *param);
-  void param_restore(bx_param_c *param, Bit64s val);
-#endif
 
 // <TAG-CLASS-CPU-START>
   // prototypes for CPU instructions...
@@ -3990,9 +3968,6 @@ public: // for now...
   BX_SMF bx_bool handle_unknown_wrmsr(Bit32u index, Bit64u  val_64) BX_CPP_AttrRegparmN(2);
 #endif
 
-#if BX_SUPPORT_APIC
-  BX_SMF bx_bool relocate_apic(Bit64u val_64);
-#endif
 
   BX_SMF void task_gate(bxInstruction_c *i, bx_selector_t *selector, bx_descriptor_t *gate_descriptor, unsigned source);
   BX_SMF void jump_protected(bxInstruction_c *i, Bit16u cs, bx_address disp) BX_CPP_AttrRegparmN(3);
@@ -4091,10 +4066,6 @@ public: // for now...
 
   BX_SMF void init_FetchDecodeTables(void);
 
-#if BX_SUPPORT_APIC
-  BX_SMF BX_CPP_INLINE Bit8u get_apic_id(void) { return BX_CPU_THIS_PTR bx_cpuid; }
-#endif
-
   BX_SMF BX_CPP_INLINE int bx_cpuid_support_x86_64(void);
   BX_SMF BX_CPP_INLINE int bx_cpuid_support_debug_extensions(void);
   BX_SMF BX_CPP_INLINE int bx_cpuid_support_1g_paging(void);
@@ -4111,13 +4082,11 @@ public: // for now...
   BX_SMF BX_CPP_INLINE int bx_cpuid_support_xsave(void);
   BX_SMF BX_CPP_INLINE int bx_cpuid_support_fsgsbase(void);
   BX_SMF BX_CPP_INLINE int bx_cpuid_support_smep(void);
-  BX_SMF BX_CPP_INLINE int bx_cpuid_support_x2apic(void);
   BX_SMF BX_CPP_INLINE int bx_cpuid_support_smx(void);
   BX_SMF BX_CPP_INLINE int bx_cpuid_support_vmx(void);
   BX_SMF BX_CPP_INLINE int bx_cpuid_support_svm(void);
   BX_SMF BX_CPP_INLINE int bx_cpuid_support_rdtscp(void);
   BX_SMF BX_CPP_INLINE int bx_cpuid_support_tsc_deadline(void);
-  BX_SMF BX_CPP_INLINE int bx_cpuid_support_xapic_extensions(void);
 
   BX_SMF BX_CPP_INLINE unsigned which_cpu(void) { return BX_CPU_THIS_PTR bx_cpuid; }
   BX_SMF BX_CPP_INLINE Bit64u get_icount(void) { return BX_CPU_THIS_PTR icount; }
@@ -4267,7 +4236,6 @@ public: // for now...
   BX_SMF Bit16u VMX_Get_Current_VPID(void);
 #endif
 #if BX_SUPPORT_X86_64
-  BX_SMF bx_bool is_virtual_apic_page(bx_phy_address paddr) BX_CPP_AttrRegparmN(1);
   BX_SMF void VMX_Virtual_Apic_Read(bx_phy_address paddr, unsigned len, void *data);
   BX_SMF void VMX_Virtual_Apic_Write(bx_phy_address paddr, unsigned len, void *data);
   BX_SMF Bit32u VMX_Read_VTPR(void);
@@ -4524,17 +4492,6 @@ BX_CPP_INLINE void BX_CPU_C::set_reg64(unsigned reg, Bit64u val)
 }
 #endif
 
-#if BX_CPU_LEVEL >= 6
-// CR8 is aliased to APIC->TASK PRIORITY register
-//   APIC.TPR[7:4] = CR8[3:0]
-//   APIC.TPR[3:0] = 0
-// Reads of CR8 return zero extended APIC.TPR[7:4]
-BX_CPP_INLINE unsigned BX_CPU_C::get_cr8(void)
-{
-   return (BX_CPU_THIS_PTR lapic.get_tpr() >> 4) & 0xf;
-}
-#endif
-
 BX_CPP_INLINE bx_bool BX_CPU_C::real_mode(void)
 {
   return (BX_CPU_THIS_PTR cpu_mode == BX_MODE_IA32_REAL);
@@ -4603,11 +4560,6 @@ BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_vmx(void)
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_xsave(void)
 {
   return (BX_CPU_THIS_PTR isa_extensions_bitmask & BX_ISA_XSAVE) != 0;
-}
-
-BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_x2apic(void)
-{
-  return (BX_CPU_THIS_PTR cpu_extensions_bitmask & BX_CPU_X2APIC) != 0;
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_pcid(void)
@@ -4713,11 +4665,6 @@ BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_rdtscp(void)
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_tsc_deadline(void)
 {
   return (BX_CPU_THIS_PTR cpu_extensions_bitmask & BX_CPU_TSC_DEADLINE) != 0;
-}
-
-BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_xapic_extensions(void)
-{
-  return (BX_CPU_THIS_PTR cpu_extensions_bitmask & BX_CPU_XAPIC_EXT) != 0;
 }
 
 IMPLEMENT_EFLAG_ACCESSOR   (ID,  21)

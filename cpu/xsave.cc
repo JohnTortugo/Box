@@ -35,13 +35,13 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XSAVE(bxInstruction_c *i)
 
   BX_CPU_THIS_PTR prepareXSAVE();
 
-  BX_DEBUG(("XSAVE: save processor state XCR0=0x%08x", BX_CPU_THIS_PTR xcr0.get32()));
+  printf("XSAVE: save processor state XCR0=0x%08x", BX_CPU_THIS_PTR xcr0.get32());
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
   bx_address laddr = get_laddr(i->seg(), eaddr);
 
   if (laddr & 0x3f) {
-    BX_ERROR(("XSAVE: access not aligned to 64-byte"));
+    printf("XSAVE: access not aligned to 64-byte");
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -184,13 +184,13 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XRSTOR(bxInstruction_c *i)
 
   BX_CPU_THIS_PTR prepareXSAVE();
 
-  BX_DEBUG(("XRSTOR: restore processor state XCR0=0x%08x", BX_CPU_THIS_PTR xcr0.get32()));
+  printf("XRSTOR: restore processor state XCR0=0x%08x", BX_CPU_THIS_PTR xcr0.get32());
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
   bx_address laddr = get_laddr(i->seg(), eaddr);
 
   if (laddr & 0x3f) {
-    BX_ERROR(("XRSTOR: access not aligned to 64-byte"));
+    printf("XRSTOR: access not aligned to 64-byte");
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -201,12 +201,12 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XRSTOR(bxInstruction_c *i)
   Bit64u header3 = read_virtual_qword(i->seg(), (eaddr + 528) & asize_mask);
 
   if ((~BX_CPU_THIS_PTR xcr0.get32() & header1) != 0) {
-    BX_ERROR(("XRSTOR: Broken header state"));
+    printf("XRSTOR: Broken header state");
     exception(BX_GP_EXCEPTION, 0);
   }
 
   if (header2 != 0 || header3 != 0) {
-    BX_ERROR(("XRSTOR: Reserved header state is not '0"));
+    printf("XRSTOR: Reserved header state is not '0");
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -373,14 +373,14 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XGETBV(bxInstruction_c *i)
 {
 #if BX_CPU_LEVEL >= 6
   if(! BX_CPU_THIS_PTR cr4.get_OSXSAVE()) {
-    BX_ERROR(("XGETBV: OSXSAVE feature is not enabled in CR4!"));
+    printf("XGETBV: OSXSAVE feature is not enabled in CR4!");
     exception(BX_UD_EXCEPTION, 0);
   }
 
   // For now hardcoded handle only XCR0 register, it should take a few
   // years until extension will be required
   if (ECX != 0) {
-    BX_ERROR(("XGETBV: Invalid XCR register %d", ECX));
+    printf("XGETBV: Invalid XCR register %d", ECX);
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -396,13 +396,13 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XSETBV(bxInstruction_c *i)
 {
 #if BX_CPU_LEVEL >= 6
   if(! BX_CPU_THIS_PTR cr4.get_OSXSAVE()) {
-    BX_ERROR(("XSETBV: OSXSAVE feature is not enabled in CR4!"));
+    printf("XSETBV: OSXSAVE feature is not enabled in CR4!");
     exception(BX_UD_EXCEPTION, 0);
   }
 
 #if BX_SUPPORT_VMX
   if (BX_CPU_THIS_PTR in_vmx_guest) {
-    BX_ERROR(("VMEXIT: XSETBV in VMX non-root operation"));
+    printf("VMEXIT: XSETBV in VMX non-root operation");
     VMexit(VMX_VMEXIT_XSETBV, 0);
   }
 #endif
@@ -415,25 +415,25 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XSETBV(bxInstruction_c *i)
 
   // CPL is always 3 in vm8086 mode
   if (/* v8086_mode() || */ CPL != 0) {
-    BX_ERROR(("XSETBV: The current priveledge level is not 0"));
+    printf("XSETBV: The current priveledge level is not 0");
     exception(BX_GP_EXCEPTION, 0);
   }
 
   // For now hardcoded handle only XCR0 register, it should take a few
   // years until extension will be required
   if (ECX != 0) {
-    BX_ERROR(("XSETBV: Invalid XCR register %d", ECX));
+    printf("XSETBV: Invalid XCR register %d", ECX);
     exception(BX_GP_EXCEPTION, 0);
   }
 
   if (EDX != 0 || (EAX & ~BX_CPU_THIS_PTR xcr0_suppmask) != 0 || (EAX & 1) == 0) {
-    BX_ERROR(("XSETBV: Attempting to change reserved bits!"));
+    printf("XSETBV: Attempting to change reserved bits!");
     exception(BX_GP_EXCEPTION, 0);
   }
 
 #if BX_SUPPORT_AVX
   if ((EAX & (BX_XCR0_AVX_BIT | BX_XCR0_SSE_BIT)) == BX_XCR0_AVX_BIT) {
-    BX_ERROR(("XSETBV: Attempting to set AVX without SSE!"));
+    printf("XSETBV: Attempting to set AVX without SSE!");
     exception(BX_GP_EXCEPTION, 0);
   }
 #endif

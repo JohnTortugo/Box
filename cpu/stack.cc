@@ -60,7 +60,7 @@ void BX_CPP_AttrRegparmN(2) BX_CPU_C::stackPrefetch(bx_address offset, unsigned 
     Bit32u pageStart = offset - pageOffset;
 
     if (! BX_CPU_THIS_PTR sregs[BX_SEG_REG_SS].cache.valid) {
-      BX_ERROR(("stackPrefetch: SS not valid"));
+      printf("stackPrefetch: SS not valid");
       exception(BX_SS_EXCEPTION, 0);
     }
       
@@ -76,7 +76,7 @@ void BX_CPP_AttrRegparmN(2) BX_CPU_C::stackPrefetch(bx_address offset, unsigned 
       else
         upper_limit = 0x0000ffff;
       if (offset <= limit || offset > upper_limit || (upper_limit - offset) < len) {
-        BX_ERROR(("stackPrefetch(%d): access [0x%08x] > SS.limit [0x%08x] ED", len+1, (Bit32u) offset, limit));
+        printf("stackPrefetch(%d): access [0x%08x] > SS.limit [0x%08x] ED", len+1, (Bit32u) offset, limit);
         exception(BX_SS_EXCEPTION, 0);
       }
 
@@ -91,7 +91,7 @@ void BX_CPP_AttrRegparmN(2) BX_CPU_C::stackPrefetch(bx_address offset, unsigned 
     }
     else {
       if (offset > (limit - len) || len > limit) {
-        BX_ERROR(("stackPrefetch(%d): access [0x%08x] > SS.limit [0x%08x]", len+1, (Bit32u) offset, limit));
+        printf("stackPrefetch(%d): access [0x%08x] > SS.limit [0x%08x]", len+1, (Bit32u) offset, limit);
         exception(BX_SS_EXCEPTION, 0);
       }
 
@@ -157,7 +157,7 @@ void BX_CPP_AttrRegparmN(2) BX_CPU_C::stack_write_word(bx_address offset, Bit16u
     bx_phy_address pAddr = BX_CPU_THIS_PTR pAddrStackPage + espBiased;
 #if BX_CPU_LEVEL >= 4 && BX_SUPPORT_ALIGNMENT_CHECK
     if (BX_CPU_THIS_PTR alignment_check() && (pAddr & 1) != 0) {
-      BX_ERROR(("stack_write_word(): #AC misaligned access"));
+      printf("stack_write_word(): #AC misaligned access");
       exception(BX_AC_EXCEPTION, 0);
     }
 #endif
@@ -184,7 +184,7 @@ void BX_CPP_AttrRegparmN(2) BX_CPU_C::stack_write_dword(bx_address offset, Bit32
     bx_phy_address pAddr = BX_CPU_THIS_PTR pAddrStackPage + espBiased;
 #if BX_CPU_LEVEL >= 4 && BX_SUPPORT_ALIGNMENT_CHECK
     if (BX_CPU_THIS_PTR alignment_check() && (pAddr & 3) != 0) {
-      BX_ERROR(("stack_write_dword(): #AC misaligned access"));
+      printf("stack_write_dword(): #AC misaligned access");
       exception(BX_AC_EXCEPTION, 0);
     }
 #endif
@@ -211,7 +211,7 @@ void BX_CPP_AttrRegparmN(2) BX_CPU_C::stack_write_qword(bx_address offset, Bit64
     bx_phy_address pAddr = BX_CPU_THIS_PTR pAddrStackPage + espBiased;
 #if BX_CPU_LEVEL >= 4 && BX_SUPPORT_ALIGNMENT_CHECK
     if (BX_CPU_THIS_PTR alignment_check() && (pAddr & 7) != 0) {
-      BX_ERROR(("stack_write_qword(): #AC misaligned access"));
+      printf("stack_write_qword(): #AC misaligned access");
       exception(BX_AC_EXCEPTION, 0);
     }
 #endif
@@ -260,7 +260,7 @@ Bit16u BX_CPP_AttrRegparmN(1) BX_CPU_C::stack_read_word(bx_address offset)
     if (BX_CPU_THIS_PTR alignment_check()) {
       bx_phy_address pAddr = BX_CPU_THIS_PTR pAddrStackPage + espBiased;
       if (pAddr & 1) {
-        BX_ERROR(("stack_read_word(): #AC misaligned access"));
+        printf("stack_read_word(): #AC misaligned access");
         exception(BX_AC_EXCEPTION, 0);
       }
     }
@@ -290,7 +290,7 @@ Bit32u BX_CPP_AttrRegparmN(1) BX_CPU_C::stack_read_dword(bx_address offset)
     if (BX_CPU_THIS_PTR alignment_check()) {
       bx_phy_address pAddr = BX_CPU_THIS_PTR pAddrStackPage + espBiased;
       if (pAddr & 3) {
-        BX_ERROR(("stack_read_dword(): #AC misaligned access"));
+        printf("stack_read_dword(): #AC misaligned access");
         exception(BX_AC_EXCEPTION, 0);
       }
     }
@@ -320,7 +320,7 @@ Bit64u BX_CPP_AttrRegparmN(1) BX_CPU_C::stack_read_qword(bx_address offset)
     if (BX_CPU_THIS_PTR alignment_check()) {
       bx_phy_address pAddr = BX_CPU_THIS_PTR pAddrStackPage + espBiased;
       if (pAddr & 7) {
-        BX_ERROR(("stack_read_qword(): #AC misaligned access"));
+        printf("stack_read_qword(): #AC misaligned access");
         exception(BX_AC_EXCEPTION, 0);
       }
     }

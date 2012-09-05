@@ -34,7 +34,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::BOUND_GwMa(bxInstruction_c *i)
   Bit16s bound_max = (Bit16s) read_virtual_word_32(i->seg(), (eaddr+2) & i->asize_mask());
 
   if (op1_16 < bound_min || op1_16 > bound_max) {
-    BX_INFO(("BOUND_GdMa: fails bounds test"));
+    printf("BOUND_GdMa: fails bounds test");
     exception(BX_BR_EXCEPTION, 0);
   }
 
@@ -51,7 +51,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::BOUND_GdMa(bxInstruction_c *i)
   Bit32s bound_max = (Bit32s) read_virtual_dword_32(i->seg(), (eaddr+4) & i->asize_mask());
 
   if (op1_32 < bound_min || op1_32 > bound_max) {
-    BX_INFO(("BOUND_GdMa: fails bounds test"));
+    printf("BOUND_GdMa: fails bounds test");
     exception(BX_BR_EXCEPTION, 0);
   }
 
@@ -133,7 +133,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::INT_Ib(bxInstruction_c *i)
 
 #ifdef SHOW_EXIT_STATUS
   if ((vector == 0x21) && (AH == 0x4c)) {
-    BX_INFO(("INT 21/4C called AL=0x%02x, BX=0x%04x", (unsigned) AL, (unsigned) BX));
+    printf("INT 21/4C called AL=0x%02x, BX=0x%04x", (unsigned) AL, (unsigned) BX);
   }
 #endif
 

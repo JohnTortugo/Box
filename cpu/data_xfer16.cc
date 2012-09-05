@@ -69,7 +69,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_EwSwR(bxInstruction_c *i)
 {
   /* Illegal to use nonexisting segments */
   if (i->src() >= 6) {
-    BX_INFO(("MOV_EwSw: using of nonexisting segment register %d", i->src()));
+    printf("MOV_EwSw: using of nonexisting segment register %d", i->src());
     exception(BX_UD_EXCEPTION, 0);
   }
 
@@ -89,7 +89,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_EwSwM(bxInstruction_c *i)
 {
   /* Illegal to use nonexisting segments */
   if (i->src() >= 6) {
-    BX_INFO(("MOV_EwSw: using of nonexisting segment register %d", i->src()));
+    printf("MOV_EwSw: using of nonexisting segment register %d", i->src());
     exception(BX_UD_EXCEPTION, 0);
   }
 
@@ -107,7 +107,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_SwEw(bxInstruction_c *i)
 
   /* Attempt to load CS or nonexisting segment register */
   if (i->dst() >= 6 || i->dst() == BX_SEG_REG_CS) {
-    BX_INFO(("MOV_EwSw: can't use this segment register %d", i->dst()));
+    printf("MOV_EwSw: can't use this segment register %d", i->dst());
     exception(BX_UD_EXCEPTION, 0);
   }
 

@@ -34,13 +34,6 @@
 extern "C" {
 #endif
 
-#ifdef WIN32
-// In a win32 compile (including cygwin), windows.h is required for several
-// files in gui and iodev.  It is important to include it here in a header
-// file so that WIN32-specific data types can be used in fields of classes.
-#include <windows.h>
-#endif
-
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -102,7 +95,6 @@ extern "C" {
 
 #include "osdep.h"       /* platform dependent includes and defines */
 #include "bx_debug/debug.h"
-#include "gui/siminterface.h"
 
 // BX_SHARE_PATH should be defined by the makefile.  If not, give it
 // a value of NULL to avoid compile problems.
@@ -120,16 +112,16 @@ int  bx_write_configuration(const char *rcfile, int overwrite);
 void bx_reset_options(void);
 void bx_set_log_actions_by_device(bx_bool panic_flag);
 // special config parameter and options functions for plugins
-void bx_init_std_nic_options(const char *name, bx_list_c *menu);
+//void bx_init_std_nic_options(const char *name, bx_list_c *menu);
 void bx_init_usb_options(const char *usb_name, const char *pname, int maxports);
-int  bx_parse_nic_params(const char *context, const char *param, bx_list_c *base);
-int  bx_parse_usb_port_params(const char *context, bx_bool devopt,
-                              const char *param, int maxports, bx_list_c *base);
-int  bx_write_pci_nic_options(FILE *fp, bx_list_c *base);
-int  bx_write_usb_options(FILE *fp, int maxports, bx_list_c *base);
+//int  bx_parse_nic_params(const char *context, const char *param, bx_list_c *base);
+//int  bx_parse_usb_port_params(const char *context, bx_bool devopt,
+//                              const char *param, int maxports, bx_list_c *base);
+//int  bx_write_pci_nic_options(FILE *fp, bx_list_c *base);
+//int  bx_write_usb_options(FILE *fp, int maxports, bx_list_c *base);
 Bit32u crc32(const Bit8u *buf, int len);
 // for param-tree testing only
-void print_tree(bx_param_c *node, int level = 0);
+//void print_tree(bx_param_c *node, int level = 0);
 
 //
 // some macros to interface the CPU and memory to external environment
@@ -245,113 +237,12 @@ void print_tree(bx_param_c *node, int level = 0);
 
 #define MAGIC_LOGNUM 0x12345678
 
-typedef class BOCHSAPI logfunctions
-{
-  char *name;
-  char *prefix;
-// values of onoff: 0=ignore, 1=report, 2=ask, 3=fatal
-#define ACT_IGNORE 0
-#define ACT_REPORT 1
-#define ACT_ASK    2
-#define ACT_FATAL  3
-#define N_ACT      4
-  int onoff[N_LOGLEV];
-  class iofunctions *logio;
-  // default log actions for all devices, declared and initialized
-  // in logio.cc.
-  BOCHSAPI_CYGONLY static int default_onoff[N_LOGLEV];
-public:
-  logfunctions(void);
-  logfunctions(class iofunctions *);
- ~logfunctions(void);
-
-  void info(const char *fmt, ...)   BX_CPP_AttrPrintf(2, 3);
-  void error(const char *fmt, ...)  BX_CPP_AttrPrintf(2, 3);
-  void panic(const char *fmt, ...)  BX_CPP_AttrPrintf(2, 3);
-  void ldebug(const char *fmt, ...) BX_CPP_AttrPrintf(2, 3);
-  void fatal (const char *prefix, const char *fmt, va_list ap, int exit_status);
-  void ask (int level, const char *prefix, const char *fmt, va_list ap);
-  void put(const char *p);
-  void put(const char *n, const char *p);
-  void setio(class iofunctions *);
-  void setonoff(int loglev, int value) {
-    assert (loglev >= 0 && loglev < N_LOGLEV);
-    onoff[loglev] = value;
-  }
-  const char *get_name() const { return name; }
-  const char *getprefix() const { return prefix; }
-  int getonoff(int level) const {
-    assert (level>=0 && level<N_LOGLEV);
-    return onoff[level];
-  }
-  static void set_default_action(int loglev, int action) {
-    assert (loglev >= 0 && loglev < N_LOGLEV);
-    assert (action >= 0 && action < N_ACT);
-    default_onoff[loglev] = action;
-  }
-  static int get_default_action(int loglev) {
-    assert (loglev >= 0 && loglev < N_LOGLEV);
-    return default_onoff[loglev];
-  }
-} logfunc_t;
-
 #define BX_LOGPREFIX_SIZE 51
-
-class BOCHSAPI iofunctions {
-  int magic;
-  char logprefix[BX_LOGPREFIX_SIZE];
-  FILE *logfd;
-  class logfunctions *log;
-  void init(void);
-  void flush(void);
-
-// Log Class types
-public:
-  iofunctions(void);
-  iofunctions(FILE *);
-  iofunctions(int);
-  iofunctions(const char *);
- ~iofunctions(void);
-
-  void out(int level, const char *pre, const char *fmt, va_list ap);
-
-  void init_log(const char *fn);
-  void init_log(int fd);
-  void init_log(FILE *fs);
-  void exit_log();
-  void set_log_prefix(const char *prefix);
-  int get_n_logfns() const { return n_logfn; }
-  logfunc_t *get_logfn(int index) { return logfn_list[index]; }
-  void add_logfn(logfunc_t *fn);
-  void remove_logfn(logfunc_t *fn);
-  void set_log_action(int loglevel, int action);
-  const char *getlevel(int i) const;
-  const char *getaction(int i) const;
-  
-protected:
-  int n_logfn;
-#define MAX_LOGFNS 512
-  logfunc_t *logfn_list[MAX_LOGFNS];
-  const char *logfn;
-};
-
-typedef class BOCHSAPI iofunctions iofunc_t;
 
 #define SAFE_GET_IOFUNC() \
   ((io==NULL)? (io=new iofunc_t("/dev/stderr")) : io)
 #define SAFE_GET_GENLOG() \
   ((genlog==NULL)? (genlog=new logfunc_t(SAFE_GET_IOFUNC())) : genlog)
-
-#if BX_NO_LOGGING
-
-#define BX_INFO(x)
-#define BX_DEBUG(x)
-#define BX_ERROR(x)
-#define BX_PANIC(x) (LOG_THIS panic) x
-
-#define BX_ASSERT(x)
-
-#else
 
 #define BX_INFO(x)  (LOG_THIS info) x
 #define BX_DEBUG(x) (LOG_THIS ldebug) x
@@ -363,11 +254,6 @@ typedef class BOCHSAPI iofunctions iofunc_t;
 #else
   #define BX_ASSERT(x)
 #endif
-
-#endif
-
-BOCHSAPI extern iofunc_t *io;
-BOCHSAPI extern logfunc_t *genlog;
 
 #ifndef UNUSED
 #  define UNUSED(x) ((void)x)
@@ -443,9 +329,8 @@ BOCHSAPI extern Bit32u apic_id_mask;
 #define BX_RESET_SOFTWARE 10
 #define BX_RESET_HARDWARE 11
 
-#include "memory/memory.h"
-#include "pc_system.h"
-#include "gui/gui.h"
+//#include "memory/memory.h"
+//#include "pc_system.h"
 
 /* --- EXTERNS --- */
 

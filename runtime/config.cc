@@ -287,15 +287,7 @@ void bx_init_options()
 
  // config interface option, set in bochsrc or command line
   static const char *config_interface_list[] = {
-#ifdef WIN32
-    "win32config",
-#endif
-#if BX_USE_TEXTCONFIG
     "textconfig",
-#endif
-#if BX_WITH_WX
-    "wx",
-#endif
     NULL
   };
   bx_param_enum_c *sel_config = new bx_param_enum_c(menu,
@@ -350,15 +342,9 @@ void bx_init_options()
   // subtree for special menus
   bx_list_c *special_menus = new bx_list_c(root_param, "menu", "");
 
-#if BX_SUPPORT_SMP
-  #define BX_CPU_PROCESSORS_LIMIT 255
-  #define BX_CPU_CORES_LIMIT 8
-  #define BX_CPU_HT_THREADS_LIMIT 4
-#else
   #define BX_CPU_PROCESSORS_LIMIT 1
   #define BX_CPU_CORES_LIMIT 1
   #define BX_CPU_HT_THREADS_LIMIT 1
-#endif
 
   // cpu subtree
   bx_list_c *cpu_param = new bx_list_c(root_param, "cpu", "CPU Options");

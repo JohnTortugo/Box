@@ -32,11 +32,11 @@
 
 void BX_CPU_C::print_state_SSE(void)
 {
-  BX_DEBUG(("MXCSR: 0x%08x\n", BX_MXCSR_REGISTER));
+  printf("MXCSR: 0x%08x\n", BX_MXCSR_REGISTER);
   for(unsigned n=0;n<BX_XMM_REGISTERS;n++) {
     BxPackedXmmRegister xmm = BX_READ_XMM_REG(n);
-    BX_DEBUG(("XMM%02u: %08x%08x:%08x%08x\n", n,
-       xmm.xmm32u(3), xmm.xmm32u(2), xmm.xmm32u(1), xmm.xmm32u(0)));
+    printf("XMM%02u: %08x%08x:%08x%08x\n", n,
+       xmm.xmm32u(3), xmm.xmm32u(2), xmm.xmm32u(1), xmm.xmm32u(0));
   }
 }
 
@@ -159,7 +159,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FXSAVE(bxInstruction_c *i)
   unsigned index;
   BxPackedXmmRegister xmm;
 
-  BX_DEBUG(("FXSAVE: save FPU/MMX/SSE state"));
+  printf("FXSAVE: save FPU/MMX/SSE state");
 
   if (BX_CPU_THIS_PTR cr0.get_EM() || BX_CPU_THIS_PTR cr0.get_TS())
     exception(BX_NM_EXCEPTION, 0);
@@ -277,7 +277,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FXRSTOR(bxInstruction_c *i)
   BxPackedXmmRegister xmm;
   unsigned index;
 
-  BX_DEBUG(("FXRSTOR: restore FPU/MMX/SSE state"));
+  printf("FXRSTOR: restore FPU/MMX/SSE state");
 
   if (BX_CPU_THIS_PTR cr0.get_EM() || BX_CPU_THIS_PTR cr0.get_TS())
     exception(BX_NM_EXCEPTION, 0);

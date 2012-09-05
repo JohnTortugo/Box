@@ -1714,7 +1714,7 @@ modrm_done:
         case BxPrefixVEX:
           continue;
         default:
-          BX_PANIC(("fetchdecode32: Unknown opcode group %d", group));
+          printf("fetchdecode32: Unknown opcode group %d", group);
       }
 
       /* get additional attributes from group table */
@@ -1767,7 +1767,7 @@ modrm_done:
       else
 #endif
       {
-        BX_INFO(("LOCK prefix unallowed (op1=0x%x, modrm=0x%02x)", b1, b2));
+        printf("LOCK prefix unallowed (op1=0x%x, modrm=0x%02x)", b1, b2);
         // replace execution function with undefined-opcode
         ia_opcode = BX_IA_ERROR;
       }
@@ -1848,8 +1848,8 @@ modrm_done:
         }
         break;
       default:
-        BX_INFO(("b1 was %x", b1));
-        BX_PANIC(("fetchdecode32: imm_mode = %u", imm_mode));
+        printf("b1 was %x", b1);
+        printf("fetchdecode32: imm_mode = %u", imm_mode);
     }
 
     unsigned imm_mode2 = attr & BxImmediate2;
@@ -1874,8 +1874,8 @@ modrm_done:
           }
           break;
         default:
-          BX_INFO(("b1 was %x", b1));
-          BX_PANIC(("fetchdecode: imm_mode2 = %u", imm_mode2));
+          printf("b1 was %x", b1);
+          printf("fetchdecode: imm_mode2 = %u", imm_mode2);
       }
     }
   }
@@ -1926,7 +1926,7 @@ modrm_done:
 #endif
     default:
       if (def != BX_SRC_NONE)
-        BX_PANIC(("fetchdecode32: unknown definition %d for src %d", def, n));
+        printf("fetchdecode32: unknown definition %d for src %d", def, n);
     }
   }
 
@@ -2004,16 +2004,11 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::BxError(bxInstruction_c *i)
   unsigned ia_opcode = i->getIaOpcode();
  
   if (ia_opcode == BX_IA_ERROR) {
-    BX_DEBUG(("BxError: Encountered an unknown instruction (signalling #UD)"));
-
-#if BX_DISASM && BX_DEBUGGER == 0 // with debugger it easy to see the #UD
-    if (LOG_THIS getonoff(LOGLEV_DEBUG))
-      debug_disasm_instruction(BX_CPU_THIS_PTR prev_rip);
-#endif
+    printf("BxError: Encountered an unknown instruction (signalling #UD)");
   }
   else {
-    BX_DEBUG(("%s: instruction not supported - signalling #UD (features bitmask: 0x%08x)",
-      get_bx_opcode_name(ia_opcode), BX_CPU_THIS_PTR isa_extensions_bitmask));
+    printf("%s: instruction not supported - signalling #UD (features bitmask: 0x%08x)",
+      get_bx_opcode_name(ia_opcode), BX_CPU_THIS_PTR isa_extensions_bitmask);
   }
 
   exception(BX_UD_EXCEPTION, 0);
@@ -2045,11 +2040,11 @@ void BX_CPU_C::init_FetchDecodeTables(void)
   Bit64u features = BX_CPU_THIS_PTR isa_extensions_bitmask;
 #if BX_CPU_LEVEL > 3
   if (! features)
-    BX_PANIC(("init_FetchDecodeTables: CPU features bitmask is empty !"));
+    printf(("init_FetchDecodeTables: CPU features bitmask is empty !"));
 #endif
 
   if (BX_IA_LAST > 0xfff)
-    BX_PANIC(("init_FetchDecodeTables: too many opcodes defined !"));
+    printf(("init_FetchDecodeTables: too many opcodes defined !"));
   
   for (unsigned n=0; n < BX_IA_LAST; n++) {
     Bit64u ia_opcode_features = BxOpcodeFeatures[n];

@@ -25,17 +25,9 @@
 #include "../cpu/cpu.h"
 #include "../iodev/iodev.h"
 
-#ifdef HAVE_LOCALE_H
-#include <locale.h>
-#endif
-
 extern "C" {
 #include <signal.h>
 }
-
-#if BX_GUI_SIGHANDLER
-bx_bool bx_gui_sighandler = 0;
-#endif
 
 // some prototypes from iodev/
 // I want to stay away from including iodev/iodev.h here
@@ -163,47 +155,55 @@ void print_tree(bx_param_c *node, int level)
 }
 #endif
 
-int bxmain(void)
-{
-#ifdef HAVE_LOCALE_H
-  // Initialize locale (for isprint() and other functions)
-  setlocale (LC_ALL, "");
-#endif
+int bxmain(void) {
+
+
+	cpu_loop();
+
+/*
   bx_user_quit = 0;
+
   bx_init_siminterface();   // create the SIM object
+
   static jmp_buf context;
-  if (setjmp (context) == 0) {
+
+  if (setjmp(context) == 0) {
     SIM->set_quit_context (&context);
-    BX_INSTR_INIT_ENV();
+
     if (bx_init_main(bx_startup_flags.argc, bx_startup_flags.argv) < 0) {
       BX_INSTR_EXIT_ENV();
       return 0;
     }
+
     // read a param to decide which config interface to start.
     // If one exists, start it.  If not, just begin.
     bx_param_enum_c *ci_param = SIM->get_param_enum(BXPN_SEL_CONFIG_INTERFACE);
     const char *ci_name = ci_param->get_selected();
+
     if (!strcmp(ci_name, "textconfig")) {
-#if BX_USE_TEXTCONFIG
       init_text_config_interface();   // in textconfig.h
-#else
-      BX_PANIC(("configuration interface 'textconfig' not present"));
-#endif
     }
     else {
       BX_PANIC(("unsupported configuration interface '%s'", ci_name));
     }
+
     ci_param->set_enabled(0);
     int status = SIM->configuration_interface(ci_name, CI_START);
+
     if (status == CI_ERR_NO_TEXT_CONSOLE)
       BX_PANIC(("Bochs needed the text console, but it was not usable"));
     // user quit the config interface, so just quit
-  } else {
+  } 
+  else {
     // quit via longjmp
   }
+
   SIM->set_quit_context(NULL);
-  BX_INSTR_EXIT_ENV();
+
   return SIM->get_exit_code();
+*/
+
+	return 0;
 }
 
 void print_usage(void)
@@ -246,12 +246,12 @@ int bx_init_main(int argc, char *argv[])
   // All other code can reference io and genlog directly.  Because these
   // objects are required for logging, and logging is so fundamental to
   // knowing what the program is doing, they are never free()d.
-  SAFE_GET_IOFUNC();  // never freed
-  SAFE_GET_GENLOG();  // never freed
+//  SAFE_GET_IOFUNC();  // never freed
+//  SAFE_GET_GENLOG();  // never freed
 
   // initalization must be done early because some destructors expect
   // the bochs config options to exist by the time they are called.
-  bx_init_bx_dbg();
+//  bx_init_bx_dbg();
   bx_init_options();
 
   bx_print_header();
@@ -263,49 +263,10 @@ int bx_init_main(int argc, char *argv[])
   while (arg < argc) {
     // parse next arg
     if (!strcmp("--help", argv[arg]) || !strncmp("-h", argv[arg], 2)
-#if defined(WIN32)
-        || !strncmp("/?", argv[arg], 2)
-#endif
        ) {
       if ((arg+1) < argc) {
         if (!strcmp("features", argv[arg+1])) {
           fprintf(stderr, "Supported features:\n\n");
-#if BX_SUPPORT_CLGD54XX
-          fprintf(stderr, "cirrus\n");
-#endif
-#if BX_SUPPORT_PCI
-          fprintf(stderr, "pci\n");
-#endif
-#if BX_SUPPORT_PCIDEV
-          fprintf(stderr, "pcidev\n");
-#endif
-#if BX_SUPPORT_NE2K
-          fprintf(stderr, "ne2k\n");
-#endif
-#if BX_SUPPORT_PCIPNIC
-          fprintf(stderr, "pcipnic\n");
-#endif
-#if BX_SUPPORT_E1000
-          fprintf(stderr, "e1000\n");
-#endif
-#if BX_SUPPORT_SB16
-          fprintf(stderr, "sb16\n");
-#endif
-#if BX_SUPPORT_ES1370
-          fprintf(stderr, "es1370\n");
-#endif
-#if BX_SUPPORT_USB_OHCI
-          fprintf(stderr, "usb_ohci\n");
-#endif
-#if BX_SUPPORT_USB_UHCI
-          fprintf(stderr, "usb_uhci\n");
-#endif
-#if BX_SUPPORT_USB_XHCI
-          fprintf(stderr, "usb_xhci\n");
-#endif
-#if BX_GDBSTUB
-          fprintf(stderr, "gdbstub\n");
-#endif
           fprintf(stderr, "\n");
           arg++;
         }
@@ -334,12 +295,6 @@ int bx_init_main(int argc, char *argv[])
       if (++arg >= argc) BX_PANIC(("-log must be followed by a filename"));
       else SIM->get_param_string(BXPN_LOG_FILENAME)->set(argv[arg]);
     }
-#if BX_DEBUGGER
-    else if (!strcmp("-dbglog", argv[arg])) {
-      if (++arg >= argc) BX_PANIC(("-dbglog must be followed by a filename"));
-      else SIM->get_param_string(BXPN_DEBUGGER_LOG_FILENAME)->set(argv[arg]);
-    }
-#endif
     else if (!strcmp("-f", argv[arg])) {
       if (++arg >= argc) BX_PANIC(("-f must be followed by a filename"));
       else bochsrc_filename = argv[arg];
@@ -362,38 +317,6 @@ int bx_init_main(int argc, char *argv[])
         SIM->get_param_string(BXPN_RESTORE_PATH)->set(argv[arg]);
       }
     }
-#ifdef WIN32
-    else if (!strcmp("-noconsole", argv[arg])) {
-      // already handled in main() / WinMain()
-    }
-#endif
-#if BX_WITH_CARBON
-    else if (!strncmp("-psn", argv[arg], 4)) {
-      // "-psn" is passed if we are launched by double-clicking
-      // ugly hack.  I don't know how to open a window to print messages in,
-      // so put them in /tmp/early-bochs-out.txt.  Sorry. -bbd
-      io->init_log("/tmp/early-bochs-out.txt");
-      BX_INFO (("I was launched by double clicking.  Fixing home directory."));
-      arg = argc; // ignore all other args.
-      setupWorkingDirectory (argv[0]);
-      // there is no stdin/stdout so disable the text-based config interface.
-      SIM->get_param_enum(BXPN_BOCHS_START)->set(BX_QUICK_START);
-      char cwd[MAXPATHLEN];
-      getwd (cwd);
-      BX_INFO (("Now my working directory is %s", cwd));
-      // if it was started from command line, there could be some args still.
-      for (int a=0; a<argc; a++) {
-        BX_INFO (("argument %d is %s", a, argv[a]));
-      }
-    }
-#endif
-#if BX_DEBUGGER
-    else if (!strcmp("-rc", argv[arg])) {
-      // process "-rc filename" option, if it exists
-      if (++arg >= argc) BX_PANIC(("-rc must be followed by a filename"));
-      else bx_dbg_set_rcfile(argv[arg]);
-    }
-#endif
     else if (argv[arg][0] == '-') {
       print_usage();
       BX_PANIC (("command line arg '%s' was not understood", argv[arg]));
@@ -404,73 +327,9 @@ int bx_init_main(int argc, char *argv[])
     }
     arg++;
   }
-#if BX_WITH_CARBON
-  if(!getenv("BXSHARE"))
-  {
-    CFBundleRef mainBundle;
-    CFURLRef bxshareDir;
-    char bxshareDirPath[MAXPATHLEN];
-    BX_INFO (("fixing default bxshare location ..."));
-    // set bxshare to the directory that contains our application
-    mainBundle = CFBundleGetMainBundle();
-    BX_ASSERT(mainBundle != NULL);
-    bxshareDir = CFBundleCopyBundleURL(mainBundle);
-    BX_ASSERT(bxshareDir != NULL);
-    // translate this to a unix style full path
-    if(!CFURLGetFileSystemRepresentation(bxshareDir, true, (UInt8 *)bxshareDirPath, MAXPATHLEN))
-    {
-      BX_PANIC(("Unable to work out bxshare path! (Most likely path too long!)"));
-      return -1;
-    }
-    char *c;
-    c = (char*) bxshareDirPath;
-    while (*c != '\0')  /* go to end */
-      c++;
-    while (*c != '/')   /* back up to parent */
-      c--;
-    *c = '\0';          /* cut off last part (binary name) */
-    setenv("BXSHARE", bxshareDirPath, 1);
-    BX_INFO (("now my BXSHARE is %s", getenv("BXSHARE")));
-    CFRelease(bxshareDir);
-  }
-#endif
 #if BX_PLUGINS
   // set a default plugin path, in case the user did not specify one
-#if BX_WITH_CARBON
-  // if there is no stdin, then we must create our own LTDL_LIBRARY_PATH.
-  // also if there is no LTDL_LIBRARY_PATH, but we have a bundle since we're here
-  // This is here so that it is available whenever --with-carbon is defined but
-  // the above code might be skipped, as in --with-sdl --with-carbon
-  if(!isatty(STDIN_FILENO) || !getenv("LTDL_LIBRARY_PATH"))
-  {
-    CFBundleRef mainBundle;
-    CFURLRef libDir;
-    char libDirPath[MAXPATHLEN];
-    if(!isatty(STDIN_FILENO))
-    {
-      // there is no stdin/stdout so disable the text-based config interface.
-      SIM->get_param_enum(BXPN_BOCHS_START)->set(BX_QUICK_START);
-    }
-    BX_INFO (("fixing default lib location ..."));
-    // locate the lib directory within the application bundle.
-    // our libs have been placed in bochs.app/Contents/(current platform aka MacOS)/lib
-    // This isn't quite right, but they are platform specific and we haven't put
-    // our plugins into true frameworks and bundles either
-    mainBundle = CFBundleGetMainBundle();
-    BX_ASSERT(mainBundle != NULL);
-    libDir = CFBundleCopyAuxiliaryExecutableURL(mainBundle, CFSTR("lib"));
-    BX_ASSERT(libDir != NULL);
-    // translate this to a unix style full path
-    if(!CFURLGetFileSystemRepresentation(libDir, true, (UInt8 *)libDirPath, MAXPATHLEN))
-    {
-      BX_PANIC(("Unable to work out ltdl library path within bochs bundle! (Most likely path too long!)"));
-      return -1;
-    }
-    setenv("LTDL_LIBRARY_PATH", libDirPath, 1);
-    BX_INFO (("now my LTDL_LIBRARY_PATH is %s", getenv("LTDL_LIBRARY_PATH")));
-    CFRelease(libDir);
-  }
-#elif BX_HAVE_GETENV && BX_HAVE_SETENV
+#if BX_HAVE_GETENV && BX_HAVE_SETENV
   if (getenv("LTDL_LIBRARY_PATH") != NULL) {
     BX_INFO (("LTDL_LIBRARY_PATH is set to '%s'", getenv("LTDL_LIBRARY_PATH")));
   } else {
@@ -505,17 +364,6 @@ int bx_init_main(int argc, char *argv[])
   SIM->init_save_restore();
   if (load_rcfile) {
     // parse configuration file and command line arguments
-#ifdef WIN32
-    int length;
-    if (bochsrc_filename != NULL) {
-      lstrcpy(bx_startup_flags.initial_dir, bochsrc_filename);
-      length = lstrlen(bx_startup_flags.initial_dir);
-      while ((length > 1) && (bx_startup_flags.initial_dir[length-1] != 92)) length--;
-      bx_startup_flags.initial_dir[length] = 0;
-    } else {
-      bx_startup_flags.initial_dir[0] = 0;
-    }
-#endif
     if (bochsrc_filename == NULL) bochsrc_filename = bx_find_bochsrc ();
     if (bochsrc_filename)
       norcfile = bx_read_configuration(bochsrc_filename);
@@ -551,27 +399,6 @@ int bx_init_main(int argc, char *argv[])
   return 0;
 }
 
-bx_bool load_and_init_display_lib(void)
-{
-  if (bx_gui != NULL) {
-    // bx_gui has already been filled in.  This happens when you start
-    // the simulation for the second time.
-    // Also, if you load wxWidgets as the configuration interface.  Its
-    // plugin_init will install wxWidgets as the bx_gui.
-    return true;
-  }
-  BX_ASSERT(bx_gui == NULL);
-  bx_param_enum_c *ci_param = SIM->get_param_enum(BXPN_SEL_CONFIG_INTERFACE);
-  const char *ci_name = ci_param->get_selected();
-  bx_param_enum_c *gui_param = SIM->get_param_enum(BXPN_SEL_DISPLAY_LIBRARY);
-  const char *gui_name = gui_param->get_selected();
-
-  PLUG_load_plugin (nogui, PLUGTYPE_OPTIONAL);
-
-  BX_ASSERT(bx_gui != NULL);
-  return true;
-}
-
 int bx_begin_simulation (int argc, char *argv[])
 {
   if (SIM->get_param_bool(BXPN_RESTORE_FLAG)->get()) {
@@ -593,21 +420,6 @@ int bx_begin_simulation (int argc, char *argv[])
   bx_cpu_count = SIM->get_param_num(BXPN_CPU_NPROCESSORS)->get() *
                  SIM->get_param_num(BXPN_CPU_NCORES)->get() *
                  SIM->get_param_num(BXPN_CPU_NTHREADS)->get();
-
-#if BX_SUPPORT_APIC
-  simulate_xapic = (SIM->get_param_enum(BXPN_CPUID_APIC)->get() >= BX_CPUID_SUPPORT_XAPIC);
-
-  // For P6 and Pentium family processors the local APIC ID feild is 4 bits
-  // APIC_MAX_ID indicate broadcast so it can't be used as valid APIC ID
-  apic_id_mask = simulate_xapic ? 0xFF : 0xF;
-
-  // leave one APIC ID to I/O APIC
-  unsigned max_smp_threads = apic_id_mask - 1;
-  if (bx_cpu_count > max_smp_threads) {
-    BX_PANIC(("cpu: too many SMP threads defined, only %u threads supported by %sAPIC",
-      max_smp_threads, simulate_xapic ? "x" : "legacy "));
-  }
-#endif
 
   BX_ASSERT(bx_cpu_count > 0);
 
@@ -636,64 +448,6 @@ int bx_begin_simulation (int argc, char *argv[])
   // Not a great solution but it works. BBD
   SIM->get_param_bool(BXPN_MOUSE_ENABLED)->set(SIM->get_param_bool(BXPN_MOUSE_ENABLED)->get());
 
-#if BX_DEBUGGER
-  // If using the debugger, it will take control and call
-  // bx_init_hardware() and cpu_loop()
-  bx_dbg_main();
-#else
-#if BX_GDBSTUB
-  // If using gdbstub, it will take control and call
-  // bx_init_hardware() and cpu_loop()
-  if (bx_dbg.gdbstub_enabled) bx_gdbstub_init();
-  else
-#endif
-  {
-    if (BX_SMP_PROCESSORS == 1) {
-      // only one processor, run as fast as possible by not messing with
-      // quantums and loops.
-      while (1) {
-        BX_CPU(0)->cpu_loop();
-        if (bx_pc_system.kill_bochs_request)
-          break;
-      }
-      // for one processor, the only reason for cpu_loop to return is
-      // that kill_bochs_request was set by the GUI interface.
-    }
-#if BX_SUPPORT_SMP
-    else {
-      // SMP simulation: do a few instructions on each processor, then switch
-      // to another.  Increasing quantum speeds up overall performance, but
-      // reduces granularity of synchronization between processors.
-      // Current implementation uses dynamic quantum, each processor will
-      // execute exactly one trace then quit the cpu_loop and switch to
-      // the next processor.
-
-      static int quantum = SIM->get_param_num(BXPN_SMP_QUANTUM)->get();
-      Bit32u executed = 0, processor = 0;
-
-      while (1) {
-         // do some instructions in each processor
-         Bit64u icount = BX_CPU(processor)->icount_last_sync = BX_CPU(processor)->get_icount();
-         BX_CPU(processor)->cpu_run_trace();
-
-         // see how many instruction it was able to run
-         Bit32u n = (Bit32u)(BX_CPU(processor)->get_icount() - icount);
-         if (n == 0) n = quantum; // the CPU was halted
-         executed += n;
-
-         if (++processor == BX_SMP_PROCESSORS) {
-           processor = 0;
-           BX_TICKN(executed / BX_SMP_PROCESSORS);
-           executed %= BX_SMP_PROCESSORS;
-         }
-
-         if (bx_pc_system.kill_bochs_request)
-           break;
-      }
-    }
-#endif /* BX_SUPPORT_SMP */
-  }
-#endif /* BX_DEBUGGER == 0 */
   BX_INFO(("cpu loop quit, shutting down simulator"));
   bx_atexit();
   return(0);
