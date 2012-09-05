@@ -2439,12 +2439,12 @@ AC_SUBST(INSTALL_PLUGINS_VAR)
 AC_PATH_PROG(GZIP, gzip)
 AC_PATH_PROG(TAR, tar)
 
-AC_OUTPUT(Makefile cpu/Makefile cpu/cpudb/Makefile memory/Makefile \
+AC_OUTPUT(Makefile cpu/Makefile cpu/cpudb/Makefile \
           fpu/Makefile elfparser/Makefile elfloader/Makefile \
-	  iodev/Makefile runtime/Makefile disasm/Makefile \
-          gui/Makefile bxversion.h)
+	  runtime/Makefile disasm/Makefile bxversion.h)
 # gui/Makefile disasm/Makefile ${INSTRUMENT_DIR}/Makefile misc/Makefile \
 # fpu/Makefile doc/docbook/Makefile build/linux/bochs-dlx \
 # bxversion.h bxversion.rc build/macosx/Info.plist \
 # build/win32/nsis/Makefile build/win32/nsis/bochs.nsi \
-# host/linux/pcidev/Makefile)
+# host/linux/pcidev/Makefile memory/Makefile \
+# iodev/Makefile )
