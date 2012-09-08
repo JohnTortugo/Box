@@ -152,7 +152,6 @@ box@EXE@: 		cpu/libcpu.a \
 			fpu/libfpu.a \
           		disasm/libdisasm.a \
 	  		runtime/libruntime.a \
-			@LINK@ @EXPORT_DYNAMIC@ $(EXTERN_OBJS) \
 			elfparser/libelfparser.a \
 			elfloader/libelfloader.a \
 			$(MCH_LINK_FLAGS) \
@@ -160,6 +159,7 @@ box@EXE@: 		cpu/libcpu.a \
 			$(READLINE_LIB) \
 			$(EXTRA_LINK_OPTS) \
 			$(LIBS)
+	@LINK@ @EXPORT_DYNAMIC@ $(EXTERN_OBJS)
 
 $(BX_OBJS): $(BX_INCLUDES)
 
