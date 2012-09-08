@@ -25,9 +25,9 @@
 #define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
 #include "cpu/cpu.h"
+#include "debug.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
-#include "iodev/iodev.h"
 
 #define CHECK_PENDING_EXCEPTIONS 1
 
@@ -55,6 +55,7 @@ void BX_CPU_C::FPU_update_last_instruction(bxInstruction_c *i)
 
 void BX_CPU_C::FPU_check_pending_exceptions(void)
 {
+/*
   if(BX_CPU_THIS_PTR the_i387.get_partial_status() & FPU_SW_Summary)
   {
      // NE=1 selects the native or internal mode, which generates #MF,
@@ -73,6 +74,7 @@ void BX_CPU_C::FPU_check_pending_exceptions(void)
         DEV_pic_raise_irq(13);
      }
   }
+*/
 }
 
 bx_address BX_CPU_C::fpu_save_environment(bxInstruction_c *i)

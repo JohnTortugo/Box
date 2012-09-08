@@ -23,6 +23,7 @@
 #define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
 #include "cpu.h"
+#include "debug.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
 #include "param_names.h"
@@ -31,9 +32,6 @@ BX_CPU_C::BX_CPU_C(unsigned id): bx_cpuid(id)
 #if BX_CPU_LEVEL >= 4
    , cpuid(NULL)
 #endif
-#if BX_SUPPORT_APIC
-   ,lapic (this, id)
-#endif
 {
   // in case of SMF, you cannot reference any member data
   // in the constructor because the only access to it is via
@@ -41,7 +39,7 @@ BX_CPU_C::BX_CPU_C(unsigned id): bx_cpuid(id)
   char name[16], logname[16];
   sprintf(name, "CPU%x", bx_cpuid);
   sprintf(logname, "cpu%x", bx_cpuid);
-  put(logname, name);
+  //put(logname, name);
 
   isa_extensions_bitmask = BX_SUPPORT_FPU ? BX_ISA_X87 : 0;
   cpu_extensions_bitmask = 0;
@@ -82,6 +80,7 @@ BX_CPU_C::BX_CPU_C(unsigned id): bx_cpuid(id)
 
 
 // implement get/set handler for parameters that need unusual set/get
+/*
 static Bit64s cpu_param_handler(bx_param_c *param, int set, Bit64s val)
 {
 #if BX_SUPPORT_SMP
@@ -150,6 +149,7 @@ static Bit64s cpu_param_handler(bx_param_c *param, int set, Bit64s val)
   }
   return val;
 }
+*/
 #undef IF_SEG_REG_GET
 #undef IF_SEG_REG_SET
 
@@ -168,6 +168,7 @@ static Bit64s cpu_param_handler(bx_param_c *param, int set, Bit64s val)
 
 static bx_cpuid_t *cpuid_factory(BX_CPU_C *cpu)
 {
+/*
   unsigned cpu_model = SIM->get_param_enum(BXPN_CPU_MODEL)->get();
 
 #define bx_define_cpudb(model) \
@@ -180,6 +181,7 @@ static bx_cpuid_t *cpuid_factory(BX_CPU_C *cpu)
     return 0;
   }
 #undef bx_define_cpudb
+*/
 }
 
 #endif
@@ -210,13 +212,13 @@ void BX_CPU_C::initialize(void)
   for (unsigned n=0; n < BX_MSR_MAX_INDEX; n++) {
     BX_CPU_THIS_PTR msrs[n] = 0;
   }
-  const char *msrs_filename = SIM->get_param_string(BXPN_CONFIGURABLE_MSRS_PATH)->getptr();
-  load_MSRs(msrs_filename);
+  //const char *msrs_filename = SIM->get_param_string(BXPN_CONFIGURABLE_MSRS_PATH)->getptr();
+  //load_MSRs(msrs_filename);
 #endif
 
   // ignore bad MSRS if user asked for it
 #if BX_CPU_LEVEL >= 5
-  BX_CPU_THIS_PTR ignore_bad_msrs = SIM->get_param_bool(BXPN_IGNORE_BAD_MSRS)->get();
+  //BX_CPU_THIS_PTR ignore_bad_msrs = SIM->get_param_bool(BXPN_IGNORE_BAD_MSRS)->get();
 #endif
 
   init_SMRAM();
@@ -358,6 +360,7 @@ void BX_CPU_C::register_wx_state(void)
 // save/restore functionality
 void BX_CPU_C::register_state(void)
 {
+/*
   unsigned n;
   char name[10];
 
@@ -503,9 +506,6 @@ void BX_CPU_C::register_state(void)
 #if BX_CPU_LEVEL >= 5
   bx_list_c *MSR = new bx_list_c(cpu, "MSR");
 
-#if BX_SUPPORT_APIC
-  BXRS_HEX_PARAM_FIELD(MSR, apicbase, msr.apicbase);
-#endif
   BXRS_HEX_PARAM_FIELD(MSR, EFER, efer.val32);
   BXRS_HEX_PARAM_FIELD(MSR,  star, msr.star);
 #if BX_SUPPORT_X86_64
@@ -612,10 +612,6 @@ void BX_CPU_C::register_state(void)
   BXRS_PARAM_BOOL(monitor_list, armed, monitor.armed);
 #endif
 
-#if BX_SUPPORT_APIC
-  lapic.register_state(cpu);
-#endif
-
 #if BX_SUPPORT_VMX
   register_vmx_state(cpu);
 #endif
@@ -655,20 +651,12 @@ void BX_CPU_C::register_state(void)
     BXRS_HEX_PARAM_FIELD(tlb_entry, accessBits, TLB.entry[n].accessBits);
   }
 #endif
+*/
 }
 
+/*
 Bit64s BX_CPU_C::param_save_handler(void *devptr, bx_param_c *param)
 {
-#if !BX_USE_CPU_SMF
-  BX_CPU_C *class_ptr = (BX_CPU_C *) devptr;
-  return class_ptr->param_save(param);
-}
-
-Bit64s BX_CPU_C::param_save(bx_param_c *param)
-{
-#else
-  UNUSED(devptr);
-#endif // !BX_USE_CPU_SMF
   const char *pname, *segname;
   bx_segment_reg_t *segment = NULL;
   Bit64s val = 0;
@@ -704,14 +692,18 @@ Bit64s BX_CPU_C::param_save(bx_param_c *param)
   }
   return val;
 }
+*/
 
+/*
 void BX_CPU_C::param_restore_handler(void *devptr, bx_param_c *param, Bit64s val)
 {
 #if !BX_USE_CPU_SMF
   BX_CPU_C *class_ptr = (BX_CPU_C *) devptr;
   class_ptr->param_restore(param, val);
 }
+*/
 
+/*
 void BX_CPU_C::param_restore(bx_param_c *param, Bit64s val)
 {
 #else
@@ -751,6 +743,7 @@ void BX_CPU_C::param_restore(bx_param_c *param, Bit64s val)
     BX_PANIC(("Unknown param %s in param_restore handler !", pname));
   }
 }
+*/
 
 void BX_CPU_C::after_restore_state(void)
 {
@@ -984,18 +977,6 @@ void BX_CPU_C::reset(unsigned source)
 
 /* initialise MSR registers to defaults */
 #if BX_CPU_LEVEL >= 5
-#if BX_SUPPORT_APIC
-  /* APIC Address, APIC enabled and BSP is default, we'll fill in the rest later */
-  BX_CPU_THIS_PTR msr.apicbase = BX_LAPIC_BASE_ADDR;
-  BX_CPU_THIS_PTR lapic.reset(source);
-  BX_CPU_THIS_PTR msr.apicbase |= 0x900;
-  BX_CPU_THIS_PTR lapic.set_base(BX_CPU_THIS_PTR msr.apicbase);
-#if BX_CPU_LEVEL >= 6
-  if (BX_CPUID_SUPPORT_CPU_EXTENSION(BX_CPU_XAPIC_EXT))
-    BX_CPU_THIS_PTR lapic.enable_xapic_extensions();
-#endif
-#endif
-
   BX_CPU_THIS_PTR efer.set32(0);
   BX_CPU_THIS_PTR efer_suppmask = 0;
   if (BX_CPUID_SUPPORT_CPU_EXTENSION(BX_CPU_NX))
@@ -1141,24 +1122,6 @@ void BX_CPU_C::reset(unsigned source)
 
 #if BX_SUPPORT_VMX || BX_SUPPORT_SVM
   BX_CPU_THIS_PTR in_event = 0;
-#endif
-
-#if BX_SUPPORT_SMP
-  // notice if I'm the bootstrap processor.  If not, do the equivalent of
-  // a HALT instruction.
-  int apic_id = lapic.get_id();
-  if (BX_BOOTSTRAP_PROCESSOR == apic_id) {
-    // boot normally
-    BX_CPU_THIS_PTR msr.apicbase |= 0x0100; /* set bit 8 BSP */
-    BX_INFO(("CPU[%d] is the bootstrap processor", apic_id));
-  } else {
-    // it's an application processor, halt until IPI is heard.
-    BX_CPU_THIS_PTR msr.apicbase &= ~0x0100; /* clear bit 8 BSP */
-    BX_INFO(("CPU[%d] is an application processor. Halting until IPI.", apic_id));
-    activity_state = BX_ACTIVITY_STATE_WAIT_FOR_SIPI;
-    disable_INIT = 1; // INIT is disabled when CPU is waiting for SIPI
-    async_event = 1;
-  }
 #endif
 
   handleCpuContextChange();

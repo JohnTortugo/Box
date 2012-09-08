@@ -24,6 +24,7 @@
 #define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
 #include "cpu.h"
+#include "debug.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_DdRd(bxInstruction_c *i)
@@ -1286,6 +1287,7 @@ bx_bool BX_CPP_AttrRegparmN(1) BX_CPU_C::SetEFER(bx_address val_64)
 
 void BX_CPU_C::WriteCR8(bxInstruction_c *i, bx_address val)
 {
+/*
 #if BX_SUPPORT_SVM
   if (BX_CPU_THIS_PTR in_svm_guest) {
     if (SVM_CR_WRITE_INTERCEPTED(8)) Svm_Vmexit(SVM_VMEXIT_CR8_WRITE);
@@ -1323,6 +1325,7 @@ void BX_CPU_C::WriteCR8(bxInstruction_c *i, bx_address val)
 #endif
 
   BX_CPU_THIS_PTR lapic.set_tpr(tpr);
+*/
 }
 
 Bit32u BX_CPU_C::ReadCR8(bxInstruction_c *i)

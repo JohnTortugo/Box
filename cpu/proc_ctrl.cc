@@ -22,6 +22,7 @@
 
 #define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
+#include "debug.h"
 #include "param_names.h"
 #include "cpu.h"
 #define LOG_THIS BX_CPU_THIS_PTR
@@ -520,21 +521,25 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::RDPMC(bxInstruction_c *i)
 #if BX_CPU_LEVEL >= 5
 Bit64u BX_CPU_C::get_TSC(void)
 {
+/*
   Bit64u tsc = bx_pc_system.time_ticks() - BX_CPU_THIS_PTR tsc_last_reset;
 #if BX_SUPPORT_VMX || BX_SUPPORT_SVM
   tsc += BX_CPU_THIS_PTR tsc_offset;
 #endif
   return tsc;
+*/
 }
 
 void BX_CPU_C::set_TSC(Bit64u newval)
 {
+/*
   // compute the correct setting of tsc_last_reset so that a get_TSC()
   // will return newval
   BX_CPU_THIS_PTR tsc_last_reset = bx_pc_system.time_ticks() - newval;
 
   // verify
   BX_ASSERT(get_TSC() == newval);
+*/
 }
 #endif
 
@@ -646,9 +651,10 @@ void BX_CPU_C::check_monitor(bx_phy_address begin_addr, unsigned len)
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MONITOR(bxInstruction_c *i)
 {
+/*
 #if BX_SUPPORT_MONITOR_MWAIT
   // CPL is always 0 in real mode
-  if (/* !real_mode() && */ CPL != 0) {
+  if (CPL != 0) { // !real_mode() &&  
     BX_DEBUG(("MWAIT instruction not recognized when CPL != 0"));
     exception(BX_UD_EXCEPTION, 0);
   }
@@ -718,13 +724,15 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MONITOR(bxInstruction_c *i)
 #endif
 
   BX_NEXT_INSTR(i);
+*/
 }
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MWAIT(bxInstruction_c *i)
 {
+/*
 #if BX_SUPPORT_MONITOR_MWAIT
   // CPL is always 0 in real mode
-  if (/* !real_mode() && */ CPL != 0) {
+  if (CPL != 0) { // !real_mode() && 
     BX_DEBUG(("MWAIT instruction not recognized when CPL != 0"));
     exception(BX_UD_EXCEPTION, 0);
   }
@@ -806,6 +814,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MWAIT(bxInstruction_c *i)
 #endif
 
   BX_NEXT_TRACE(i);
+*/
 }
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SYSENTER(bxInstruction_c *i)

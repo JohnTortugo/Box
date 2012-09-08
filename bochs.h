@@ -238,10 +238,10 @@ Bit32u crc32(const Bit8u *buf, int len);
 #define SAFE_GET_GENLOG() \
   ((genlog==NULL)? (genlog=new logfunc_t(SAFE_GET_IOFUNC())) : genlog)
 
-#define BX_INFO(x)  (LOG_THIS info) x
-#define BX_DEBUG(x) (LOG_THIS ldebug) x
-#define BX_ERROR(x) (LOG_THIS error) x
-#define BX_PANIC(x) (LOG_THIS panic) x
+//#define BX_INFO(x)  (LOG_THIS info) x
+//#define BX_DEBUG(x) (LOG_THIS ldebug) x
+//#define BX_ERROR(x) (LOG_THIS error) x
+//#define BX_PANIC(x) (LOG_THIS panic) x
 
 #if BX_ASSERT_ENABLE
   #define BX_ASSERT(x) do {if (!(x)) BX_PANIC(("failed assertion \"%s\" at %s:%d\n", #x, __FILE__, __LINE__));} while (0)

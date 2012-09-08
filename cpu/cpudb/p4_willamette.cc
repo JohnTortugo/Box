@@ -23,6 +23,7 @@
 
 #include "bochs.h"
 #include "cpu.h"
+#include "debug.h"
 #include "p4_willamette.h"
 
 #define LOG_THIS cpu->
@@ -127,9 +128,6 @@ void p4_willamette_t::get_std_cpuid_leaf_1(cpuid_function_t *leaf) const
   unsigned n_logical_processors = ncores*nthreads;
   leaf->ebx = ((CACHE_LINE_SIZE / 8) << 8) |
               (n_logical_processors << 16);
-#if BX_SUPPORT_APIC
-  leaf->ebx |= ((cpu->get_apic_id() & 0xff) << 24);
-#endif
 
   // ECX: Extended Feature Flags
   leaf->ecx = 0;
@@ -194,12 +192,6 @@ void p4_willamette_t::get_std_cpuid_leaf_1(cpuid_function_t *leaf) const
               BX_CPUID_STD_SSE2 |
               BX_CPUID_STD_SELF_SNOOP |
               BX_CPUID_STD_HT;
-#if BX_SUPPORT_APIC
-  // if MSR_APICBASE APIC Global Enable bit has been cleared,
-  // the CPUID feature flag for the APIC is set to 0.
-  if (cpu->msr.apicbase & 0x800)
-    leaf->edx |= BX_CPUID_STD_APIC; // APIC on chip
-#endif
 }
 
 // leaf 0x00000002 //

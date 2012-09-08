@@ -19,8 +19,8 @@
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 #include "bochs.h"
+#include "debug.h"
 #include "bxversion.h"
-#include "iodev/iodev.h"
 #include "param_names.h"
 #include <assert.h>
 
@@ -51,6 +51,7 @@ static int parse_line_formatted(const char *context, int num_params, char *param
 static int parse_bochsrc(const char *rcfile);
 static int get_floppy_type_from_image(const char *filename);
 
+/*
 static Bit64s bx_param_handler(bx_param_c *param, int set, Bit64s val)
 {
   char pname[BX_PATHNAME_LEN];
@@ -111,7 +112,9 @@ static Bit64s bx_param_handler(bx_param_c *param, int set, Bit64s val)
   }
   return val;
 }
+*/
 
+/*
 const char *bx_param_string_handler(bx_param_string_c *param, int set,
                                     const char *oldval, const char *val, int maxlen)
 {
@@ -136,7 +139,9 @@ const char *bx_param_string_handler(bx_param_string_c *param, int set,
   }
   return val;
 }
+*/
 
+/*
 void bx_init_std_nic_options(const char *name, bx_list_c *menu)
 {
   // networking module choices
@@ -1835,11 +1840,9 @@ static int parse_line_unformatted(const char *context, char *line)
 #define PARSE_WARN(x)  \
   BX_ERROR(x)
 
-/*
- * this supports the "floppyx: image=" option.
- * the functions returns the type of the floppy
- * image (1.44, 360, etc.), based on the image file size.
- */
+// this supports the "floppyx: image=" option.
+// the functions returns the type of the floppy
+// image (1.44, 360, etc.), based on the image file size.
 int get_floppy_type_from_image(const char *filename)
 {
   struct stat stat_buf;
@@ -1899,7 +1902,7 @@ static Bit32s parse_log_options(const char *context, int num_params, char *param
     level = LOGLEV_ERROR;
   } else if (!strcmp(params[0], "info")) {
     level = LOGLEV_INFO;
-  } else { /* debug */
+  } else { // debug 
     level = LOGLEV_DEBUG;
   }
   for (i = 1; i < num_params; i++) {
@@ -2140,7 +2143,7 @@ static int parse_line_formatted(const char *context, int num_params, char *param
         SIM->get_param_enum("type", base)->set(BX_FLOPPY_320K);
       }
       else if (!strncmp(params[i], "image=", 6)) {
-        /* "image=" means we should get floppy type from image */
+        // "image=" means we should get floppy type from image 
         SIM->get_param_string("path", base)->set(&params[i][6]);
         t = get_floppy_type_from_image(&params[i][6]);
         if (t != BX_FLOPPY_UNKNOWN)
@@ -3598,3 +3601,4 @@ int bx_write_configuration(const char *rc, int overwrite)
   fclose(fp);
   return 0;
 }
+*/

@@ -22,8 +22,8 @@
 
 #include "bochs.h"
 #include "cpu/cpu.h"
-#include "iodev/iodev.h"
 #include <assert.h>
+#include "debug.h"
 
 #if BX_WITH_CARBON
 #include <Carbon/Carbon.h>
@@ -33,6 +33,7 @@
 
 static int Allocio=0;
 
+/*
 const char* iofunctions::getlevel(int i) const
 {
   static const char *loglevel[N_LOGLEV] = {
@@ -510,8 +511,8 @@ void logfunctions::ask(int level, const char *prefix, const char *fmt, va_list a
 }
 
 #if BX_WITH_CARBON
-/* Panic button to display fatal errors.
-  Completely self contained, can't rely on carbon.cc being available */
+// Panic button to display fatal errors.
+//  Completely self contained, can't rely on carbon.cc being available 
 static void carbonFatalDialog(const char *error, const char *exposition)
 {
   DialogRef                     alertDialog;
@@ -539,8 +540,8 @@ static void carbonFatalDialog(const char *error, const char *exposition)
   CreateStandardAlert(
     kAlertStopAlert,
     cfError,
-    cfExposition,       /* can be NULL */
-    &alertParam,             /* can be NULL */
+    cfExposition,       // can be NULL 
+    &alertParam,             // can be NULL 
     &alertDialog);
   RunStandardAlert(alertDialog, NULL, &index);
   // Cleanup
@@ -605,3 +606,4 @@ void bx_center_print(FILE *file, const char *line, unsigned maxwidth)
   for (size_t i=0; i<imax; i++) fputc(' ', file);
   fputs(line, file);
 }
+*/

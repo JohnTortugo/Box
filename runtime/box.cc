@@ -18,12 +18,10 @@
 //  License along with this library; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-#include "../bochs.h"
-#include "../bxversion.h"
-#include "../param_names.h"
-#include "../gui/textconfig.h"
-#include "../cpu/cpu.h"
-#include "../iodev/iodev.h"
+#include "bochs.h"
+#include "debug.h"
+#include "bxversion.h"
+#include "cpu/cpu.h"
 
 extern "C" {
 #include <signal.h>
@@ -40,10 +38,10 @@ void bx_init_options(void);
 void bx_init_bx_dbg(void);
 
 static const char *divider = "========================================================================";
-static logfunctions thePluginLog;
-logfunctions *pluginlog = &thePluginLog;
 
-bx_startup_flags_t bx_startup_flags;
+
+
+
 bx_bool bx_user_quit;
 Bit8u bx_cpu_count;
 #if BX_SUPPORT_APIC
@@ -55,26 +53,21 @@ bx_bool simulate_xapic;
 
 #define LOG_THIS genlog->
 
-bx_pc_system_c bx_pc_system;
+
 
 bx_debug_t bx_dbg;
 
 typedef BX_CPU_C *BX_CPU_C_PTR;
 
-#if BX_SUPPORT_SMP
-// multiprocessor simulation, we need an array of cpus
-BOCHSAPI BX_CPU_C_PTR *bx_cpu_array = NULL;
-#else
-// single processor simulation, so there's one of everything
-BOCHSAPI BX_CPU_C bx_cpu;
-#endif
+//BOCHSAPI BX_CPU_C bx_cpu;
 
-BOCHSAPI BX_MEM_C bx_mem;
+
 
 char *bochsrc_filename = NULL;
 
 void bx_print_header()
 {
+/*
   printf("%s\n", divider);
   char buffer[128];
   sprintf (buffer, "Box IA32 Process Emulator %s\n", VER_STRING);
@@ -92,6 +85,7 @@ void bx_print_header()
 #endif
   }
   printf("%s\n", divider);
+*/
 }
 
 #if BX_DEBUGGER
@@ -157,10 +151,10 @@ void print_tree(bx_param_c *node, int level)
 
 int bxmain(void) {
 
-
+/*
 	cpu_loop();
 
-/*
+
   bx_user_quit = 0;
 
   bx_init_siminterface();   // create the SIM object
@@ -235,6 +229,7 @@ void print_usage(void)
 
 int bx_init_main(int argc, char *argv[])
 {
+/*
   // To deal with initialization order problems inherent in C++, use the macros
   // SAFE_GET_IOFUNC and SAFE_GET_GENLOG to retrieve "io" and "genlog" in all
   // constructors or functions called by constructors.  The macros test for
@@ -344,7 +339,7 @@ int bx_init_main(int argc, char *argv[])
 #else
   // we don't have getenv or setenv.  Do nothing.
 #endif
-#endif  /* if BX_PLUGINS */
+#endif  // if BX_PLUGINS 
 
   // initialize plugin system. This must happen before we attempt to
   // load any modules.
@@ -394,10 +389,12 @@ int bx_init_main(int argc, char *argv[])
     }
   }
   return 0;
+*/
 }
 
 int bx_begin_simulation (int argc, char *argv[])
 {
+/*
   if (SIM->get_param_bool(BXPN_RESTORE_FLAG)->get()) {
     if (!SIM->restore_config()) {
       BX_PANIC(("cannot restore configuration"));
@@ -422,12 +419,11 @@ int bx_begin_simulation (int argc, char *argv[])
 
   bx_init_hardware();
 
-  /* BOX:REMOVE
-  if (SIM->get_param_enum(BXPN_LOAD32BITOS_WHICH)->get()) {
-    void bx_load32bitOSimagehack(void);
-    bx_load32bitOSimagehack();
-  }
-  */
+  // BOX:REMOVE
+  //if (SIM->get_param_enum(BXPN_LOAD32BITOS_WHICH)->get()) {
+  //  void bx_load32bitOSimagehack(void);
+  //  bx_load32bitOSimagehack();
+  //}
   SIM->set_init_done(1);
 
   // update headerbar buttons since drive status can change during init
@@ -448,20 +444,24 @@ int bx_begin_simulation (int argc, char *argv[])
   BX_INFO(("cpu loop quit, shutting down simulator"));
   bx_atexit();
   return(0);
+*/
 }
 
 void bx_stop_simulation(void)
 {
+/*
   // in wxWidgets, the whole simulator is running in a separate thread.
   // our only job is to end the thread as soon as possible, NOT to shut
   // down the whole application with an exit.
   BX_CPU(0)->async_event = 1;
   bx_pc_system.kill_bochs_request = 1;
   // the cpu loop will exit very soon after this condition is set.
+*/
 }
 
 void bx_sr_after_restore_state(void)
 {
+/*
 #if BX_SUPPORT_SMP == 0
   BX_CPU(0)->after_restore_state();
 #else
@@ -470,10 +470,12 @@ void bx_sr_after_restore_state(void)
   }
 #endif
   DEV_after_restore_state();
+*/
 }
 
 void bx_set_log_actions_by_device(bx_bool panic_flag)
 {
+/*
   int id, l, m, val;
   bx_list_c *loglev, *level;
   bx_param_num_c *action;
@@ -496,10 +498,12 @@ void bx_set_log_actions_by_device(bx_bool panic_flag)
       }
     }
   }
+*/
 }
 
 void bx_init_hardware()
 {
+/*
   // all configuration has been read, now initialize everything.
 
   if (SIM->get_param_enum(BXPN_BOCHS_START)->get()==BX_QUICK_START) {
@@ -741,6 +745,7 @@ void bx_init_hardware()
   }
 #endif
 #endif
+*/
 }
 
 void bx_init_bx_dbg(void)
@@ -753,6 +758,7 @@ void bx_init_bx_dbg(void)
 
 int bx_atexit(void)
 {
+/*
   if (!SIM->get_init_done()) return 1; // protect from reentry
 
   // in case we ended up in simulation mode, change back to config mode
@@ -792,10 +798,12 @@ int bx_atexit(void)
   SIM->set_init_done(0);
 
   return 0;
+*/
 }
 
 void CDECL bx_signal_handler(int signum)
 {
+/*
   // in a multithreaded environment, a signal such as SIGINT can be sent to all
   // threads.  This function is only intended to handle signals in the
   // simulator thread.  It will simply return if called from any other thread.
@@ -833,4 +841,5 @@ void CDECL bx_signal_handler(int signum)
    exit(0);
   else
    BX_PANIC(("SIGNAL %u caught", signum));
+*/
 }

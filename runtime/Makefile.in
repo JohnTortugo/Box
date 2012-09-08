@@ -40,8 +40,6 @@ BX_INCDIRS = -I.. -I$(srcdir)/.. -I../elfparser -I$(srcdir)/../elfparser \
 	     -I../@INSTRUMENT_DIR@ -I$(srcdir)/../@INSTRUMENT_DIR@
 
 BX_OBJS = \
-	osdep.o \
-	pc_system.o \
 	config.o \
 	logio.o
 
@@ -73,7 +71,5 @@ dist-clean: clean
 ###########################################
 box.o: box.@CPP_SUFFIX@ 
 main.o: box.@CPP_SUFFIX@ 
-osdep.o: osdep.@CPP_SUFFIX@ 
 logio.o: logio.@CPP_SUFFIX@ 
 config.o: config.@CPP_SUFFIX@ 
-pc_system.o: pc_system.@CPP_SUFFIX@ 

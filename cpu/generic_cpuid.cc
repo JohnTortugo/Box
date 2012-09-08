@@ -22,6 +22,7 @@
 /////////////////////////////////////////////////////////////////////////
 
 #include "bochs.h"
+#include "debug.h"
 #include "cpu.h"
 #include "param_names.h"
 #include "generic_cpuid.h"
@@ -30,21 +31,16 @@
 
 bx_cpuid_t::bx_cpuid_t(BX_CPU_C *_cpu): cpu(_cpu)
 {
-#if BX_SUPPORT_SMP
-  nthreads = SIM->get_param_num(BXPN_CPU_NTHREADS)->get();
-  ncores = SIM->get_param_num(BXPN_CPU_NCORES)->get();
-  nprocessors = SIM->get_param_num(BXPN_CPU_NPROCESSORS)->get();
-#else
   nthreads = 1;
   ncores = 1;
   nprocessors = 1;
-#endif
 }
 
 #if BX_CPU_LEVEL >= 4
 
 bx_generic_cpuid_t::bx_generic_cpuid_t(BX_CPU_C *cpu): bx_cpuid_t(cpu)
 {
+/*
   init_isa_extensions_bitmask();
   init_cpu_extensions_bitmask();
 #if BX_SUPPORT_VMX
@@ -82,10 +78,12 @@ bx_generic_cpuid_t::bx_generic_cpuid_t(BX_CPU_C *cpu): bx_cpuid_t(cpu)
   if (BX_CPUID_SUPPORT_ISA_EXTENSION(BX_ISA_SVM))
     max_ext_leaf = 0x8000000A;
 #endif
+*/
 }
 
 void bx_generic_cpuid_t::get_cpuid_leaf(Bit32u function, Bit32u subfunction, cpuid_function_t *leaf) const
 {
+/*
   static bx_bool cpuid_limit_winnt = SIM->get_param_bool(BXPN_CPUID_LIMIT_WINNT)->get();
   if (cpuid_limit_winnt)
     if (function > 2 && function < 0x80000000) function = 2;
@@ -172,11 +170,13 @@ void bx_generic_cpuid_t::get_cpuid_leaf(Bit32u function, Bit32u subfunction, cpu
     return;
 #endif
   }
+*/
 }
 
 // leaf 0x00000000 //
 void bx_generic_cpuid_t::get_std_cpuid_leaf_0(cpuid_function_t *leaf) const
 {
+/*
   static Bit8u *vendor_string = (Bit8u *)SIM->get_param_string(BXPN_VENDOR_STRING)->getptr();
 
   // EAX: highest std function understood by CPUID
@@ -194,6 +194,7 @@ void bx_generic_cpuid_t::get_std_cpuid_leaf_0(cpuid_function_t *leaf) const
   leaf->ecx = bx_bswap32(leaf->ecx);
   leaf->edx = bx_bswap32(leaf->edx);
 #endif
+*/
 }
 
 // leaf 0x00000001 //
@@ -219,9 +220,6 @@ void bx_generic_cpuid_t::get_std_cpuid_leaf_1(cpuid_function_t *leaf) const
   }
   unsigned n_logical_processors = ncores*nthreads;
   leaf->ebx |= (n_logical_processors << 16);
-#if BX_SUPPORT_APIC
-  leaf->ebx |= ((cpu->get_apic_id() & 0xff) << 24);
-#endif
 
   // ECX: Extended Feature Flags
 #if BX_CPU_LEVEL >= 6
@@ -346,64 +344,6 @@ void bx_generic_cpuid_t::get_std_cpuid_extended_topology_leaf(Bit32u subfunction
   leaf->eax = 0;
   leaf->ebx = 0;
   leaf->ecx = subfunction;
-  leaf->edx = cpu->get_apic_id();
-
-#if BX_SUPPORT_SMP
-  switch(subfunction) {
-  case 0:
-     if (nthreads > 1) {
-        leaf->eax = ilog2(nthreads-1)+1;
-        leaf->ebx = nthreads;
-        leaf->ecx |= (1<<8);
-     }
-     else if (ncores > 1) {
-        leaf->eax = ilog2(ncores-1)+1;
-        leaf->ebx = ncores;
-        leaf->ecx |= (2<<8);
-     }
-     else if (nprocessors > 1) {
-        leaf->eax = ilog2(nprocessors-1)+1;
-        leaf->ebx = nprocessors;
-     }
-     else {
-        leaf->eax = 1;
-        leaf->ebx = 1; // number of logical CPUs at this level
-     }
-     break;
-
-  case 1:
-     if (nthreads > 1) {
-        if (ncores > 1) {
-           leaf->eax = ilog2(ncores-1)+1;
-           leaf->ebx = ncores;
-           leaf->ecx |= (2<<8);
-        }
-        else if (nprocessors > 1) {
-           leaf->eax = ilog2(nprocessors-1)+1;
-           leaf->ebx = nprocessors;
-        }
-     }
-     else if (ncores > 1) {
-        if (nprocessors > 1) {
-           leaf->eax = ilog2(nprocessors-1)+1;
-           leaf->ebx = nprocessors;
-        }
-     }
-     break;
-
-  case 2:
-     if (nthreads > 1) {
-        if (nprocessors > 1) {
-           leaf->eax = ilog2(nprocessors-1)+1;
-           leaf->ebx = nprocessors;
-        }
-     }
-     break;
-
-  default:
-     break;
-  }
-#endif
 }
 
 // leaf 0x0000000C - reserved //
@@ -465,6 +405,7 @@ void bx_generic_cpuid_t::get_std_cpuid_xsave_leaf(Bit32u subfunction, cpuid_func
 // leaf 0x80000000 //
 void bx_generic_cpuid_t::get_ext_cpuid_leaf_0(cpuid_function_t *leaf) const
 {
+/*
   // EAX: highest extended function understood by CPUID
   // EBX: vendor ID string
   // EDX: vendor ID string
@@ -487,6 +428,7 @@ void bx_generic_cpuid_t::get_ext_cpuid_leaf_0(cpuid_function_t *leaf) const
   leaf->ecx = bx_bswap32(leaf->ecx);
   leaf->edx = bx_bswap32(leaf->edx);
 #endif
+*/
 }
 
 // leaf 0x80000001 //
@@ -542,6 +484,7 @@ void bx_generic_cpuid_t::get_ext_cpuid_leaf_1(cpuid_function_t *leaf) const
 // leaf 0x80000004 //
 void bx_generic_cpuid_t::get_ext_cpuid_brand_string_leaf(Bit32u function, cpuid_function_t *leaf) const
 {
+/*
   // CPUID function 0x800000002-0x800000004 - Processor Name String Identifier
   static Bit8u *brand_string = (Bit8u *)SIM->get_param_string(BXPN_BRAND_STRING)->getptr();
 
@@ -574,6 +517,7 @@ void bx_generic_cpuid_t::get_ext_cpuid_brand_string_leaf(Bit32u function, cpuid_
   leaf->ecx = bx_bswap32(leaf->ecx);
   leaf->edx = bx_bswap32(leaf->edx);
 #endif
+*/
 }
 
 // leaf 0x80000005 //
@@ -657,6 +601,7 @@ void bx_generic_cpuid_t::get_ext_cpuid_leaf_A(cpuid_function_t *leaf) const
 
 void bx_generic_cpuid_t::init_isa_extensions_bitmask(void)
 {
+/*
   Bit64u features_bitmask = 0;
 
 #if BX_SUPPORT_FPU
@@ -948,33 +893,13 @@ void bx_generic_cpuid_t::init_isa_extensions_bitmask(void)
 #endif // CPU_LEVEL >= 4
 
   this->isa_extensions_bitmask = features_bitmask;
+*/
 }
 
 void bx_generic_cpuid_t::init_cpu_extensions_bitmask(void)
 {
+/*
   Bit32u features_bitmask = 0;
-
-#if BX_SUPPORT_APIC
-  static unsigned apic_enabled = SIM->get_param_enum(BXPN_CPUID_APIC)->get();
-  // determine SSE in runtime
-  switch (apic_enabled) {
-#if BX_CPU_LEVEL >= 6
-    case BX_CPUID_SUPPORT_X2APIC:
-      features_bitmask |= BX_CPU_X2APIC | BX_CPU_XAPIC;
-      break;
-    case BX_CPUID_SUPPORT_XAPIC_EXT:
-      features_bitmask |= BX_CPU_XAPIC_EXT | BX_CPU_XAPIC;
-      break;
-#endif
-    case BX_CPUID_SUPPORT_XAPIC:
-      features_bitmask |= BX_CPU_XAPIC;
-      break;
-    case BX_CPUID_SUPPORT_LEGACY_APIC:
-      break;
-    default:
-      BX_PANIC(("unknown APIC option %d", apic_enabled));
-  };
-#endif
 
 #if BX_CPU_LEVEL >= 5
   features_bitmask |= BX_CPU_VME;
@@ -1026,11 +951,13 @@ void bx_generic_cpuid_t::init_cpu_extensions_bitmask(void)
 #endif // CPU_LEVEL >= 5
 
   this->cpu_extensions_bitmask = features_bitmask;
+*/
 }
 
 #if BX_SUPPORT_VMX
 void bx_generic_cpuid_t::init_vmx_extensions_bitmask(void)
 {
+/*
   Bit32u features_bitmask = 0;
 
   static unsigned vmx_enabled = SIM->get_param_num(BXPN_CPUID_VMX)->get();
@@ -1056,7 +983,7 @@ void bx_generic_cpuid_t::init_vmx_extensions_bitmask(void)
                             BX_VMX_PAUSE_LOOP_EXITING;
 
         features_bitmask |= BX_VMX_SAVE_DEBUGCTL_DISABLE |
-                         /* BX_VMX_MONITOR_TRAP_FLAG | */ // not implemented yet
+                         // BX_VMX_MONITOR_TRAP_FLAG | // not implemented yet
                             BX_VMX_PERF_GLOBAL_CTRL;
       }
 #endif
@@ -1064,12 +991,14 @@ void bx_generic_cpuid_t::init_vmx_extensions_bitmask(void)
   }
   
   this->vmx_extensions_bitmask = features_bitmask;
+*/
 }
 #endif
 
 #if BX_SUPPORT_SVM
 void bx_generic_cpuid_t::init_svm_extensions_bitmask(void)
 {
+/*
   Bit32u features_bitmask = 0;
 
   static bx_bool svm_enabled = SIM->get_param_bool(BXPN_CPUID_SVM)->get();
@@ -1079,6 +1008,7 @@ void bx_generic_cpuid_t::init_svm_extensions_bitmask(void)
   }
 
   this->svm_extensions_bitmask = features_bitmask;
+*/
 }
 #endif
 
@@ -1095,6 +1025,7 @@ void bx_generic_cpuid_t::init_svm_extensions_bitmask(void)
 
 Bit32u bx_generic_cpuid_t::get_cpu_version_information(void) const
 {
+/*
   static Bit32u stepping = SIM->get_param_num(BXPN_CPUID_STEPPING)->get();
   static Bit32u model = SIM->get_param_num(BXPN_CPUID_MODEL)->get();
   static Bit32u family = SIM->get_param_num(BXPN_CPUID_FAMILY)->get();
@@ -1106,6 +1037,7 @@ Bit32u bx_generic_cpuid_t::get_cpu_version_information(void) const
          ((model & 0xf0) << 12) |
          ((family & 0x0f) << 8) |
          ((model & 0x0f) << 4) | stepping;
+*/
 }
 
 #if BX_CPU_LEVEL >= 6
@@ -1272,13 +1204,6 @@ Bit32u bx_generic_cpuid_t::get_std_cpuid_features(void) const
 
   if (BX_CPUID_SUPPORT_CPU_EXTENSION(BX_CPU_PSE))
     features |= BX_CPUID_STD_PSE;
-#endif
-
-#if BX_SUPPORT_APIC
-  // if MSR_APICBASE APIC Global Enable bit has been cleared,
-  // the CPUID feature flag for the APIC is set to 0.
-  if (cpu->msr.apicbase & 0x800)
-    features |= BX_CPUID_STD_APIC; // APIC on chip
 #endif
 
   if (BX_CPUID_SUPPORT_ISA_EXTENSION(BX_ISA_SYSENTER_SYSEXIT))

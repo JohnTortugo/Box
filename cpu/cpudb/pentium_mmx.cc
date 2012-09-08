@@ -23,6 +23,7 @@
 
 #include "bochs.h"
 #include "cpu.h"
+#include "debug.h"
 #include "pentium_mmx.h"
 
 #if BX_CPU_LEVEL >= 5 && BX_SUPPORT_X86_64 == 0
@@ -94,6 +95,7 @@ void pentium_mmx_t::get_std_cpuid_leaf_0(cpuid_function_t *leaf) const
 // leaf 0x00000001 //
 void pentium_mmx_t::get_std_cpuid_leaf_1(cpuid_function_t *leaf) const
 {
+/*
   // EAX:       CPU Version Information
   //   [3:0]   Stepping ID
   //   [7:4]   Model: starts at 1
@@ -158,6 +160,7 @@ void pentium_mmx_t::get_std_cpuid_leaf_1(cpuid_function_t *leaf) const
   if (cpu->msr.apicbase & 0x800)
     leaf->edx |= BX_CPUID_STD_APIC; // APIC on chip
 #endif
+*/
 }
 
 void pentium_mmx_t::dump_cpuid(void) const

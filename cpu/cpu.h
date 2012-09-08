@@ -22,6 +22,7 @@
 #ifndef BX_CPU_H
 #  define BX_CPU_H 1
 
+#include "config.h"
 #include <setjmp.h>
 
 // <TAG-DEFINES-DECODE-START>

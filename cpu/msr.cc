@@ -24,11 +24,13 @@
 #define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
 #include "cpu.h"
+#include "debug.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
 #if BX_CPU_LEVEL >= 5
 bx_bool BX_CPP_AttrRegparmN(2) BX_CPU_C::rdmsr(Bit32u index, Bit64u *msr)
 {
+/*
   Bit64u val64 = 0;
 
 #if BX_CPU_LEVEL >= 6
@@ -126,13 +128,6 @@ bx_bool BX_CPP_AttrRegparmN(2) BX_CPU_C::rdmsr(Bit32u index, Bit64u *msr)
       val64 = BX_CPU_THIS_PTR get_TSC();
       break;
 
-#if BX_SUPPORT_APIC
-    case BX_MSR_APICBASE:
-      val64 = BX_CPU_THIS_PTR msr.apicbase;
-      BX_INFO(("RDMSR: Read %08x:%08x from MSR_APICBASE", GET32H(val64), GET32L(val64)));
-      break;
-#endif
-
 #if BX_CPU_LEVEL >= 6
     case BX_MSR_TSC_DEADLINE:
       if (! bx_cpuid_support_tsc_deadline()) {
@@ -144,11 +139,10 @@ bx_bool BX_CPP_AttrRegparmN(2) BX_CPU_C::rdmsr(Bit32u index, Bit64u *msr)
 #endif
 
 #if BX_SUPPORT_VMX
-/*
-    case BX_MSR_IA32_SMM_MONITOR_CTL:
-      BX_PANIC(("Dual-monitor treatment of SMI and SMM is not implemented"));
-      break;
-*/
+//    case BX_MSR_IA32_SMM_MONITOR_CTL:
+//      BX_PANIC(("Dual-monitor treatment of SMI and SMM is not implemented"));
+//      break;
+
     case BX_MSR_IA32_FEATURE_CONTROL:
       val64 = BX_CPU_THIS_PTR msr.ia32_feature_ctrl;
       break;
@@ -310,6 +304,7 @@ bx_bool BX_CPP_AttrRegparmN(2) BX_CPU_C::rdmsr(Bit32u index, Bit64u *msr)
   BX_DEBUG(("RDMSR: read %08x:%08x from MSR %x", GET32H(val64), GET32L(val64), index));
 
   *msr = val64;
+*/
   return 1;
 }
 
@@ -440,6 +435,7 @@ bx_bool isValidMSR_FixedMTRR(Bit64u fixed_mtrr_msr)
 #if BX_CPU_LEVEL >= 5
 bx_bool BX_CPP_AttrRegparmN(2) BX_CPU_C::wrmsr(Bit32u index, Bit64u val_64)
 {
+/*
   Bit32u val32_lo = GET32L(val_64);
   Bit32u val32_hi = GET32H(val_64);
 
@@ -600,11 +596,6 @@ bx_bool BX_CPP_AttrRegparmN(2) BX_CPU_C::wrmsr(Bit32u index, Bit64u val_64)
       BX_CPU_THIS_PTR set_TSC(val_64);
       break;
 
-#if BX_SUPPORT_APIC
-    case BX_MSR_APICBASE:
-      return relocate_apic(val_64);
-#endif
-
 #if BX_CPU_LEVEL >= 6
     case BX_MSR_TSC_DEADLINE:
       if (! bx_cpuid_support_tsc_deadline()) {
@@ -622,12 +613,12 @@ bx_bool BX_CPP_AttrRegparmN(2) BX_CPU_C::wrmsr(Bit32u index, Bit64u val_64)
         BX_ERROR(("WRMSR: IA32_FEATURE_CONTROL_MSR VMX lock bit is set !"));
         return 0;
       }
-/*
-      if (val_64 & ~((Bit64u)(BX_IA32_FEATURE_CONTROL_BITS))) {
-        BX_ERROR(("WRMSR: attempt to set reserved bits of IA32_FEATURE_CONTROL_MSR !"));
-        return 0;
-      }
-*/
+
+//      if (val_64 & ~((Bit64u)(BX_IA32_FEATURE_CONTROL_BITS))) {
+//        BX_ERROR(("WRMSR: attempt to set reserved bits of IA32_FEATURE_CONTROL_MSR !"));
+//        return 0;
+//      }
+
       BX_CPU_THIS_PTR msr.ia32_feature_ctrl = val32_lo;
       break;
 
@@ -759,7 +750,7 @@ bx_bool BX_CPP_AttrRegparmN(2) BX_CPU_C::wrmsr(Bit32u index, Bit64u val_64)
     default:
       return handle_unknown_wrmsr(index, val_64);
   }
-
+*/
   return 1;
 }
 
@@ -791,61 +782,6 @@ bx_bool BX_CPP_AttrRegparmN(2) BX_CPU_C::handle_unknown_wrmsr(Bit32u index, Bit6
 }
 
 #endif // BX_CPU_LEVEL >= 5
-
-#if BX_SUPPORT_APIC
-bx_bool BX_CPU_C::relocate_apic(Bit64u val_64)
-{
-  /* MSR_APICBASE
-   *  [0:7]  Reserved
-   *    [8]  This is set if CPU is BSP
-   *    [9]  Reserved
-   *   [10]  X2APIC mode bit (1=enabled 0=disabled)
-   *   [11]  APIC Global Enable bit (1=enabled 0=disabled)
-   * [12:M]  APIC Base Address (physical)
-   * [M:63]  Reserved
-   */
-
-#define BX_MSR_APICBASE_RESERVED_BITS (0x2ff | (bx_cpuid_support_x2apic() ? 0 : 0x400))
-
-  if (BX_CPU_THIS_PTR msr.apicbase & 0x800) {
-    Bit32u val32_hi = GET32H(val_64), val32_lo = GET32L(val_64);
-    BX_INFO(("WRMSR: wrote %08x:%08x to MSR_APICBASE", val32_hi, val32_lo));
-    if (! IsValidPhyAddr(val_64)) {
-      BX_ERROR(("relocate_apic: invalid physical address"));
-      return 0;
-    }
-    if (val32_lo & BX_MSR_APICBASE_RESERVED_BITS) {
-      BX_ERROR(("relocate_apic: attempt to set reserved bits"));
-      return 0;
-    }
-
-#if BX_CPU_LEVEL >= 6
-    if (bx_cpuid_support_x2apic()) {
-      unsigned apic_state = (BX_CPU_THIS_PTR msr.apicbase >> 10) & 3;
-      unsigned new_state = (val32_lo >> 10) & 3;
-      if (new_state == BX_APIC_STATE_INVALID) {
-        BX_ERROR(("relocate_apic: attempt to set invalid apic state"));
-        return 0;
-      }
-      if (apic_state == BX_APIC_X2APIC_MODE && new_state != BX_APIC_GLOBALLY_DISABLED) {
-        BX_ERROR(("relocate_apic: attempt to switch from x2apic -> xapic"));
-        return 0;
-      }
-    }
-#endif
-
-    BX_CPU_THIS_PTR msr.apicbase = (bx_phy_address) val_64;
-    BX_CPU_THIS_PTR lapic.set_base(BX_CPU_THIS_PTR msr.apicbase);
-    // TLB flush is required for emulation correctness
-    TLB_flush();  // don't care about performance of apic relocation
-  }
-  else {
-    BX_INFO(("WRMSR: MSR_APICBASE APIC global enable bit cleared !"));
-  }
-
-  return 1;
-}
-#endif
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::WRMSR(bxInstruction_c *i)
 {

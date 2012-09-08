@@ -22,10 +22,9 @@
 prefix          = @prefix@
 exec_prefix     = @exec_prefix@
 srcdir          = @srcdir@
-VPATH = @srcdir@
+VPATH 			= @srcdir@
 bindir          = @bindir@
 libdir          = @libdir@
-plugdir         = @libdir@/bochs/plugins
 datarootdir     = @datarootdir@
 mandir          = @mandir@
 man1dir         = $(mandir)/man1
@@ -48,6 +47,7 @@ INSTALL_LIST_BIN=bochs@EXE@ bximage@EXE@ bxcommit@EXE@
 INSTALL_LIST_BIN_OPTIONAL=bochsdbg@EXE@
 INSTALL_LIST_WIN32=$(INSTALL_LIST_SHARE) $(INSTALL_LIST_DOC) $(INSTALL_LIST_BIN) $(INSTALL_LIST_BIN_OPTIONAL) niclist@EXE@
 INSTALL_LIST_MACOSX=$(INSTALL_LIST_SHARE) $(INSTALL_LIST_DOC) bochs.scpt
+
 # for win32 and macosx, these files get renamed to *.txt in install process
 TEXT_FILE_LIST=README CHANGES COPYING TODO VGABIOS-elpin-LICENSE VGABIOS-lgpl-README
 CP=cp
@@ -147,26 +147,19 @@ all: @PRIMARY_TARGET@
 
 @EXTERNAL_DEPENDENCY@
 
-box@EXE@: cpu/libcpu.a cpu/cpudb/libcpudb.a memory/libmemory.a fpu/libfpu.a \
-          disasm/libdisasm.a elfparser/libelfparser.a elfloader/libelfloader.a \
-	  runtime/libruntime.a iodev/libiodev.a gui/libgui.a 
-	@LINK@ @EXPORT_DYNAMIC@ $(EXTERN_OBJS) \
-		cpu/libcpu.a \
-		cpu/cpudb/libcpudb.a \
-		disasm/libdisasm.a \
-		memory/libmemory.a \
-		fpu/libfpu.a \
-		iodev/libiodev.a \
-  		runtime/libruntime.a \
-		elfparser/libelfparser.a \
-		elfloader/libelfloader.a \
-  		gui/libgui.a \
-		runtime/libruntime.a \
-		$(MCH_LINK_FLAGS) \
-		$(SIMX86_LINK_FLAGS) \
-		$(READLINE_LIB) \
-		$(EXTRA_LINK_OPTS) \
-		$(LIBS)
+box@EXE@: 		cpu/libcpu.a \
+			cpu/cpudb/libcpudb.a \
+			fpu/libfpu.a \
+          		disasm/libdisasm.a \
+	  		runtime/libruntime.a \
+			@LINK@ @EXPORT_DYNAMIC@ $(EXTERN_OBJS) \
+			elfparser/libelfparser.a \
+			elfloader/libelfloader.a \
+			$(MCH_LINK_FLAGS) \
+			$(SIMX86_LINK_FLAGS) \
+			$(READLINE_LIB) \
+			$(EXTRA_LINK_OPTS) \
+			$(LIBS)
 
 $(BX_OBJS): $(BX_INCLUDES)
 
@@ -181,29 +174,14 @@ cpu/cpudb/libcpudb.a::
 	$(MAKE) $(MDEFINES) libcpudb.a
 	@CD_UP_TWO@
 
-memory/libmemory.a::
-	cd memory @COMMAND_SEPARATOR@
-	$(MAKE) $(MDEFINES) libmemory.a
-	@CD_UP_ONE@
-
 fpu/libfpu.a::
 	cd fpu @COMMAND_SEPARATOR@
 	$(MAKE) $(MDEFINES) libfpu.a
 	@CD_UP_ONE@
 
-gui/libgui.a::
-	cd gui @COMMAND_SEPARATOR@
-	$(MAKE) $(MDEFINES) libgui.a
-	@CD_UP_ONE@
-
 disasm/libdisasm.a::
 	cd disasm @COMMAND_SEPARATOR@
 	$(MAKE) $(MDEFINES) libdisasm.a
-	@CD_UP_ONE@
-
-iodev/libiodev.a::
-	cd iodev @COMMAND_SEPARATOR@
-	$(MAKE) $(MDEFINES) libiodev.a
 	@CD_UP_ONE@
 
 elfparser/libelfparser.a::
@@ -337,7 +315,7 @@ tar:
 zip:
 	NAME=`pwd|$(SED) 's/.*\///'`; (cd ..; $(RM) -f $$NAME-msvc-src.zip; $(ZIP) $$NAME-msvc-src.zip -r $$NAME -x \*CVS\* -x \*.cvsignore -x \*.svn\* ); ls -l ../$$NAME-msvc-src.zip
 
-SUBDIRS = cpu fpu iodev memory runtime elfparser elfloader
+SUBDIRS = cpu fpu runtime elfparser elfloader
 
 clean: local-clean
 	for subdir in $(SUBDIRS); do \

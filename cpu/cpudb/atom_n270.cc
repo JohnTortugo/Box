@@ -23,6 +23,7 @@
 
 #include "bochs.h"
 #include "cpu.h"
+#include "debug.h"
 #include "param_names.h"
 #include "atom_n270.h"
 
@@ -38,6 +39,7 @@ atom_n270_t::atom_n270_t(BX_CPU_C *cpu): bx_cpuid_t(cpu)
 
 void atom_n270_t::get_cpuid_leaf(Bit32u function, Bit32u subfunction, cpuid_function_t *leaf) const
 {
+/*
   static bx_bool cpuid_limit_winnt = SIM->get_param_bool(BXPN_CPUID_LIMIT_WINNT)->get();
   if (cpuid_limit_winnt)
     if (function > 2 && function < 0x80000000) function = 2;
@@ -97,6 +99,7 @@ void atom_n270_t::get_cpuid_leaf(Bit32u function, Bit32u subfunction, cpuid_func
     get_std_cpuid_leaf_A(leaf);
     return;
   }
+*/
 }
 
 Bit64u atom_n270_t::get_isa_extensions_bitmask(void) const
@@ -136,6 +139,7 @@ Bit32u atom_n270_t::get_cpu_extensions_bitmask(void) const
 // leaf 0x00000000 //
 void atom_n270_t::get_std_cpuid_leaf_0(cpuid_function_t *leaf) const
 {
+/*
   static const char* vendor_string = "GenuineIntel";
 
   // EAX: highest std function understood by CPUID
@@ -157,6 +161,7 @@ void atom_n270_t::get_std_cpuid_leaf_0(cpuid_function_t *leaf) const
   leaf->ecx = bx_bswap32(leaf->ecx);
   leaf->edx = bx_bswap32(leaf->edx);
 #endif
+*/
 }
 
 // leaf 0x00000001 //
@@ -180,9 +185,6 @@ void atom_n270_t::get_std_cpuid_leaf_1(cpuid_function_t *leaf) const
   unsigned n_logical_processors = ncores*nthreads;
   leaf->ebx = ((CACHE_LINE_SIZE / 8) << 8) |
               (n_logical_processors << 16);
-#if BX_SUPPORT_APIC
-  leaf->ebx |= ((cpu->get_apic_id() & 0xff) << 24);
-#endif
 
   // ECX: Extended Feature Flags
   // * [0:0]   SSE3: SSE3 Instructions
@@ -292,12 +294,6 @@ void atom_n270_t::get_std_cpuid_leaf_1(cpuid_function_t *leaf) const
               BX_CPUID_STD_HT |
               BX_CPUID_STD_THERMAL_MONITOR |
               BX_CPUID_STD_PBE;
-#if BX_SUPPORT_APIC
-  // if MSR_APICBASE APIC Global Enable bit has been cleared,
-  // the CPUID feature flag for the APIC is set to 0.
-  if (cpu->msr.apicbase & 0x800)
-    leaf->edx |= BX_CPUID_STD_APIC; // APIC on chip
-#endif
 }
 
 // leaf 0x00000002 //

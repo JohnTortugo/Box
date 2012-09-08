@@ -23,9 +23,10 @@
 #define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
 #include "cpu.h"
+#include "debug.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
-#include "iodev/iodev.h"
+//#include "iodev/iodev.h"
 
 //
 // Repeat Speedups methods
@@ -34,6 +35,7 @@
 #if BX_SUPPORT_REPEAT_SPEEDUPS
 Bit32u BX_CPU_C::FastRepINSW(bxInstruction_c *i, bx_address dstOff, Bit16u port, Bit32u wordCount)
 {
+/*
   Bit32u wordsFitDst;
   signed int pointerDelta;
   Bit8u *hostAddrDst;
@@ -101,12 +103,13 @@ Bit32u BX_CPU_C::FastRepINSW(bxInstruction_c *i, bx_address dstOff, Bit16u port,
 
     return count;
   }
-
+*/
   return 0;
 }
 
 Bit32u BX_CPU_C::FastRepOUTSW(bxInstruction_c *i, unsigned srcSeg, bx_address srcOff, Bit16u port, Bit32u wordCount)
 {
+/*
   Bit32u wordsFitSrc;
   signed int pointerDelta;
   Bit8u *hostAddrSrc;
@@ -176,7 +179,7 @@ Bit32u BX_CPU_C::FastRepOUTSW(bxInstruction_c *i, unsigned srcSeg, bx_address sr
 
     return count;
   }
-
+*/
   return 0;
 }
 
@@ -213,6 +216,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::REP_INSB_YbDX(bxInstruction_c *i)
 // 16-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSB16_YbDX(bxInstruction_c *i)
 {
+/*
   // trigger any segment or page faults before reading from IO port
   Bit8u value8 = read_RMW_virtual_byte_32(BX_SEG_REG_ES, DI);
 
@@ -224,17 +228,19 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSB16_YbDX(bxInstruction_c *i)
     DI--;
   else
     DI++;
+*/
 }
 
 // 32-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSB32_YbDX(bxInstruction_c *i)
 {
+/*
   // trigger any segment or page faults before reading from IO port
   Bit8u value8 = read_RMW_virtual_byte(BX_SEG_REG_ES, EDI);
 
   value8 = BX_INP(DX, 1);
 
-  /* no seg override possible */
+  // no seg override possible 
   write_RMW_virtual_byte(value8);
 
   if (BX_CPU_THIS_PTR get_DF()) {
@@ -243,6 +249,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSB32_YbDX(bxInstruction_c *i)
   else {
     RDI = EDI + 1;
   }
+*/
 }
 
 #if BX_SUPPORT_X86_64
@@ -250,6 +257,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSB32_YbDX(bxInstruction_c *i)
 // 64-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSB64_YbDX(bxInstruction_c *i)
 {
+/*
   // trigger any segment or page faults before reading from IO port
   Bit8u value8 = read_RMW_virtual_byte_64(BX_SEG_REG_ES, RDI);
 
@@ -261,6 +269,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSB64_YbDX(bxInstruction_c *i)
     RDI--;
   else
     RDI++;
+*/
 }
 
 #endif
@@ -292,6 +301,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::REP_INSW_YwDX(bxInstruction_c *i)
 // 16-bit operand size, 16-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSW16_YwDX(bxInstruction_c *i)
 {
+/*
   // trigger any segment or page faults before reading from IO port
   Bit16u value16 = read_RMW_virtual_word_32(BX_SEG_REG_ES, DI);
 
@@ -303,19 +313,20 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSW16_YwDX(bxInstruction_c *i)
     DI -= 2;
   else
     DI += 2;
+*/
 }
 
 // 16-bit operand size, 32-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSW32_YwDX(bxInstruction_c *i)
 {
+/*
   Bit16u value16=0;
   Bit32u edi = EDI;
   unsigned incr = 2;
 
 #if (BX_SUPPORT_REPEAT_SPEEDUPS) && (BX_DEBUGGER == 0)
-  /* If conditions are right, we can transfer IO to physical memory
-   * in a batch, rather than one instruction at a time.
-   */
+  // If conditions are right, we can transfer IO to physical memory
+  // in a batch, rather than one instruction at a time.
   if (i->repUsedL() && !BX_CPU_THIS_PTR async_event)
   {
     Bit32u wordCount = ECX;
@@ -354,6 +365,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSW32_YwDX(bxInstruction_c *i)
     RDI = EDI - incr;
   else
     RDI = EDI + incr;
+*/
 }
 
 #if BX_SUPPORT_X86_64
@@ -361,6 +373,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSW32_YwDX(bxInstruction_c *i)
 // 16-bit operand size, 64-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSW64_YwDX(bxInstruction_c *i)
 {
+/*
   // trigger any segment or page faults before reading from IO port
   Bit16u value16 = read_RMW_virtual_word_64(BX_SEG_REG_ES, RDI);
 
@@ -372,6 +385,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSW64_YwDX(bxInstruction_c *i)
     RDI -= 2;
   else
     RDI += 2;
+*/
 }
 
 #endif
@@ -403,6 +417,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::REP_INSD_YdDX(bxInstruction_c *i)
 // 32-bit operand size, 16-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSD16_YdDX(bxInstruction_c *i)
 {
+/*
   // trigger any segment or page faults before reading from IO port
   Bit32u value32 = read_RMW_virtual_dword_32(BX_SEG_REG_ES, DI);
 
@@ -414,11 +429,13 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSD16_YdDX(bxInstruction_c *i)
     DI -= 4;
   else
     DI += 4;
+*/
 }
 
 // 32-bit operand size, 32-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSD32_YdDX(bxInstruction_c *i)
 {
+/*
   // trigger any segment or page faults before reading from IO port
   Bit32u value32 = read_RMW_virtual_dword(BX_SEG_REG_ES, EDI);
 
@@ -430,6 +447,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSD32_YdDX(bxInstruction_c *i)
     RDI = EDI - 4;
   else
     RDI = EDI + 4;
+*/
 }
 
 #if BX_SUPPORT_X86_64
@@ -437,6 +455,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSD32_YdDX(bxInstruction_c *i)
 // 32-bit operand size, 64-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSD64_YdDX(bxInstruction_c *i)
 {
+/*
   // trigger any segment or page faults before reading from IO port
   Bit32u value32 = read_RMW_virtual_dword_64(BX_SEG_REG_ES, RDI);
 
@@ -448,6 +467,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::INSD64_YdDX(bxInstruction_c *i)
     RDI -= 4;
   else
     RDI += 4;
+*/
 }
 
 #endif
@@ -483,6 +503,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::REP_OUTSB_DXXb(bxInstruction_c *i)
 // 16-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSB16_DXXb(bxInstruction_c *i)
 {
+/*
   Bit8u value8 = read_virtual_byte_32(i->seg(), SI);
   BX_OUTP(DX, value8, 1);
 
@@ -490,11 +511,13 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSB16_DXXb(bxInstruction_c *i)
     SI--;
   else
     SI++;
+*/
 }
 
 // 32-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSB32_DXXb(bxInstruction_c *i)
 {
+/*
   Bit8u value8 = read_virtual_byte(i->seg(), ESI);
   BX_OUTP(DX, value8, 1);
 
@@ -502,6 +525,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSB32_DXXb(bxInstruction_c *i)
     RSI = ESI - 1;
   else
     RSI = ESI + 1;
+*/
 }
 
 #if BX_SUPPORT_X86_64
@@ -509,6 +533,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSB32_DXXb(bxInstruction_c *i)
 // 64-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSB64_DXXb(bxInstruction_c *i)
 {
+/*
   Bit8u value8 = read_virtual_byte_64(i->seg(), RSI);
   BX_OUTP(DX, value8, 1);
 
@@ -516,6 +541,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSB64_DXXb(bxInstruction_c *i)
     RSI--;
   else
     RSI++;
+*/
 }
 
 #endif
@@ -547,6 +573,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::REP_OUTSW_DXXw(bxInstruction_c *i)
 // 16-bit operand size, 16-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSW16_DXXw(bxInstruction_c *i)
 {
+/*
   Bit16u value16 = read_virtual_word_32(i->seg(), SI);
   BX_OUTP(DX, value16, 2);
 
@@ -554,19 +581,20 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSW16_DXXw(bxInstruction_c *i)
     SI -= 2;
   else
     SI += 2;
+*/
 }
 
 // 16-bit operand size, 32-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSW32_DXXw(bxInstruction_c *i)
 {
+/*
   Bit16u value16;
   Bit32u esi = ESI;
   unsigned incr = 2;
 
 #if (BX_SUPPORT_REPEAT_SPEEDUPS) && (BX_DEBUGGER == 0)
-  /* If conditions are right, we can transfer IO to physical memory
-   * in a batch, rather than one instruction at a time.
-   */
+  // If conditions are right, we can transfer IO to physical memory
+  // in a batch, rather than one instruction at a time.
   if (i->repUsedL() && !BX_CPU_THIS_PTR async_event) {
     Bit32u wordCount = ECX;
     wordCount = FastRepOUTSW(i, i->seg(), esi, DX, wordCount);
@@ -593,6 +621,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSW32_DXXw(bxInstruction_c *i)
     RSI = ESI - incr;
   else
     RSI = ESI + incr;
+*/
 }
 
 #if BX_SUPPORT_X86_64
@@ -600,6 +629,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSW32_DXXw(bxInstruction_c *i)
 // 16-bit operand size, 64-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSW64_DXXw(bxInstruction_c *i)
 {
+/*
   Bit16u value16 = read_virtual_word_64(i->seg(), RSI);
   BX_OUTP(DX, value16, 2);
 
@@ -607,6 +637,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSW64_DXXw(bxInstruction_c *i)
     RSI -= 2;
   else
     RSI += 2;
+*/
 }
 
 #endif
@@ -638,6 +669,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::REP_OUTSD_DXXd(bxInstruction_c *i)
 // 32-bit operand size, 16-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSD16_DXXd(bxInstruction_c *i)
 {
+/*
   Bit32u value32 = read_virtual_dword_32(i->seg(), SI);
   BX_OUTP(DX, value32, 4);
 
@@ -645,11 +677,13 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSD16_DXXd(bxInstruction_c *i)
     SI -= 4;
   else
     SI += 4;
+*/
 }
 
 // 32-bit operand size, 32-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSD32_DXXd(bxInstruction_c *i)
 {
+/*
   Bit32u value32 = read_virtual_dword(i->seg(), ESI);
   BX_OUTP(DX, value32, 4);
 
@@ -657,6 +691,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSD32_DXXd(bxInstruction_c *i)
     RSI = ESI - 4;
   else
     RSI = ESI + 4;
+*/
 }
 
 #if BX_SUPPORT_X86_64
@@ -664,6 +699,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSD32_DXXd(bxInstruction_c *i)
 // 32-bit operand size, 64-bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSD64_DXXd(bxInstruction_c *i)
 {
+/*
   Bit32u value32 = read_virtual_dword_64(i->seg(), RSI);
   BX_OUTP(DX, value32, 4);
 
@@ -671,6 +707,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSD64_DXXd(bxInstruction_c *i)
     RSI -= 4;
   else
     RSI += 4;
+*/
 }
 
 #endif
@@ -681,6 +718,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSD64_DXXd(bxInstruction_c *i)
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::IN_ALIb(bxInstruction_c *i)
 {
+/*
   unsigned port = i->Ib();
 
   if (! allow_io(i, port, 1)) {
@@ -691,10 +729,12 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::IN_ALIb(bxInstruction_c *i)
   AL = BX_INP(port, 1);
 
   BX_NEXT_INSTR(i);
+*/
 }
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::IN_AXIb(bxInstruction_c *i)
 {
+/*
   unsigned port = i->Ib();
 
   if (! allow_io(i, port, 2)) {
@@ -705,10 +745,12 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::IN_AXIb(bxInstruction_c *i)
   AX = BX_INP(port, 2);
 
   BX_NEXT_INSTR(i);
+*/
 }
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::IN_EAXIb(bxInstruction_c *i)
 {
+/*
   unsigned port = i->Ib();
 
   if (! allow_io(i, port, 4)) {
@@ -719,10 +761,12 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::IN_EAXIb(bxInstruction_c *i)
   RAX = BX_INP(port, 4);
 
   BX_NEXT_INSTR(i);
+*/
 }
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::OUT_IbAL(bxInstruction_c *i)
 {
+/*
   unsigned port = i->Ib();
 
   if (! allow_io(i, port, 1)) {
@@ -733,10 +777,12 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::OUT_IbAL(bxInstruction_c *i)
   BX_OUTP(port, AL, 1);
 
   BX_NEXT_INSTR(i);
+*/
 }
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::OUT_IbAX(bxInstruction_c *i)
 {
+/*
   unsigned port = i->Ib();
 
   if (! allow_io(i, port, 2)) {
@@ -747,10 +793,12 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::OUT_IbAX(bxInstruction_c *i)
   BX_OUTP(port, AX, 2);
 
   BX_NEXT_INSTR(i);
+*/
 }
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::OUT_IbEAX(bxInstruction_c *i)
 {
+/*
   unsigned port = i->Ib();
 
   if (! allow_io(i, port, 4)) {
@@ -761,10 +809,12 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::OUT_IbEAX(bxInstruction_c *i)
   BX_OUTP(port, EAX, 4);
 
   BX_NEXT_INSTR(i);
+*/
 }
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::IN_ALDX(bxInstruction_c *i)
 {
+/*
   unsigned port = DX;
 
   if (! allow_io(i, port, 1)) {
@@ -775,10 +825,12 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::IN_ALDX(bxInstruction_c *i)
   AL = BX_INP(port, 1);
 
   BX_NEXT_INSTR(i);
+*/
 }
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::IN_AXDX(bxInstruction_c *i)
 {
+/*
   unsigned port = DX;
 
   if (! allow_io(i, port, 2)) {
@@ -789,10 +841,12 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::IN_AXDX(bxInstruction_c *i)
   AX = BX_INP(port, 2);
 
   BX_NEXT_INSTR(i);
+*/
 }
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::IN_EAXDX(bxInstruction_c *i)
 {
+/*
   unsigned port = DX;
 
   if (! allow_io(i, port, 4)) {
@@ -803,10 +857,12 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::IN_EAXDX(bxInstruction_c *i)
   RAX = BX_INP(port, 4);
 
   BX_NEXT_INSTR(i);
+*/
 }
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::OUT_DXAL(bxInstruction_c *i)
 {
+/*
   unsigned port = DX;
 
   if (! allow_io(i, port, 1)) {
@@ -817,10 +873,12 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::OUT_DXAL(bxInstruction_c *i)
   BX_OUTP(port, AL, 1);
 
   BX_NEXT_INSTR(i);
+*/
 }
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::OUT_DXAX(bxInstruction_c *i)
 {
+/*
   unsigned port = DX;
 
   if (! allow_io(i, port, 2)) {
@@ -831,10 +889,12 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::OUT_DXAX(bxInstruction_c *i)
   BX_OUTP(port, AX, 2);
 
   BX_NEXT_INSTR(i);
+*/
 }
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::OUT_DXEAX(bxInstruction_c *i)
 {
+/*
   unsigned port = DX;
 
   if (! allow_io(i, port, 4)) {
@@ -845,6 +905,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::OUT_DXEAX(bxInstruction_c *i)
   BX_OUTP(port, EAX, 4);
 
   BX_NEXT_INSTR(i);
+*/
 }
 
 bx_bool BX_CPP_AttrRegparmN(3) BX_CPU_C::allow_io(bxInstruction_c *i, Bit16u port, unsigned len)

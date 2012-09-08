@@ -23,6 +23,7 @@
 #define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
 #include "cpu.h"
+#include "debug.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
 #if BX_DISASM
@@ -31,6 +32,7 @@
 
 void BX_CPU_C::debug_disasm_instruction(bx_address offset)
 {
+/*
 #if BX_DEBUGGER
   bx_dbg_disassemble_current(BX_CPU_ID, 1); // only one cpu, print time stamp
 #else
@@ -71,6 +73,7 @@ void BX_CPU_C::debug_disasm_instruction(bx_address offset)
     BX_INFO(("0x" FMT_ADDRX ": (instruction unavailable) page not present", offset));
   }
 #endif  // #if BX_DEBUGGER
+*/
 }
 
 #endif  // #if BX_DISASM

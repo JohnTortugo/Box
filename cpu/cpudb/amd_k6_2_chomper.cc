@@ -23,6 +23,7 @@
 
 #include "bochs.h"
 #include "cpu.h"
+#include "debug.h"
 #include "amd_k6_2_chomper.h"
 
 #define LOG_THIS cpu->
@@ -175,12 +176,6 @@ void amd_k6_2_chomper_t::get_std_cpuid_leaf_1(cpuid_function_t *leaf) const
               BX_CPUID_STD_PSE36 |
 #endif
               BX_CPUID_STD_MMX;
-#if BX_SUPPORT_APIC
-  // if MSR_APICBASE APIC Global Enable bit has been cleared,
-  // the CPUID feature flag for the APIC is set to 0.
-  if (cpu->msr.apicbase & 0x800)
-    leaf->edx |= BX_CPUID_STD_APIC; // APIC on chip
-#endif
 }
 
 // leaf 0x80000000 //
@@ -254,12 +249,6 @@ void amd_k6_2_chomper_t::get_ext_cpuid_leaf_1(cpuid_function_t *leaf) const
 #endif
               BX_CPUID_STD_MMX |
               BX_CPUID_STD2_3DNOW;
-#if BX_SUPPORT_APIC
-  // if MSR_APICBASE APIC Global Enable bit has been cleared,
-  // the CPUID feature flag for the APIC is set to 0.
-  if (cpu->msr.apicbase & 0x800)
-    leaf->edx |= BX_CPUID_STD_APIC; // APIC on chip
-#endif
 }
 
 // leaf 0x80000002 //

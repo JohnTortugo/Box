@@ -22,6 +22,7 @@
 #define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
 #include "cpu.h"
+#include "debug.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
 // X86 Registers Which Affect Paging:
@@ -1093,6 +1094,7 @@ void BX_CPU_C::update_access_dirty(bx_phy_address *entry_addr, Bit32u *entry, un
 // Translate a linear address to a physical address
 bx_phy_address BX_CPU_C::translate_linear(bx_address laddr, unsigned user, unsigned rw)
 {
+/*
   Bit32u combined_access = 0x06;
   Bit32u lpf_mask = 0xfff; // 4K pages
 
@@ -1211,6 +1213,7 @@ bx_phy_address BX_CPU_C::translate_linear(bx_address laddr, unsigned user, unsig
   }
 
   return paddress;
+*/
 }
 
 #if BX_SUPPORT_SVM
@@ -1673,6 +1676,7 @@ void dbg_print_ept_paging_pte(int level, Bit64u entry)
 #if BX_SUPPORT_VMX >= 2
 bx_bool BX_CPU_C::dbg_translate_guest_physical(bx_phy_address guest_paddr, bx_phy_address *phy, bx_bool verbose)
 {
+/*
   VMCS_CACHE *vm = &BX_CPU_THIS_PTR vmcs;
   bx_phy_address pt_address = LPFOf(vm->eptptr);
   Bit64u offset_mask = BX_CONST64(0x0000ffffffffffff);
@@ -1711,11 +1715,13 @@ bx_bool BX_CPU_C::dbg_translate_guest_physical(bx_phy_address guest_paddr, bx_ph
 
   *phy = pt_address + (bx_phy_address)(guest_paddr & offset_mask);
   return 1;
+*/
 }
 #endif
 
 bx_bool BX_CPU_C::dbg_xlate_linear2phy(bx_address laddr, bx_phy_address *phy, bx_bool verbose)
 {
+/*
   bx_phy_address paddress;
 
 #if BX_SUPPORT_X86_64
@@ -1842,6 +1848,7 @@ bx_bool BX_CPU_C::dbg_xlate_linear2phy(bx_address laddr, bx_phy_address *phy, bx
 page_fault:
   *phy = 0;
   return 0;
+*/
 }
 #endif
 
@@ -1974,6 +1981,7 @@ void BX_CPU_C::access_read_linear(bx_address laddr, unsigned len, unsigned curr_
 
 void BX_CPU_C::access_write_physical(bx_phy_address paddr, unsigned len, void *data)
 {
+/*
 #if BX_SUPPORT_VMX && BX_SUPPORT_X86_64
   if (is_virtual_apic_page(paddr)) {
     VMX_Virtual_Apic_Write(paddr, len, data);
@@ -1989,10 +1997,12 @@ void BX_CPU_C::access_write_physical(bx_phy_address paddr, unsigned len, void *d
 #endif
 
   BX_MEM(0)->writePhysicalPage(BX_CPU_THIS, paddr, len, data);
+*/
 }
 
 void BX_CPU_C::access_read_physical(bx_phy_address paddr, unsigned len, void *data)
 {
+/*
 #if BX_SUPPORT_VMX && BX_SUPPORT_X86_64
   if (is_virtual_apic_page(paddr)) {
     VMX_Virtual_Apic_Read(paddr, len, data);
@@ -2008,10 +2018,12 @@ void BX_CPU_C::access_read_physical(bx_phy_address paddr, unsigned len, void *da
 #endif
 
   BX_MEM(0)->readPhysicalPage(BX_CPU_THIS, paddr, len, data);
+*/
 }
 
 bx_hostpageaddr_t BX_CPU_C::getHostMemAddr(bx_phy_address paddr, unsigned rw)
 {
+/*
 #if BX_SUPPORT_VMX && BX_SUPPORT_X86_64
   if (is_virtual_apic_page(paddr))
     return 0; // Do not allow direct access to virtual apic page
@@ -2023,6 +2035,7 @@ bx_hostpageaddr_t BX_CPU_C::getHostMemAddr(bx_phy_address paddr, unsigned rw)
 #endif
 
   return (bx_hostpageaddr_t) BX_MEM(0)->getHostMemAddr(BX_CPU_THIS, paddr, rw);
+*/
 }
 
 #if BX_LARGE_RAMFILE
