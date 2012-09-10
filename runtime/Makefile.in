@@ -40,12 +40,14 @@ BX_INCDIRS = -I.. -I$(srcdir)/.. -I../elfparser -I$(srcdir)/../elfparser \
 	     -I../@INSTRUMENT_DIR@ -I$(srcdir)/../@INSTRUMENT_DIR@
 
 BX_OBJS = \
+	main.o \
+	box.o \
 	config.o \
 	logio.o
 
 BX_INCLUDES = ../bochs.h ../config.h
 
-all: libruntime.a main.o box.o
+all: libruntime.a
 
 .@CPP_SUFFIX@.o:
 	$(CXX) @DASH@c $(BX_INCDIRS) $(CXXFLAGS) @CXXFP@$< @OFP@$@

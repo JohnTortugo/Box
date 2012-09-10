@@ -121,8 +121,6 @@ NONINLINE_OBJS = \
 	@EXTRA_BX_OBJS@
 
 EXTERN_OBJS = \
-	runtime/main.o \
-	runtime/box.o
 
 DEBUGGER_LIB   = bx_debug/libdebug.a
 DISASM_LIB     = disasm/libdisasm.a
@@ -147,19 +145,22 @@ all: @PRIMARY_TARGET@
 
 @EXTERNAL_DEPENDENCY@
 
-box@EXE@: 		cpu/libcpu.a \
+box@EXE@:		elfparser/libelfparser.a elfloader/libelfloader.a \
+			cpu/libcpu.a cpu/cpudb/libcpudb.a fpu/libfpu.a \
+          		disasm/libdisasm.a runtime/libruntime.a 
+	@LINK@ @EXPORT_DYNAMIC@ \
+			elfparser/libelfparser.a \
+			elfloader/libelfloader.a \
+			cpu/libcpu.a \
 			cpu/cpudb/libcpudb.a \
 			fpu/libfpu.a \
           		disasm/libdisasm.a \
-	  		runtime/libruntime.a \
-			elfparser/libelfparser.a \
-			elfloader/libelfloader.a \
+	 		runtime/libruntime.a \
 			$(MCH_LINK_FLAGS) \
 			$(SIMX86_LINK_FLAGS) \
 			$(READLINE_LIB) \
 			$(EXTRA_LINK_OPTS) \
 			$(LIBS)
-	@LINK@ @EXPORT_DYNAMIC@ $(EXTERN_OBJS)
 
 $(BX_OBJS): $(BX_INCLUDES)
 
