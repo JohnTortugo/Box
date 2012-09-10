@@ -409,8 +409,7 @@ exception.o: exception.@CPP_SUFFIX@ ../bochs.h ../config.h ../osdep.h \
   ../instrument/stubs/instrument.h  cpuid.h crregs.h \
  descriptor.h instr.h ia_opcodes.h lazy_flags.h   i387.h \
  ../fpu/softfloat.h ../fpu/tag_w.h ../fpu/status_w.h ../fpu/control_w.h \
- xmm.h vmx.h svm.h stack.h ../param_names.h  ../plugin.h \
- ../extplugin.h
+ xmm.h vmx.h svm.h stack.h ../param_names.h  ../plugin.h
 fetchdecode.o: fetchdecode.@CPP_SUFFIX@ ../bochs.h ../config.h ../osdep.h \
  ../bx_debug/debug.h ../config.h ../osdep.h  \
  ../cpudb.h    \
@@ -475,8 +474,7 @@ io.o: io.@CPP_SUFFIX@ ../bochs.h ../config.h ../osdep.h ../bx_debug/debug.h \
  ../instrument/stubs/instrument.h  cpuid.h crregs.h descriptor.h \
  instr.h ia_opcodes.h lazy_flags.h   i387.h \
  ../fpu/softfloat.h ../fpu/tag_w.h ../fpu/status_w.h ../fpu/control_w.h \
- xmm.h vmx.h svm.h stack.h  ../plugin.h ../extplugin.h \
- ../param_names.h
+ xmm.h vmx.h svm.h stack.h  ../plugin.h ../param_names.h
 iret.o: iret.@CPP_SUFFIX@ ../bochs.h ../config.h ../osdep.h ../bx_debug/debug.h \
  ../config.h ../osdep.h  ../cpudb.h \
      \
@@ -736,8 +734,7 @@ vmx.o: vmx.@CPP_SUFFIX@ ../bochs.h ../config.h ../osdep.h ../bx_debug/debug.h \
  ../instrument/stubs/instrument.h  cpuid.h crregs.h descriptor.h \
  instr.h ia_opcodes.h lazy_flags.h   i387.h \
  ../fpu/softfloat.h ../fpu/tag_w.h ../fpu/status_w.h ../fpu/control_w.h \
- xmm.h vmx.h svm.h stack.h  ../plugin.h ../extplugin.h \
- ../param_names.h
+ xmm.h vmx.h svm.h stack.h  ../plugin.h ../param_names.h
 vmfunc.o: vmfunc.@CPP_SUFFIX@ ../bochs.h ../config.h ../osdep.h ../bx_debug/debug.h \
  ../config.h ../osdep.h  ../cpudb.h \
      \
