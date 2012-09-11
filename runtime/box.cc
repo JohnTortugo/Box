@@ -18,6 +18,7 @@
 //  License along with this library; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
+#define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
 #include "debug.h"
 #include "bxversion.h"
@@ -37,9 +38,9 @@ void bx_init_hardware(void);
 void bx_init_options(void);
 void bx_init_bx_dbg(void);
 
+extern int CacheSize;
+
 static const char *divider = "========================================================================";
-
-
 
 
 bx_bool bx_user_quit;
@@ -59,9 +60,7 @@ bx_debug_t bx_dbg;
 
 typedef BX_CPU_C *BX_CPU_C_PTR;
 
-//BOCHSAPI BX_CPU_C bx_cpu;
-
-
+BOCHSAPI BX_CPU_C bx_cpu;
 
 char *bochsrc_filename = NULL;
 
@@ -150,8 +149,29 @@ void print_tree(bx_param_c *node, int level)
 #endif
 
 int bxmain(void) {
+    char instr[] = {
+0xb8,0x01,0x00,0x00,0x00,      	//mov    $0x1,%eax
+0xbb,0x02,0x00,0x00,0x00,      	//mov    $0x2,%ebx
+0x89,0xc6,               	//mov    %eax,%esi
+0x89,0xda,               	//mov    %ebx,%edx
+0x01,0xf2,               	//add    %esi,%edx
+0x89,0xd1,               	//mov    %edx,%ecx
+0x89,0xc6,               	//mov    %eax,%esi
+0x89,0xca,               	//mov    %ecx,%edx
+0x89,0xf7,               	//mov    %esi,%edi
+0x29,0xd7,               	//sub    %edx,%edi
+0x89,0xfa,               	//mov    %edi,%edx
+0x89,0xd3               	//mov    %edx,%ebx
+};
+
+   RIP = (int) instr;
+
+   CacheSize = sizeof(instr);
+
+   bx_cpu.cpu_loop();
 
 /*
+
 	cpu_loop();
 
 
