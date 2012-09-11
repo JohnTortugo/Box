@@ -28,7 +28,7 @@
 
 #include "param_names.h"
 
-bxPageWriteStampTable pageWriteStampTable;
+//bxPageWriteStampTable pageWriteStampTable;
 
 void flushICaches(void)
 {
@@ -37,7 +37,7 @@ void flushICaches(void)
     BX_CPU(i)->async_event |= BX_ASYNC_EVENT_STOP_TRACE;
   }
 
-  pageWriteStampTable.resetWriteStamps();
+  //pageWriteStampTable.resetWriteStamps();
 }
 
 void handleSMC(bx_phy_address pAddr, Bit32u mask)
@@ -122,8 +122,8 @@ bxICacheEntry_c* BX_CPU_C::serveICacheMiss(bxICacheEntry_c *entry, Bit32u eipBia
       // Add the instruction to trace cache
       entry->pAddr = ~entry->pAddr;
       entry->traceMask = 0x80000000; /* last line in page */
-      pageWriteStampTable.markICacheMask(entry->pAddr, entry->traceMask);
-      pageWriteStampTable.markICacheMask(BX_CPU_THIS_PTR pAddrFetchPage, 0x1);
+      //pageWriteStampTable.markICacheMask(entry->pAddr, entry->traceMask);
+      //pageWriteStampTable.markICacheMask(BX_CPU_THIS_PTR pAddrFetchPage, 0x1);
 
 #if BX_SUPPORT_HANDLERS_CHAINING_SPEEDUPS
       entry->tlen++; /* Add the inserted end of trace opcode */
@@ -160,7 +160,7 @@ bxICacheEntry_c* BX_CPU_C::serveICacheMiss(bxICacheEntry_c *entry, Bit32u eipBia
     if (remainingInPage >= 15) { // avoid merging with page split trace
       if (mergeTraces(entry, i, pAddr)) {
           entry->traceMask |= traceMask;
-          pageWriteStampTable.markICacheMask(pAddr, entry->traceMask);
+          //pageWriteStampTable.markICacheMask(pAddr, entry->traceMask);
           BX_CPU_THIS_PTR iCache.commit_trace(entry->tlen);
           return entry;
       }
@@ -171,7 +171,7 @@ bxICacheEntry_c* BX_CPU_C::serveICacheMiss(bxICacheEntry_c *entry, Bit32u eipBia
 
   entry->traceMask |= traceMask;
 
-  pageWriteStampTable.markICacheMask(pAddr, entry->traceMask);
+  //pageWriteStampTable.markICacheMask(pAddr, entry->traceMask);
 
 #if BX_SUPPORT_HANDLERS_CHAINING_SPEEDUPS
   entry->tlen++; /* Add the inserted end of trace opcode */

@@ -216,7 +216,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::INVD(bxInstruction_c *i)
   BX_DEBUG(("INVD: Flush internal caches !"));
   BX_INSTR_CACHE_CNTRL(BX_CPU_ID, BX_INSTR_INVD);
 
-  flushICaches();
+  //flushICaches();
 
   BX_NEXT_TRACE(i);
 }
@@ -250,7 +250,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::WBINVD(bxInstruction_c *i)
   BX_DEBUG(("WBINVD: Flush internal caches !"));
   BX_INSTR_CACHE_CNTRL(BX_CPU_ID, BX_INSTR_WBINVD);
 
-  flushICaches();
+  //flushICaches();
 
   BX_NEXT_TRACE(i);
 }

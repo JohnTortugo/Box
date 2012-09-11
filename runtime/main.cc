@@ -12,9 +12,6 @@ int main(int argc, char **argv) {
 
   ElfLoader loader(argv[0], getenv("LD_LIBRARY_PATH"));
 
-//  bx_startup_flags.argc = argc;
-//  bx_startup_flags.argv = argv;
-  
   printf("\n* Passando o controle para o interpretador\n");
   return bxmain();
 }

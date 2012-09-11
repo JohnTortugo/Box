@@ -509,13 +509,14 @@ class BX_MEM_C;
             ((BxRepIterationPtr_tR) (func)) args
 #endif
 
+/*
 #if BX_SUPPORT_SMP
 // multiprocessor simulation, we need an array of cpus and memories
 BOCHSAPI extern BX_CPU_C **bx_cpu_array;
-#else
+#else */
 // single processor simulation, so there's one of everything
 BOCHSAPI extern BX_CPU_C   bx_cpu;
-#endif
+// #endif
 
 // notify internal debugger/instrumentation about memory access
 #define BX_NOTIFY_LIN_MEMORY_ACCESS(laddr, paddr, size, pl, rw, dataptr) {              \
@@ -751,7 +752,7 @@ typedef struct {
 
 #define PAGE_OFFSET(laddr) ((Bit32u)(laddr) & 0xfff)
 
-#include "icache.h"
+// #include "icache.h"
 
 // general purpose register
 #if BX_SUPPORT_X86_64
@@ -1163,7 +1164,7 @@ public: // for now...
   // An instruction cache.  Each entry should be exactly 32 bytes, and
   // this structure should be aligned on a 32-byte boundary to be friendly
   // with the host cache lines.
-  bxICache_c iCache BX_CPP_AlignN(32);
+  // bxICache_c iCache BX_CPP_AlignN(32);
   Bit32u fetchModeMask;
 
   struct {
@@ -3544,9 +3545,9 @@ public: // for now...
   BX_SMF int fetchDecode64(const Bit8u *fetchPtr, bxInstruction_c *i, unsigned remainingInPage) BX_CPP_AttrRegparmN(3);
 #endif
   BX_SMF void boundaryFetch(const Bit8u *fetchPtr, unsigned remainingInPage, bxInstruction_c *);
-  BX_SMF bxICacheEntry_c *serveICacheMiss(bxICacheEntry_c *entry, Bit32u eipBiased, bx_phy_address pAddr);
-  BX_SMF bxICacheEntry_c* getICacheEntry(void);
-  BX_SMF bx_bool mergeTraces(bxICacheEntry_c *entry, bxInstruction_c *i, bx_phy_address pAddr);
+//  BX_SMF bxICacheEntry_c *serveICacheMiss(bxICacheEntry_c *entry, Bit32u eipBiased, bx_phy_address pAddr);
+//  BX_SMF bxICacheEntry_c* getICacheEntry(void);
+//  BX_SMF bx_bool mergeTraces(bxICacheEntry_c *entry, bxInstruction_c *i, bx_phy_address pAddr);
 #if BX_SUPPORT_HANDLERS_CHAINING_SPEEDUPS
   BX_SMF BX_INSF_TYPE linkTrace(bxInstruction_c *i) BX_CPP_AttrRegparmN(1);
 #endif
@@ -4490,6 +4491,18 @@ BX_CPP_INLINE void BX_CPU_C::set_reg64(unsigned reg, Bit64u val)
 {
    assert(reg < BX_GENERAL_REGISTERS);
    BX_CPU_THIS_PTR gen_reg[reg].rrx = val;
+}
+#endif
+
+#if BX_CPU_LEVEL >= 6
+// CR8 is aliased to APIC->TASK PRIORITY register
+//   APIC.TPR[7:4] = CR8[3:0]
+//   APIC.TPR[3:0] = 0
+// Reads of CR8 return zero extended APIC.TPR[7:4]
+BX_CPP_INLINE unsigned BX_CPU_C::get_cr8(void)
+{
+   printf("CPU should not reach this point!!!!\n");
+   exit(0);
 }
 #endif
 

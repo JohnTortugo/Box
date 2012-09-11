@@ -121,6 +121,8 @@ NONINLINE_OBJS = \
 	@EXTRA_BX_OBJS@
 
 EXTERN_OBJS = \
+	runtime/main.o \
+	runtime/box.o
 
 DEBUGGER_LIB   = bx_debug/libdebug.a
 DISASM_LIB     = disasm/libdisasm.a
@@ -160,7 +162,7 @@ box@EXE@:		elfparser/libelfparser.a elfloader/libelfloader.a \
 			$(SIMX86_LINK_FLAGS) \
 			$(READLINE_LIB) \
 			$(EXTRA_LINK_OPTS) \
-			$(LIBS)
+			$(LIBS) $(EXTERN_OBJS)
 
 $(BX_OBJS): $(BX_INCLUDES)
 

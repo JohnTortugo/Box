@@ -88,7 +88,7 @@ void BX_CPP_AttrRegparmN(2) BX_CPU_C::VMwrite16(unsigned encoding, Bit16u val_16
 
   if (BX_CPU_THIS_PTR vmcshostptr) {
     Bit16u *hostAddr = (Bit16u*) (BX_CPU_THIS_PTR vmcshostptr | offset);
-    pageWriteStampTable.decWriteStamp(pAddr, 2);
+    //pageWriteStampTable.decWriteStamp(pAddr, 2);
     WriteHostWordToLittleEndian(hostAddr, val_16);
   }
   else {
@@ -130,7 +130,7 @@ void BX_CPP_AttrRegparmN(2) BX_CPU_C::VMwrite32(unsigned encoding, Bit32u val_32
 
   if (BX_CPU_THIS_PTR vmcshostptr) {
     Bit32u *hostAddr = (Bit32u*) (BX_CPU_THIS_PTR vmcshostptr | offset);
-    pageWriteStampTable.decWriteStamp(pAddr, 4);
+    //pageWriteStampTable.decWriteStamp(pAddr, 4);
     WriteHostDWordToLittleEndian(hostAddr, val_32);
   }
   else {
@@ -176,7 +176,7 @@ void BX_CPP_AttrRegparmN(2) BX_CPU_C::VMwrite64(unsigned encoding, Bit64u val_64
 
   if (BX_CPU_THIS_PTR vmcshostptr) {
     Bit64u *hostAddr = (Bit64u*) (BX_CPU_THIS_PTR vmcshostptr | offset);
-    pageWriteStampTable.decWriteStamp(pAddr, 8);
+    //pageWriteStampTable.decWriteStamp(pAddr, 8);
     WriteHostQWordToLittleEndian(hostAddr, val_64);
   }
   else {
@@ -1619,9 +1619,11 @@ Bit32u BX_CPU_C::VMenterLoadCheckGuestState(Bit64u *qualification)
     }
 
     if (guest.interruptibility_state & BX_VMX_INTERRUPTS_BLOCKED_BY_STI)
-      inhibit_interrupts(BX_INHIBIT_INTERRUPTS);
+      BX_INFO(("inhibit_interrupts disabled!!!");
+//inhibit_interrupts(BX_INHIBIT_INTERRUPTS);
     else if (guest.interruptibility_state & BX_VMX_INTERRUPTS_BLOCKED_BY_MOV_SS)
-      inhibit_interrupts(BX_INHIBIT_INTERRUPTS_BY_MOVSS);
+      BX_INFO(("inhibit_interrupts disabled!!!");
+//inhibit_interrupts(BX_INHIBIT_INTERRUPTS_BY_MOVSS);
     else
       BX_CPU_THIS_PTR inhibit_mask = 0;
   }

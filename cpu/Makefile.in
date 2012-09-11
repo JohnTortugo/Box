@@ -42,7 +42,12 @@ BX_INCDIRS = -I.. -I$(srcdir)/.. -I../@INSTRUMENT_DIR@ -I$(srcdir)/../@INSTRUMEN
 OBJS = \
 	init.o \
 	cpu.o \
-	fetchdecode.o \
+	access.o \
+	access32.o \
+	vm8086.o \
+	tasking.o \
+	resolver.o \
+	protect_ctrl.o \
 	shift16.o \
 	logical16.o \
 	ctrl_xfer32.o \
@@ -104,7 +109,8 @@ OBJS = \
 	bit32.o \
 	bmi32.o \
 	string.o \
-	paging.o
+	paging.o \
+	fetchdecode.o \
 
 BX_INCLUDES = ../bochs.h ../config.h
 

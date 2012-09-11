@@ -189,7 +189,8 @@ static bx_cpuid_t *cpuid_factory(BX_CPU_C *cpu)
 // BX_CPU_C constructor
 void BX_CPU_C::initialize(void)
 {
-  BX_CPU_THIS_PTR set_INTR(0);
+  //BX_CPU_THIS_PTR set_INTR(0);
+  BX_INFO(("INTR(0) !!!!"));
 
 #if BX_CPU_LEVEL >= 4
   BX_CPU_THIS_PTR cpuid = cpuid_factory(this);
@@ -847,7 +848,7 @@ void BX_CPU_C::reset(unsigned source)
   BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.avl = 0;
 #endif
 
-  flushICaches();
+  //flushICaches();
 
   /* DS (Data Segment) and descriptor cache */
   parse_selector(0x0000,

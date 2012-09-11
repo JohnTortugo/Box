@@ -22,6 +22,7 @@
 #define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
 #include "cpu.h"
+#include "../debug.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PUSH_RX(bxInstruction_c *i)
@@ -52,7 +53,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::POP16_Sw(bxInstruction_c *i)
     // trap exceptions until the execution boundary following the
     // next instruction is reached.
     // Same code as MOV_SwEw()
-    inhibit_interrupts(BX_INHIBIT_INTERRUPTS_BY_MOVSS);
+    BX_INFO(("inhibit_interrupts disabled!!!"));
+//inhibit_interrupts(BX_INHIBIT_INTERRUPTS_BY_MOVSS);
   }
 
   BX_NEXT_INSTR(i);
