@@ -28,63 +28,18 @@ extern "C" {
 #include <signal.h>
 }
 
-// some prototypes from iodev/
-// I want to stay away from including iodev/iodev.h here
-Bit32u bx_unmapped_io_read_handler(Bit32u address, unsigned io_len);
-void   bx_unmapped_io_write_handler(Bit32u address, Bit32u value,
-                                    unsigned io_len);
-
 void bx_init_hardware(void);
 void bx_init_options(void);
-void bx_init_bx_dbg(void);
 
 extern int CacheSize;
-
-static const char *divider = "========================================================================";
-
-
-bx_bool bx_user_quit;
-Bit8u bx_cpu_count;
-#if BX_SUPPORT_APIC
-Bit32u apic_id_mask; // determinted by XAPIC option
-bx_bool simulate_xapic;
-#endif
-
-/* typedefs */
-
-#define LOG_THIS genlog->
-
-
-
-bx_debug_t bx_dbg;
 
 typedef BX_CPU_C *BX_CPU_C_PTR;
 
 BOCHSAPI BX_CPU_C bx_cpu;
 
-char *bochsrc_filename = NULL;
 
-void bx_print_header()
-{
-/*
-  printf("%s\n", divider);
-  char buffer[128];
-  sprintf (buffer, "Box IA32 Process Emulator %s\n", VER_STRING);
-  bx_center_print(stdout, buffer, 72);
-  if (REL_STRING[0]) {
-    sprintf(buffer, "%s\n", REL_STRING);
-    bx_center_print(stdout, buffer, 72);
-#ifdef __DATE__
-#ifdef __TIME__
-    sprintf(buffer, "Compiled on %s at %s\n", __DATE__, __TIME__);
-#else
-    sprintf(buffer, "Compiled on %s\n", __DATE__);
-#endif
-    bx_center_print(stdout, buffer, 72);
-#endif
-  }
-  printf("%s\n", divider);
-*/
+
+void bx_print_header() {
 }
 
 int bxmain(void) {
@@ -124,6 +79,12 @@ int bxmain(void) {
 
     bx_cpu.sregs[BX_SEG_REG_CS].cache.u.segment.d_b = 1;
     bx_cpu.sregs[BX_SEG_REG_CS].cache.u.segment.g = 1;
+
+    bx_cpu.sregs[BX_SEG_REG_SS].cache.u.segment.d_b = 1;
+    bx_cpu.sregs[BX_SEG_REG_SS].cache.u.segment.g = 1;
+
+    bx_cpu.sregs[BX_SEG_REG_DS].cache.u.segment.d_b = 1;
+    bx_cpu.sregs[BX_SEG_REG_DS].cache.u.segment.g = 1;
 
 	//bx_cpu.init_FetchDecodeTables();
     //bx_cpu.initialize();
@@ -400,10 +361,6 @@ void bx_init_hardware()
 #endif
 #endif
 */
-}
-
-void bx_init_bx_dbg(void)
-{
 }
 
 int bx_atexit(void)

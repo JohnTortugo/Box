@@ -39,11 +39,12 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XCHG_ERXEAX(bxInstruction_c *i)
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_ERXId(bxInstruction_c *i)
-{
-  BX_WRITE_32BIT_REGZ(i->dst(), i->Id());
+BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_ERXId(bxInstruction_c *i) {
+    printf("I'm alive\n");
 
-  BX_NEXT_INSTR(i);
+    BX_WRITE_32BIT_REGZ(i->dst(), i->Id());
+
+    BX_NEXT_INSTR(i);
 }
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV32_EdGdM(bxInstruction_c *i)
@@ -66,6 +67,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV32S_EdGdM(bxInstruction_c *i)
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_GdEdR(bxInstruction_c *i)
 {
+    printf("I'm alive\n");
+
   BX_WRITE_32BIT_REGZ(i->dst(), BX_READ_32BIT_REG(i->src()));
 
   BX_NEXT_INSTR(i);

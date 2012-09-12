@@ -45,16 +45,7 @@ BX_CPU_C::push_16(Bit16u value16)
   }
 }
 
-  BX_CPP_INLINE void BX_CPP_AttrRegparmN(1)
-BX_CPU_C::push_32(Bit32u value32)
-{
-#if BX_SUPPORT_X86_64
-  if (long64_mode()) { /* StackAddrSize = 64 */
-    stack_write_dword(RSP-4, value32);
-    RSP -= 4;
-  }
-  else
-#endif
+BX_CPP_INLINE void BX_CPP_AttrRegparmN(1) BX_CPU_C::push_32(Bit32u value32) {
   if (BX_CPU_THIS_PTR sregs[BX_SEG_REG_SS].cache.u.segment.d_b) { /* StackAddrSize = 32 */
     stack_write_dword((Bit32u) (ESP-4), value32);
     ESP -= 4;

@@ -15,10 +15,10 @@ void BX_CPU_C::cpu_loop(void) {
 
     while (CacheSize >= 1) {
         // I inspected the exec1 pointer using 
-        // objdump -d box | grep exec1 
+        // objdump -dC box | grep exec1 
         // and it indeed is pointing to the right function =DDD
         // hurray
-        printf("RIP: 0x%016lX \t CacheSize: %02d \t", RIP,CacheSize);
+        printf("RIP: 0x%016lx \t CacheSize: %02d \t", RIP,CacheSize);
         ret = fetchDecode32((Bit8u *) RIP, i, CacheSize);
         printf("iLen: %02d \t Exec1: %0x \t\t", i->ilen(), i->execute);
 
@@ -28,6 +28,12 @@ void BX_CPU_C::cpu_loop(void) {
         char disbuf[50];
         d.disasm32((bx_address)RIP, (bx_address)RIP, (const Bit8u *)RIP, disbuf);
         printf("%s\n", disbuf);
+
+        // call the interpretation routine
+        // memory isn't working yet
+        printf("calling interpretation: ");
+        //(i->execute)(i);
+        printf("\n");
 
         CacheSize -= i->ilen();
         RIP += i->ilen();
