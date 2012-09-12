@@ -35,7 +35,7 @@ RANLIB = @RANLIB@
 
 BX_INCDIRS = -I.. -I../.. -I$(srcdir)/.. -I$(srcdir)/../.. -I../../@INSTRUMENT_DIR@ -I$(srcdir)/../../@INSTRUMENT_DIR@
 
-CPUDB_OBJS = pentium_mmx.o \
+BX_OBJS = pentium_mmx.o \
              amd_k6_2_chomper.o  \
              p2_klamath.o \
              p3_katmai.o \
@@ -56,22 +56,16 @@ CPUDB_OBJS = pentium_mmx.o \
 BX_INCLUDES = ../../bochs.h ../../config.h
 
 
-all: libcpudb.a
+all: $(BX_OBJS)
 
 .@CPP_SUFFIX@.o:
 	$(CXX) @DASH@c $(BX_INCDIRS) $(CXXFLAGS) @CXXFP@$< @OFP@$@
 
 
-libcpudb.a: $(CPUDB_OBJS)
-	@RMCOMMAND@ libcpudb.a
-	@MAKELIB@ $(CPUDB_OBJS)
-	$(RANLIB) libcpudb.a
-
 $(CPUDB_OBJS): $(BX_INCLUDES)
 
 clean:
 	@RMCOMMAND@ *.o
-	@RMCOMMAND@ *.a
 
 dist-clean: clean
 	@RMCOMMAND@ Makefile

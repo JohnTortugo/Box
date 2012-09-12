@@ -41,13 +41,13 @@ L_TARGET = libfpu.a
 
 BX_INCDIRS = -I.. -I$(srcdir)/.. -I../@INSTRUMENT_DIR@ -I$(srcdir)/../@INSTRUMENT_DIR@ -I. -I$(srcdir)/. -I./stubs -I$(srcdir)/./stubs
 
-OBJS = ferr.o fpu.o fpu_arith.o fpu_compare.o fpu_const.o fpu_cmov.o \
+BX_OBJS = ferr.o fpu.o fpu_arith.o fpu_compare.o fpu_const.o fpu_cmov.o \
                fpu_load_store.o fpu_misc.o fpu_trans.o \
                fprem.o fsincos.o f2xm1.o fyl2x.o fpatan.o \
                softfloat.o softfloatx80.o softfloat16.o softfloat-muladd.o \
                softfloat-specialize.o softfloat-round-pack.o poly.o
 
-all: libfpu.a
+all: $(BX_OBJS)
 
 .@CPP_SUFFIX@.o:
 	$(CXX) @DASH@c $(BX_INCDIRS) $(CXXFLAGS) @CXXFP@$< @OFP@$@
@@ -56,14 +56,8 @@ all: libfpu.a
 	$(CC) @DASH@c $(CFLAGS) $(BX_INCDIRS) $< @OFP@$@
 
 
-libfpu.a: $(OBJS)
-	@RMCOMMAND@ libfpu.a
-	@MAKELIB@ $(OBJS)
-	$(RANLIB) libfpu.a
-
 clean:
 	@RMCOMMAND@ *.o
-	@RMCOMMAND@ *.a
 
 dist-clean: clean
 	@RMCOMMAND@ Makefile
@@ -76,7 +70,6 @@ f2xm1.o: f2xm1.@CPP_SUFFIX@ softfloatx80.h softfloat.h ../config.h \
  softfloat-specialize.h softfloat-macros.h softfloat-round-pack.h
 ferr.o: ferr.@CPP_SUFFIX@ ../bochs.h ../config.h ../osdep.h ../bx_debug/debug.h \
  ../config.h ../osdep.h ../cpudb.h \
-  \
  ../instrument/stubs/instrument.h ../cpu/cpu.h ../cpu/cpuid.h \
  ../cpu/crregs.h ../cpu/descriptor.h ../cpu/instr.h ../cpu/ia_opcodes.h \
  ../cpu/lazy_flags.h ../cpu/i387.h \
@@ -90,7 +83,6 @@ fprem.o: fprem.@CPP_SUFFIX@ softfloatx80.h softfloat.h ../config.h \
  softfloat-specialize.h softfloat-round-pack.h softfloat-macros.h
 fpu.o: fpu.@CPP_SUFFIX@ ../bochs.h ../config.h ../osdep.h ../bx_debug/debug.h \
  ../config.h ../osdep.h ../cpudb.h \
-  \
  ../instrument/stubs/instrument.h ../cpu/cpu.h ../cpu/cpuid.h \
  ../cpu/crregs.h ../cpu/descriptor.h ../cpu/instr.h ../cpu/ia_opcodes.h \
  ../cpu/lazy_flags.h ../cpu/i387.h \

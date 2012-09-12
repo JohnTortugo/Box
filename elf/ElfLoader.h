@@ -5,7 +5,7 @@
 #include <set>
 #include <string>
 
-#include "../elfparser/ElfParser.h"
+#include "ElfParser.h"
 
 using namespace std;
 

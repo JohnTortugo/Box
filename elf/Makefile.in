@@ -39,26 +39,22 @@ RANLIB = @RANLIB@
 BX_INCDIRS = -I. -I.. -I$(srcdir)/.. 
 
 BX_OBJS = \
-	ElfLoader.o
+	ElfLoader.o \
+	ElfParser.o \
+	ElfFile.o
 
 BX_INCLUDES = ../bochs.h ../config.h
 
-all: libelfloader.a
+all: $(BX_OBJS)
 
 .@CPP_SUFFIX@.o:
 	$(CXX) @DASH@c $(BX_INCDIRS) $(CXXFLAGS) @CXXFP@$< @OFP@$@
 
 
-libelfloader.a: $(BX_OBJS)
-	@RMCOMMAND@ libelfloader.a
-	@MAKELIB@ $(BX_OBJS)
-	$(RANLIB) libelfloader.a
-
 $(BX_OBJS): $(BX_INCLUDES)
 
 clean:
 	@RMCOMMAND@ *.o
-	@RMCOMMAND@ *.a
 
 dist-clean: clean
 	@RMCOMMAND@ Makefile
@@ -68,3 +64,5 @@ dist-clean: clean
 #  gcc -MM -I.. -I../instrument/stubs *.cc | sed 's/\.cc/.@CPP_SUFFIX@/g'
 ###########################################
 ElfLoader.o: ElfLoader.@CPP_SUFFIX@ 
+ElfParser.o: ElfParser.@CPP_SUFFIX@ 
+ElfFile.o: ElfFile.@CPP_SUFFIX@ 

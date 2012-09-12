@@ -49,24 +49,15 @@ BX_INCLUDES = disasm.h
 
 BX_INCDIRS = -I.. -I$(srcdir)/.. -I../@INSTRUMENT_DIR@ -I$(srcdir)/../@INSTRUMENT_DIR@
 
-all: libdisasm.a
+all: $(BX_OBJS)
 
 .@CPP_SUFFIX@.o:
 	$(CXX) @DASH@c $(BX_INCDIRS) $(CXXFLAGS) @CXXFP@$< @OFP@$@
 
-
-
-libdisasm.a: $(BX_OBJS)
-	@RMCOMMAND@ libdisasm.a
-	@MAKELIB@ $(BX_OBJS)
-	$(RANLIB) libdisasm.a
-
 $(BX_OBJS): $(BX_INCLUDES)
-
 
 clean:
 	@RMCOMMAND@ *.o
-	@RMCOMMAND@ *.a
 
 dist-clean: clean
 	@RMCOMMAND@ Makefile

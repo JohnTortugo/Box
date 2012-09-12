@@ -90,25 +90,7 @@ CXXFLAGS = @CXXFLAGS@ @GUI_CXXFLAGS@ $(MCH_CFLAGS) $(FLA_FLAGS) @DEFINE_PLUGIN_P
 
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-# To compile with readline:
-#   linux needs just -lreadline
-#   solaris needs -lreadline -lcurses
-X_LIBS = @X_LIBS@
-X_PRE_LIBS = @X_PRE_LIBS@
-GUI_LINK_OPTS_X = $(X_LIBS) $(X_PRE_LIBS)
-GUI_LINK_OPTS_SDL = `sdl-config --cflags --libs`
-GUI_LINK_OPTS_SVGA =  -lvga -lvgagl
-GUI_LINK_OPTS_RFB = @RFB_LIBS@
-GUI_LINK_OPTS_AMIGAOS =
-GUI_LINK_OPTS_WIN32 = -luser32 -lgdi32 -lcomdlg32 -lcomctl32 -lwsock32 -lshell32
-GUI_LINK_OPTS_WIN32_VCPP = user32.lib gdi32.lib winmm.lib \
-  comdlg32.lib comctl32.lib wsock32.lib advapi32.lib shell32.lib
-GUI_LINK_OPTS_MACOS =
-GUI_LINK_OPTS_CARBON = -framework Carbon
-GUI_LINK_OPTS_NOGUI =
-GUI_LINK_OPTS_TERM = @GUI_LINK_OPTS_TERM@
-GUI_LINK_OPTS_WX = @GUI_LINK_OPTS_WX@
-GUI_LINK_OPTS = @GUI_LINK_OPTS@  @DEVICE_LINK_OPTS@
+
 RANLIB = @RANLIB@
 
 CFLAGS_CONSOLE = @CFLAGS@ $(MCH_CFLAGS) $(FLA_FLAGS)
@@ -119,10 +101,6 @@ BX_INCDIRS = -I. -I$(srcdir)/. -I@INSTRUMENT_DIR@ -I$(srcdir)/@INSTRUMENT_DIR@
 
 NONINLINE_OBJS = \
 	@EXTRA_BX_OBJS@
-
-EXTERN_OBJS = \
-	runtime/main.o \
-	runtime/box.o
 
 DEBUGGER_LIB   = bx_debug/libdebug.a
 DISASM_LIB     = disasm/libdisasm.a
@@ -142,183 +120,29 @@ BX_INCLUDES = bochs.h config.h
 .c.o:
 	$(CC) @DASH@c $(BX_INCDIRS) $(CFLAGS) $(FPU_FLAGS) $< @OFP@$@
 
+$(BX_OBJS): $(BX_INCLUDES)
+
+SUBDIRS = cpu fpu runtime elf disasm
 
 all: @PRIMARY_TARGET@
 
-@EXTERNAL_DEPENDENCY@
+all: box
 
-box@EXE@:		elfparser/libelfparser.a elfloader/libelfloader.a \
-			cpu/libcpu.a cpu/cpudb/libcpudb.a fpu/libfpu.a \
-          		disasm/libdisasm.a runtime/libruntime.a 
+box@EXE@: build-deps
 	@LINK@ @EXPORT_DYNAMIC@ \
-			elfparser/libelfparser.a \
-			elfloader/libelfloader.a \
-			cpu/libcpu.a \
-			cpu/cpudb/libcpudb.a \
-			fpu/libfpu.a \
-          		disasm/libdisasm.a \
-	 		runtime/libruntime.a \
+                        runtime/*.o cpu/*.o cpu/cpudb/*.o fpu/*.o  \
+			disasm/*.o elf/*.o \
 			$(MCH_LINK_FLAGS) \
 			$(SIMX86_LINK_FLAGS) \
 			$(READLINE_LIB) \
 			$(EXTRA_LINK_OPTS) \
-			$(LIBS) $(EXTERN_OBJS)
+			$(LIBS)
 
-$(BX_OBJS): $(BX_INCLUDES)
-
-# cannot use -C option to be compatible with Microsoft nmake
-cpu/libcpu.a::
-	cd cpu @COMMAND_SEPARATOR@
-	$(MAKE) $(MDEFINES) libcpu.a
-	@CD_UP_ONE@
-
-cpu/cpudb/libcpudb.a::
-	cd cpu/cpudb @COMMAND_SEPARATOR@
-	$(MAKE) $(MDEFINES) libcpudb.a
-	@CD_UP_TWO@
-
-fpu/libfpu.a::
-	cd fpu @COMMAND_SEPARATOR@
-	$(MAKE) $(MDEFINES) libfpu.a
-	@CD_UP_ONE@
-
-disasm/libdisasm.a::
-	cd disasm @COMMAND_SEPARATOR@
-	$(MAKE) $(MDEFINES) libdisasm.a
-	@CD_UP_ONE@
-
-elfparser/libelfparser.a::
-	cd elfparser @COMMAND_SEPARATOR@
-	$(MAKE) $(MDEFINES) libelfparser.a
-	@CD_UP_ONE@
-
-elfloader/libelfloader.a::
-	cd elfloader @COMMAND_SEPARATOR@
-	$(MAKE) $(MDEFINES) libelfloader.a
-	@CD_UP_ONE@
-
-runtime/libruntime.a:
-	cd runtime @COMMAND_SEPARATOR@
-	$(MAKE) $(MDEFINES) all
-	@CD_UP_ONE@
-
-
-#####################################################################
-# Install target for all platforms.
-#####################################################################
-
-install: all @INSTALL_TARGET@
-
-#####################################################################
-# Install target for win32
-#
-# This is intended to be run in cygwin, since it has better scripting
-# tools.
-#####################################################################
-
-#####################################################################
-# install target for unix
-#####################################################################
-
-install_unix: install_bin @INSTALL_PLUGINS_VAR@ install_man install_share install_doc @INSTALL_DOCBOOK_VAR@
-
-install_bin::
-	for i in $(DESTDIR)$(bindir); do mkdir -p $$i && test -d $$i && test -w $$i; done
-	for i in $(INSTALL_LIST_BIN); do if test -f $$i; then install $$i $(DESTDIR)$(bindir); else install $(srcdir)/$$i $(DESTDIR)$(bindir); fi; done
-	-for i in $(INSTALL_LIST_BIN_OPTIONAL); do if test -f $$i; then install $$i $(DESTDIR)$(bindir); else install $(srcdir)/$$i $(DESTDIR)$(bindir); fi; done
-
-install_libtool_plugins::
-	for i in $(DESTDIR)$(plugdir); do mkdir -p $$i && test -d $$i && test -w $$i; done
-	list=`cd gui && echo *.la`; for i in $$list; do $(LIBTOOL) --mode=install install gui/$$i $(DESTDIR)$(plugdir); done
-	list=`cd iodev && echo *.la`; for i in $$list; do $(LIBTOOL) --mode=install install iodev/$$i $(DESTDIR)$(plugdir); done
-	list=`cd iodev/hdimage && echo *.la`; for i in $$list; do $(LIBTOOL) --mode=install install iodev/hdimage/$$i $(DESTDIR)$(plugdir); done
-	list=`cd iodev/usb && echo *.la`; for i in $$list; do $(LIBTOOL) --mode=install install iodev/usb/$$i $(DESTDIR)$(plugdir); done
-	list=`cd iodev/network && echo *.la`; for i in $$list; do $(LIBTOOL) --mode=install install iodev/network/$$i $(DESTDIR)$(plugdir); done
-	list=`cd iodev/sound && echo *.la`; for i in $$list; do $(LIBTOOL) --mode=install install iodev/sound/$$i $(DESTDIR)$(plugdir); done
-	$(LIBTOOL) --finish $(DESTDIR)$(plugdir)
-
-install_dll_plugins::
-	for i in $(DESTDIR)$(plugdir); do mkdir -p $$i && test -d $$i && test -w $$i; done
-	list=`cd gui && echo *.dll`; for i in $$list; do cp gui/$$i $(DESTDIR)$(plugdir); done
-	list=`cd iodev && echo *.dll`; for i in $$list; do cp iodev/$$i $(DESTDIR)$(plugdir); done
-	list=`cd iodev/hdimage && echo *.dll`; for i in $$list; do cp iodev/hdimage/$$i $(DESTDIR)$(plugdir); done
-	list=`cd iodev/usb && echo *.dll`; for i in $$list; do cp iodev/usb/$$i $(DESTDIR)$(plugdir); done
-	list=`cd iodev/network && echo *.dll`; for i in $$list; do cp iodev/network/$$i $(DESTDIR)$(plugdir); done
-	list=`cd iodev/sound && echo *.dll`; for i in $$list; do cp iodev/sound/$$i $(DESTDIR)$(plugdir); done
-
-install_share::
-	for i in $(DESTDIR)$(sharedir);	do mkdir -p $$i && test -d $$i && test -w $$i; done
-	for i in $(INSTALL_LIST_SHARE); do if test -f $$i; then install -m 644 $$i $(DESTDIR)$(sharedir); else install -m 644 $(srcdir)/$$i $(DESTDIR)$(sharedir); fi; done
-	-mkdir $(DESTDIR)$(sharedir)/keymaps
-	for i in $(srcdir)/gui/keymaps/*.map; do install -m 644 $$i $(DESTDIR)$(sharedir)/keymaps/; done
-
-install_doc::
-	for i in $(DESTDIR)$(docdir); do mkdir -p $$i && test -d $$i && test -w $$i; done
-	for i in $(INSTALL_LIST_DOC); do if test -f $$i; then install -m 644 $$i $(DESTDIR)$(docdir); else install -m 644 $(srcdir)/$$i $(DESTDIR)$(docdir); fi; done
-	$(RM) -f $(DESTDIR)$(docdir)/README
-	$(CAT) $(srcdir)/build/linux/README.linux-binary $(srcdir)/README > $(DESTDIR)$(docdir)/README
-	install -m 644 $(srcdir)/.bochsrc $(DESTDIR)$(docdir)/bochsrc-sample.txt
-
-
-install_man::
-	-mkdir -p $(DESTDIR)$(man1dir)
-	-mkdir -p $(DESTDIR)$(man5dir)
-	for i in $(MAN_PAGE_1_LIST); do cat $(srcdir)/doc/man/$$i.1 | $(SED) 's/@version@/$(VERSION)/g' | $(GZIP_BIN) -c >  $(DESTDIR)$(man1dir)/$$i.1.gz; chmod 644 $(DESTDIR)$(man1dir)/$$i.1.gz; done
-	for i in $(MAN_PAGE_5_LIST); do cat $(srcdir)/doc/man/$$i.5 | $(GZIP_BIN) -c >  $(DESTDIR)$(man5dir)/$$i.5.gz; chmod 644 $(DESTDIR)$(man5dir)/$$i.5.gz; done
-
-download_dlx: $(DLXLINUX_TAR)
-
-$(DLXLINUX_TAR):
-	$(RM) -f $(DLXLINUX_TAR)
-	$(WGET) $(DLXLINUX_TAR_URL)
-	test -f $(DLXLINUX_TAR)
-
-unpack_dlx: $(DLXLINUX_TAR)
-	rm -rf dlxlinux
-	$(GUNZIP) -c $(DLXLINUX_TAR) | $(TAR) -xvf -
-	test -d dlxlinux
-	(cd dlxlinux; $(MV) bochsrc.txt bochsrc.txt.orig; $(SED) -e "s/1\.1\.2/$(VERSION)/g"  -e 's,/usr/local/bochs/latest,$(prefix)/share/bochs,g' < bochsrc.txt.orig > bochsrc.txt; rm -f bochsrc.txt.orig)
-
-install_dlx:
-	$(RM) -rf $(DESTDIR)$(sharedir)/dlxlinux
-	cp -r dlxlinux $(DESTDIR)$(sharedir)/dlxlinux
-	$(CHMOD) 755 $(DESTDIR)$(sharedir)/dlxlinux
-	$(GZIP_BIN) $(DESTDIR)$(sharedir)/dlxlinux/hd10meg.img
-	$(CHMOD) 644 $(DESTDIR)$(sharedir)/dlxlinux/*
-	for i in bochs-dlx; do cp $(srcdir)/build/linux/$$i $(DESTDIR)$(bindir)/$$i; $(CHMOD) 755 $(DESTDIR)$(bindir)/$$i; done
-
-uninstall::
-	$(RM) -rf $(DESTDIR)$(sharedir)
-	$(RM) -rf $(DESTDIR)$(docdir)
-	$(RM) -rf $(DESTDIR)$(libdir)/bochs
-	for i in bochs bximage bxcommit bochs-dlx; do rm -f $(DESTDIR)$(bindir)/$$i; done
-	for i in $(MAN_PAGE_1_LIST); do $(RM) -f $(man1dir)/$$i.1.gz; done
-	for i in $(MAN_PAGE_5_LIST); do $(RM) -f $(man5dir)/$$i.5.gz; done
-
-VS2008_WORKSPACE_ZIP=build/win32/vs2008ex-workspace.zip
-VS2008_WORKSPACE_FILES=vs2008/bochs.sln vs2008/*.vcproj
-
-vs2008workspace:
-	zip $(VS2008_WORKSPACE_ZIP) $(VS2008_WORKSPACE_FILES)
-
-########
-# the win32_snap target is used to create a ZIP of bochs sources configured
-# for VC++.  This ZIP is stuck on the website every once in a while to make
-# it easier for VC++ users to compile bochs.  First, you should
-# run "sh .conf.win32-vcpp" to configure the source code, then do
-# "make win32_snap" to unzip the workspace files and create the ZIP.
-########
-win32_snap:
-	unzip $(VS2008_WORKSPACE_ZIP)
-	$(MAKE) zip
-
-tar:
-	NAME=`pwd|$(SED) 's/.*\///'`; (cd ..; $(RM) -f $$NAME.zip; tar cf - $$NAME | $(GZIP_BIN) > $$NAME.tar.gz); ls -l ../$$NAME.tar.gz
-
-zip:
-	NAME=`pwd|$(SED) 's/.*\///'`; (cd ..; $(RM) -f $$NAME-msvc-src.zip; $(ZIP) $$NAME-msvc-src.zip -r $$NAME -x \*CVS\* -x \*.cvsignore -x \*.svn\* ); ls -l ../$$NAME-msvc-src.zip
-
-SUBDIRS = cpu fpu runtime elfparser elfloader
+build-deps:
+	for subdir in $(SUBDIRS); do \
+	    echo making $@ in $$subdir; \
+	    ($(MAKE) -C $$subdir $(MDEFINES) all) || exit 1; \
+	done
 
 clean: local-clean
 	for subdir in $(SUBDIRS); do \
@@ -334,7 +158,6 @@ dist-clean: local-dist-clean
 
 local-clean:
 	@RMCOMMAND@ *.o
-	@RMCOMMAND@ *.a
 	@RMCOMMAND@ box@EXE@
 	@RMCOMMAND@ -rf bochs.app
 	@RMCOMMAND@ -rf .libs
