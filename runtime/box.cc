@@ -87,438 +87,72 @@ void bx_print_header()
 */
 }
 
-#if BX_DEBUGGER
-void print_tree(bx_param_c *node, int level)
-{
-  int i;
-  char tmpstr[BX_PATHNAME_LEN], tmpbyte[4];
-
-  for (i=0; i<level; i++)
-    dbg_printf("  ");
-  if (node == NULL) {
-      dbg_printf("NULL pointer\n");
-      return;
-  }
-  switch (node->get_type()) {
-    case BXT_PARAM_NUM:
-      if (((bx_param_num_c*)node)->get_base() == BASE_DEC) {
-        dbg_printf("%s = " FMT_LL "d (number)\n", node->get_name(), ((bx_param_num_c*)node)->get64());
-      } else {
-        dbg_printf("%s = 0x" FMT_LL "x (hex number)\n", node->get_name(), ((bx_param_num_c*)node)->get64());
-      }
-      break;
-    case BXT_PARAM_BOOL:
-      dbg_printf("%s = %s (boolean)\n", node->get_name(), ((bx_param_bool_c*)node)->get()?"true":"false");
-      break;
-    case BXT_PARAM_ENUM:
-      dbg_printf("%s = '%s' (enum)\n", node->get_name(), ((bx_param_enum_c*)node)->get_selected());
-      break;
-    case BXT_PARAM_STRING:
-      if (((bx_param_string_c*)node)->get_options() & bx_param_string_c::RAW_BYTES) {
-        tmpstr[0] = 0;
-        for (i = 0; i < ((bx_param_string_c*)node)->get_maxsize(); i++) {
-          if (i > 0) {
-            tmpbyte[0] = ((bx_param_string_c*)node)->get_separator();
-            tmpbyte[1] = 0;
-            strcat(tmpstr, tmpbyte);
-          }
-          sprintf(tmpbyte, "%02x", (Bit8u)((bx_param_string_c*)node)->getptr()[i]);
-          strcat(tmpstr, tmpbyte);
-        }
-        dbg_printf("%s = '%s' (raw byte string)\n", node->get_name(), tmpstr);
-      } else {
-        dbg_printf("%s = '%s' (string)\n", node->get_name(), ((bx_param_string_c*)node)->getptr());
-      }
-      break;
-    case BXT_LIST:
-      {
-	dbg_printf("%s = \n", node->get_name());
-	bx_list_c *list = (bx_list_c*)node;
-	for (i=0; i < list->get_size(); i++) {
-	   print_tree(list->get(i), level+1);
-	}
-	break;
-      }
-    case BXT_PARAM_DATA:
-      dbg_printf("%s = 'size=%d' (binary data)\n", node->get_name(), ((bx_shadow_data_c*)node)->get_size());
-      break;
-    default:
-      dbg_printf("%s (unknown parameter type)\n", node->get_name());
-  }
-}
-#endif
-
 int bxmain(void) {
-    char instr[] = {
-0xb8,0x01,0x00,0x00,0x00,      	//mov    $0x1,%eax
-0xbb,0x02,0x00,0x00,0x00,      	//mov    $0x2,%ebx
-0x89,0xc6,               	//mov    %eax,%esi
-0x89,0xda,               	//mov    %ebx,%edx
-0x01,0xf2,               	//add    %esi,%edx
-0x89,0xd1,               	//mov    %edx,%ecx
-0x89,0xc6,               	//mov    %eax,%esi
-0x89,0xca,               	//mov    %ecx,%edx
-0x89,0xf7,               	//mov    %esi,%edi
-0x29,0xd7,               	//sub    %edx,%edi
-0x89,0xfa,               	//mov    %edi,%edx
-0x89,0xd3               	//mov    %edx,%ebx
-};
+    char instr[] =  {
+                        0xb8,0x01,0x00,0x00,0x00,      	        // mov    $0x1,%eax
+                        0xbb,0x02,0x00,0x00,0x00,      	        // mov    $0x2,%ebx
+                        0x89,0xc6,               	            // mov    %eax,%esi
+                        0x89,0xda,               	            // mov    %ebx,%edx
+                        0x01,0xf2,               	            // add    %esi,%edx
+                        0x89,0xd1,               	            // mov    %edx,%ecx
+                        0x89,0xc6,               	            // mov    %eax,%esi
+                        0x89,0xca,               	            // mov    %ecx,%edx
+                        0x89,0xf7,               	            // mov    %esi,%edi
+                        0x29,0xd7,               	            // sub    %edx,%edi
+                        0x89,0xfa,               	            // mov    %edi,%edx
+                        0x89,0xd3,               	            // mov    %edx,%ebx
+                        0x55,                   	            // push   %ebp
+                        0x89, 0xe5,                	            // mov    %esp,%ebp
+                        0x53,                   	            // push   %ebx
+                        0x83, 0xec, 0x04,                       // sub    $0x4,%esp
+                        0x5b,                   	            // pop    %ebx
+                        0x81, 0xc3, 0xfc, 0x6c, 0x0a, 0x00,     // add    $0xa6cfc,%ebx
+                        0x8b, 0x93, 0xfc, 0xff, 0xff, 0xff,     // mov    -0x4(%ebx),%edx
+                        0x85, 0xd2,                	            // test   %edx,%edx
+                        0x74, 0x05,                	            // je     806743a
+                        0xe8, 0xd1, 0x03, 0x00, 0x00,           // call   8067810
+                        0x58,                   	            // pop    %eax
+                        0x5b,                   	            // pop    %ebx
+                        0xc9,                   	            // leave  
+                        0xc3                   	                // ret    
+                    };
 
-   RIP = (int) instr;
 
-   CacheSize = sizeof(instr);
+    RIP = (int) instr;
 
-   bx_cpu.cpu_loop();
+    CacheSize = sizeof(instr);
 
-/*
+    bx_cpu.sregs[BX_SEG_REG_CS].cache.u.segment.d_b = 1;
+    bx_cpu.sregs[BX_SEG_REG_CS].cache.u.segment.g = 1;
 
-	cpu_loop();
+	//bx_cpu.init_FetchDecodeTables();
+    //bx_cpu.initialize();
 
-
-  bx_user_quit = 0;
-
-  bx_init_siminterface();   // create the SIM object
-
-  static jmp_buf context;
-
-  if (setjmp(context) == 0) {
-    SIM->set_quit_context (&context);
-
-    if (bx_init_main(bx_startup_flags.argc, bx_startup_flags.argv) < 0) {
-      BX_INSTR_EXIT_ENV();
-      return 0;
-    }
-
-    // read a param to decide which config interface to start.
-    // If one exists, start it.  If not, just begin.
-    bx_param_enum_c *ci_param = SIM->get_param_enum(BXPN_SEL_CONFIG_INTERFACE);
-    const char *ci_name = ci_param->get_selected();
-
-    if (!strcmp(ci_name, "textconfig")) {
-      init_text_config_interface();   // in textconfig.h
-    }
-    else {
-      BX_PANIC(("unsupported configuration interface '%s'", ci_name));
-    }
-
-    ci_param->set_enabled(0);
-    int status = SIM->configuration_interface(ci_name, CI_START);
-
-    if (status == CI_ERR_NO_TEXT_CONSOLE)
-      BX_PANIC(("Bochs needed the text console, but it was not usable"));
-    // user quit the config interface, so just quit
-  } 
-  else {
-    // quit via longjmp
-  }
-
-  SIM->set_quit_context(NULL);
-
-  return SIM->get_exit_code();
-*/
+    bx_cpu.cpu_loop();
 
 	return 0;
 }
 
-void print_usage(void)
-{
-  fprintf(stderr,
-    "Usage: bochs [flags] [bochsrc options]\n\n"
-    "  -n               no configuration file\n"
-    "  -f configfile    specify configuration file\n"
-    "  -q               quick start (skip configuration interface)\n"
-    "  -benchmark n     run bochs in benchmark mode for millions of emulated ticks\n"
-    "  -r path          restore the Bochs state from path\n"
-    "  -log filename    specify Bochs log file name\n"
-#if BX_DEBUGGER
-    "  -rc filename     execute debugger commands stored in file\n"
-    "  -dbglog filename specify Bochs internal debugger log file name\n"
-#endif
-    "  --help           display this help and exit\n"
-    "  --help features  display available features / devices and exit\n"
-#if BX_CPU_LEVEL > 4
-    "  --help cpu       display supported CPU models and exit\n"
-#endif
-    "\nFor information on Bochs configuration file arguments, see the\n"
-#if (!defined(WIN32)) && !BX_WITH_MACOS
-    "bochsrc section in the user documentation or the man page of bochsrc.\n");
-#else
-    "bochsrc section in the user documentation.\n");
-#endif
+void print_usage(void) {
 }
 
-int bx_init_main(int argc, char *argv[])
-{
-/*
-  // To deal with initialization order problems inherent in C++, use the macros
-  // SAFE_GET_IOFUNC and SAFE_GET_GENLOG to retrieve "io" and "genlog" in all
-  // constructors or functions called by constructors.  The macros test for
-  // NULL and create the object if necessary, then return it.  Ensure that io
-  // and genlog get created, by making one reference to each macro right here.
-  // All other code can reference io and genlog directly.  Because these
-  // objects are required for logging, and logging is so fundamental to
-  // knowing what the program is doing, they are never free()d.
-//  SAFE_GET_IOFUNC();  // never freed
-//  SAFE_GET_GENLOG();  // never freed
-
-  // initalization must be done early because some destructors expect
-  // the bochs config options to exist by the time they are called.
-//  bx_init_bx_dbg();
-  bx_init_options();
-
-  bx_print_header();
-
-  SIM->get_param_enum(BXPN_BOCHS_START)->set(BX_RUN_START);
-
-  // interpret the args that start with -, like -q, -f, etc.
-  int arg = 1, load_rcfile=1, i = 0;
-  while (arg < argc) {
-    // parse next arg
-    if (!strcmp("--help", argv[arg]) || !strncmp("-h", argv[arg], 2)
-       ) {
-      if ((arg+1) < argc) {
-        if (!strcmp("features", argv[arg+1])) {
-          fprintf(stderr, "Supported features:\n\n");
-          fprintf(stderr, "\n");
-          arg++;
-        }
-#if BX_CPU_LEVEL > 4
-        else if (!strcmp("cpu", argv[arg+1])) {
-          fprintf(stderr, "Supported CPU models:\n\n");
-          do {
-            fprintf(stderr, "%s\n", SIM->get_param_enum(BXPN_CPU_MODEL)->get_choice(i));
-          } while (i++ < SIM->get_param_enum(BXPN_CPU_MODEL)->get_max());
-          fprintf(stderr, "\n");
-          arg++;
-        }
-#endif
-      } else {
-        print_usage();
-      }
-      SIM->quit_sim(0);
-    }
-    else if (!strcmp("-n", argv[arg])) {
-      load_rcfile = 0;
-    }
-    else if (!strcmp("-q", argv[arg])) {
-      SIM->get_param_enum(BXPN_BOCHS_START)->set(BX_QUICK_START);
-    }
-    else if (!strcmp("-log", argv[arg])) {
-      if (++arg >= argc) BX_PANIC(("-log must be followed by a filename"));
-      else SIM->get_param_string(BXPN_LOG_FILENAME)->set(argv[arg]);
-    }
-    else if (!strcmp("-f", argv[arg])) {
-      if (++arg >= argc) BX_PANIC(("-f must be followed by a filename"));
-      else bochsrc_filename = argv[arg];
-    }
-    else if (!strcmp("-qf", argv[arg])) {
-      SIM->get_param_enum(BXPN_BOCHS_START)->set(BX_QUICK_START);
-      if (++arg >= argc) BX_PANIC(("-qf must be followed by a filename"));
-      else bochsrc_filename = argv[arg];
-    }
-    else if (!strcmp("-benchmark", argv[arg])) {
-      SIM->get_param_enum(BXPN_BOCHS_START)->set(BX_QUICK_START);
-      if (++arg >= argc) BX_PANIC(("-benchmark must be followed by a number"));
-      else SIM->get_param_num(BXPN_BOCHS_BENCHMARK)->set(atoi(argv[arg]));
-    }
-    else if (!strcmp("-r", argv[arg])) {
-      if (++arg >= argc) BX_PANIC(("-r must be followed by a path"));
-      else {
-        SIM->get_param_enum(BXPN_BOCHS_START)->set(BX_QUICK_START);
-        SIM->get_param_bool(BXPN_RESTORE_FLAG)->set(1);
-        SIM->get_param_string(BXPN_RESTORE_PATH)->set(argv[arg]);
-      }
-    }
-    else if (argv[arg][0] == '-') {
-      print_usage();
-      BX_PANIC (("command line arg '%s' was not understood", argv[arg]));
-    }
-    else {
-      // the arg did not start with -, so stop interpreting flags
-      break;
-    }
-    arg++;
-  }
-#if BX_PLUGINS
-  // set a default plugin path, in case the user did not specify one
-#if BX_HAVE_GETENV && BX_HAVE_SETENV
-  if (getenv("LTDL_LIBRARY_PATH") != NULL) {
-    BX_INFO (("LTDL_LIBRARY_PATH is set to '%s'", getenv("LTDL_LIBRARY_PATH")));
-  } else {
-    BX_INFO (("LTDL_LIBRARY_PATH not set. using compile time default '%s'",
-        BX_PLUGIN_PATH));
-    setenv("LTDL_LIBRARY_PATH", BX_PLUGIN_PATH, 1);
-  }
-  if (getenv("BXSHARE") != NULL) {
-    BX_INFO (("BXSHARE is set to '%s'", getenv("BXSHARE")));
-  } else {
-    BX_INFO (("BXSHARE not set. using compile time default '%s'",
-        BX_SHARE_PATH));
-    setenv("BXSHARE", BX_SHARE_PATH, 1);
-  }
-#else
-  // we don't have getenv or setenv.  Do nothing.
-#endif
-#endif  // if BX_PLUGINS 
-
-  // initialize plugin system. This must happen before we attempt to
-  // load any modules.
-  //BOX:REMOVE plugin_startup();
-
-  int norcfile = 1;
-
-  if (SIM->get_param_bool(BXPN_RESTORE_FLAG)->get()) {
-    load_rcfile = 0;
-    norcfile = 0;
-  }
-  // load pre-defined optional plugins before parsing configuration
-  SIM->opt_plugin_ctrl("*", 1);
-  SIM->init_save_restore();
-  if (load_rcfile) {
-    // parse configuration file and command line arguments
-    if (bochsrc_filename == NULL) bochsrc_filename = bx_find_bochsrc ();
-    if (bochsrc_filename)
-      norcfile = bx_read_configuration(bochsrc_filename);
-  }
-
-  if (norcfile) {
-    // No configuration was loaded, so the current settings are unusable.
-    // Switch off quick start so that we will drop into the configuration
-    // interface.
-    if (SIM->get_param_enum(BXPN_BOCHS_START)->get() == BX_QUICK_START) {
-      if (!SIM->test_for_text_console())
-        BX_PANIC(("Unable to start Bochs without a bochsrc.txt and without a text console"));
-      else
-        BX_ERROR(("Switching off quick start, because no configuration file was found."));
-    }
-    SIM->get_param_enum(BXPN_BOCHS_START)->set(BX_LOAD_START);
-  }
-
-  if (SIM->get_param_bool(BXPN_RESTORE_FLAG)->get()) {
-    if (arg < argc) {
-      BX_ERROR(("WARNING: bochsrc options are ignored in restore mode!"));
-    }
-  }
-  else {
-    // parse the rest of the command line.  This is done after reading the
-    // configuration file so that the command line arguments can override
-    // the settings from the file.
-    if (bx_parse_cmdline(arg, argc, argv)) {
-      BX_PANIC(("There were errors while parsing the command line"));
-      return -1;
-    }
-  }
-  return 0;
-*/
+int bx_init_main(int argc, char *argv[]){
 }
 
 int bx_begin_simulation (int argc, char *argv[])
 {
-/*
-  if (SIM->get_param_bool(BXPN_RESTORE_FLAG)->get()) {
-    if (!SIM->restore_config()) {
-      BX_PANIC(("cannot restore configuration"));
-      SIM->get_param_bool(BXPN_RESTORE_FLAG)->set(0);
-    }
-  } else {
-    // make sure all optional plugins have been loaded
-    SIM->opt_plugin_ctrl("*", 1);
-  }
-
-  // deal with gui selection
-  if (!load_and_init_display_lib ()) {
-    BX_PANIC (("no gui module was loaded"));
-    return 0;
-  }
-
-  bx_cpu_count = SIM->get_param_num(BXPN_CPU_NPROCESSORS)->get() *
-                 SIM->get_param_num(BXPN_CPU_NCORES)->get() *
-                 SIM->get_param_num(BXPN_CPU_NTHREADS)->get();
-
-  BX_ASSERT(bx_cpu_count > 0);
-
-  bx_init_hardware();
-
-  // BOX:REMOVE
-  //if (SIM->get_param_enum(BXPN_LOAD32BITOS_WHICH)->get()) {
-  //  void bx_load32bitOSimagehack(void);
-  //  bx_load32bitOSimagehack();
-  //}
-  SIM->set_init_done(1);
-
-  // update headerbar buttons since drive status can change during init
-  bx_gui->update_drive_status_buttons();
-
-  // iniialize statusbar and set all items inactive
-  if (!SIM->get_param_bool(BXPN_RESTORE_FLAG)->get())
-  {
-    bx_gui->statusbar_setitem(-1, 0);
-  }
-
-  // The set handler for mouse_enabled does not actually update the gui
-  // until init_done is set.  This forces the set handler to be called,
-  // which sets up the mouse enabled GUI-specific stuff correctly.
-  // Not a great solution but it works. BBD
-  SIM->get_param_bool(BXPN_MOUSE_ENABLED)->set(SIM->get_param_bool(BXPN_MOUSE_ENABLED)->get());
-
-  BX_INFO(("cpu loop quit, shutting down simulator"));
-  bx_atexit();
-  return(0);
-*/
 }
 
 void bx_stop_simulation(void)
 {
-/*
-  // in wxWidgets, the whole simulator is running in a separate thread.
-  // our only job is to end the thread as soon as possible, NOT to shut
-  // down the whole application with an exit.
-  BX_CPU(0)->async_event = 1;
-  bx_pc_system.kill_bochs_request = 1;
-  // the cpu loop will exit very soon after this condition is set.
-*/
 }
 
 void bx_sr_after_restore_state(void)
 {
-/*
-#if BX_SUPPORT_SMP == 0
-  BX_CPU(0)->after_restore_state();
-#else
-  for (unsigned i=0; i<BX_SMP_PROCESSORS; i++) {
-    BX_CPU(i)->after_restore_state();
-  }
-#endif
-  DEV_after_restore_state();
-*/
 }
 
 void bx_set_log_actions_by_device(bx_bool panic_flag)
 {
-/*
-  int id, l, m, val;
-  bx_list_c *loglev, *level;
-  bx_param_num_c *action;
-
-  loglev = (bx_list_c*) SIM->get_param("general.logfn");
-  for (l = 0; l < loglev->get_size(); l++) {
-    level = (bx_list_c*) loglev->get(l);
-    for (m = 0; m < level->get_size(); m++) {
-      action = (bx_param_num_c*) level->get(m);
-      id = SIM->get_logfn_id(action->get_name());
-      val = action->get();
-      if (id < 0) {
-        if (panic_flag) {
-          BX_PANIC(("unknown log function module '%s'", action->get_name()));
-        }
-      } else if (val >= 0) {
-        SIM->set_log_action(id, l, val);
-        // mark as 'done'
-        action->set(-1);
-      }
-    }
-  }
-*/
 }
 
 void bx_init_hardware()
@@ -770,10 +404,6 @@ void bx_init_hardware()
 
 void bx_init_bx_dbg(void)
 {
-#if BX_DEBUGGER
-  bx_dbg_init_infile();
-#endif
-  memset(&bx_dbg, 0, sizeof(bx_debug_t));
 }
 
 int bx_atexit(void)
