@@ -73,7 +73,7 @@ int bxmain(void) {
                     };
 
 
-    RIP = (int) instr;
+    RIP = (intptr_t) instr;
 
     CacheSize = sizeof(instr);
 
