@@ -25,7 +25,7 @@
 #include "bochs.h"
 #include "param_names.h"
 #include "cpu/cpu.h"
-#include "iodev/iodev.h"
+#include "../debug.h"
 #define LOG_THIS BX_MEM(0)->
 
 // alignment of memory vector, must be a power of 2
@@ -39,8 +39,6 @@ Bit8u* const BX_MEM_C::swapped_out = ((Bit8u*)NULL - sizeof(Bit8u));
 BX_MEM_C::BX_MEM_C()
 {
   int i;
-
-  put("memory", "MEM0");
 
   vector = NULL;
   actual_vector = NULL;
@@ -144,7 +142,7 @@ void BX_MEM_C::init_memory(Bit64u guest, Bit64u host)
   for (idx = 0; idx < BX_MEM_HANDLERS; idx++)
     BX_MEM_THIS memory_handlers[idx] = NULL;
 
-  BX_MEM_THIS pci_enabled = SIM->get_param_bool(BXPN_I440FX_SUPPORT)->get();
+  BX_MEM_THIS pci_enabled = 0;
   BX_MEM_THIS smram_available = 0;
   BX_MEM_THIS smram_enable = 0;
   BX_MEM_THIS smram_restricted = 0;
@@ -195,8 +193,7 @@ void BX_MEM_C::allocate_block(Bit32u block)
       // tlb buffer check loop
       const Bit8u* buffer_end = buffer+BX_MEM_BLOCK_LEN;
       // Don't replace it if any CPU is using it as a TLB entry
-      for (int i=0; i<BX_SMP_PROCESSORS && !used_for_tlb;i++)
-        used_for_tlb = BX_CPU(i)->check_addr_in_tlb_buffers(buffer, buffer_end);
+      used_for_tlb = BX_CPU(0)->check_addr_in_tlb_buffers(buffer, buffer_end);
     } while (used_for_tlb);
     // Flush the block to be replaced
     bx_phy_address address = ((bx_phy_address)BX_MEM_THIS next_swapout_idx)*BX_MEM_BLOCK_LEN;
@@ -254,6 +251,7 @@ void ramfile_save_handler(void *devptr, FILE *fp)
 #endif
 
 // Note: This must be called before the memory file save handler is called.
+/*
 Bit64s memory_param_save_handler(void *devptr, bx_param_c *param)
 {
   const char *pname = param->get_name();
@@ -295,9 +293,11 @@ void memory_param_restore_handler(void *devptr, bx_param_c *param, Bit64s val)
 #endif
   }
 }
+*/
 
 void BX_MEM_C::register_state()
 {
+/*
   char param_name[15];
 
   bx_list_c *list = new bx_list_c(SIM->get_bochs_root(), "memory", "Memory State");
@@ -326,6 +326,7 @@ void BX_MEM_C::register_state()
     sprintf(param_name, "%d_w", i);
     new bx_shadow_bool_c(memtype, param_name, &BX_MEM_THIS memory_type[i][1]);
   }
+*/
 }
 
 void BX_MEM_C::cleanup_memory()
@@ -556,7 +557,7 @@ bx_bool BX_MEM_C::dbg_fetch_mem(BX_CPU_C *cpu, bx_phy_address addr, unsigned len
       if (BX_MEM_THIS smram_enable || cpu->smm_mode())
         *buf = *(BX_MEM_THIS get_vector(addr));
       else
-        *buf = DEV_vga_mem_read(addr);
+        *buf = NULL;
     }
 #if BX_SUPPORT_PCI
     else if (BX_MEM_THIS pci_enabled && (addr >= 0x000c0000 && addr < 0x00100000)) {
@@ -905,19 +906,15 @@ void BX_MEM_C::set_memory_type(memory_area_t area, bx_bool rw, bx_bool dram)
 
 bx_bool BX_MEM_C::is_monitor(bx_phy_address begin_addr, unsigned len)
 {
-  for (int i=0; i<BX_SMP_PROCESSORS;i++) {
-    if (BX_CPU(i)->is_monitor(begin_addr, len))
-      return 1;
-  }
+   if (BX_CPU(0)->is_monitor(begin_addr, len))
+     return 1;
 
   return 0; // // this is NOT monitored page
 }
 
 void BX_MEM_C::check_monitor(bx_phy_address begin_addr, unsigned len)
 {
-  for (int i=0; i<BX_SMP_PROCESSORS;i++) {
-    BX_CPU(i)->check_monitor(begin_addr, len);
-  }
+  BX_CPU(0)->check_monitor(begin_addr, len);
 }
 
 #endif

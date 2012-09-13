@@ -88,6 +88,7 @@ extern "C" {
 #endif
 
 #include "osdep.h"       /* platform dependent includes and defines */
+//#include "runtime/paramtree.h"       /* platform dependent includes and defines */
 #include "bx_debug/debug.h"
 
 // BX_SHARE_PATH should be defined by the makefile.  If not, give it
@@ -182,11 +183,7 @@ Bit32u crc32(const Bit8u *buf, int len);
 #define BX_SET_ENABLE_A20(enabled)  bx_pc_system.set_enable_a20(enabled)
 #define BX_GET_ENABLE_A20()         bx_pc_system.get_enable_a20()
 
-#if BX_SUPPORT_A20
-#  define A20ADDR(x)                ((bx_phy_address)(x) & bx_pc_system.a20_mask)
-#else
 #  define A20ADDR(x)                ((bx_phy_address)(x))
-#endif
 
 // you can't use static member functions on the CPU, if there are going
 // to be 2 cpus.  Check this early on.
@@ -323,8 +320,7 @@ BOCHSAPI extern Bit32u apic_id_mask;
 #define BX_RESET_SOFTWARE 10
 #define BX_RESET_HARDWARE 11
 
-//#include "memory/memory.h"
-//#include "pc_system.h"
+#include "memory/memory.h"
 
 /* --- EXTERNS --- */
 

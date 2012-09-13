@@ -122,7 +122,7 @@ BX_INCLUDES = bochs.h config.h
 
 $(BX_OBJS): $(BX_INCLUDES)
 
-SUBDIRS = cpu fpu runtime elf disasm
+SUBDIRS = cpu fpu runtime elf disasm memory
 
 all: @PRIMARY_TARGET@
 
@@ -131,7 +131,7 @@ all: box
 box@EXE@: build-deps
 	@LINK@ @EXPORT_DYNAMIC@ \
                         runtime/*.o cpu/*.o cpu/cpudb/*.o fpu/*.o  \
-			disasm/*.o elf/*.o \
+			memory/*.o disasm/*.o elf/*.o \
 			$(MCH_LINK_FLAGS) \
 			$(SIMX86_LINK_FLAGS) \
 			$(READLINE_LIB) \

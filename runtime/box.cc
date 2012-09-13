@@ -36,8 +36,7 @@ extern int CacheSize;
 typedef BX_CPU_C *BX_CPU_C_PTR;
 
 BOCHSAPI BX_CPU_C bx_cpu;
-
-
+BOCHSAPI BX_MEM_C bx_mem;
 
 void bx_print_header() {
 }

@@ -78,7 +78,7 @@ struct memory_handler_struct {
 #define SMRAM_CODE  1
 #define SMRAM_DATA  2
 
-class BOCHSAPI BX_MEM_C : public logfunctions {
+class BOCHSAPI BX_MEM_C {
 private:
   struct memory_handler_struct **memory_handlers;
   bx_bool pci_enabled;
@@ -163,8 +163,8 @@ public:
   void register_state(void);
 
   friend void ramfile_save_handler(void *devptr, FILE *fp);
-  friend Bit64s memory_param_save_handler(void *devptr, bx_param_c *param);
-  friend void memory_param_restore_handler(void *devptr, bx_param_c *param, Bit64s val);
+//  friend Bit64s memory_param_save_handler(void *devptr, bx_param_c *param);
+//  friend void memory_param_restore_handler(void *devptr, bx_param_c *param, Bit64s val);
 };
 
 BOCHSAPI extern BX_MEM_C bx_mem;
@@ -178,6 +178,7 @@ BX_CPP_INLINE Bit8u* BX_MEM_C::get_vector(bx_phy_address addr)
   return (BX_MEM_THIS vector + addr);
 }
 */
+
 
 BX_CPP_INLINE Bit8u* BX_MEM_C::get_vector(bx_phy_address addr)
 {

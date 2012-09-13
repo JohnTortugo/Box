@@ -22,8 +22,8 @@
 
 #include "bochs.h"
 #include "cpu/cpu.h"
-#include "iodev/iodev.h"
-#define LOG_THIS BX_MEM_THIS
+#include "../debug.h"
+//#define LOG_THIS BX_MEM_THIS
 
 //
 // Memory map inside the 1st megabyte:
@@ -88,29 +88,29 @@ mem_write:
     if (a20addr < 0x000a0000 || a20addr >= 0x00100000)
     {
       if (len == 8) {
-        pageWriteStampTable.decWriteStamp(a20addr, 8);
+        //pageWriteStampTable.decWriteStamp(a20addr, 8);
         WriteHostQWordToLittleEndian(BX_MEM_THIS get_vector(a20addr), *(Bit64u*)data);
         return;
       }
       if (len == 4) {
-        pageWriteStampTable.decWriteStamp(a20addr, 4);
+        // pageWriteStampTable.decWriteStamp(a20addr, 4);
         WriteHostDWordToLittleEndian(BX_MEM_THIS get_vector(a20addr), *(Bit32u*)data);
         return;
       }
       if (len == 2) {
-        pageWriteStampTable.decWriteStamp(a20addr, 2);
+        //pageWriteStampTable.decWriteStamp(a20addr, 2);
         WriteHostWordToLittleEndian(BX_MEM_THIS get_vector(a20addr), *(Bit16u*)data);
         return;
       }
       if (len == 1) {
-        pageWriteStampTable.decWriteStamp(a20addr, 1);
+        //pageWriteStampTable.decWriteStamp(a20addr, 1);
         * (BX_MEM_THIS get_vector(a20addr)) = * (Bit8u *) data;
         return;
       }
       // len == other, just fall thru to special cases handling
     }
 
-    pageWriteStampTable.decWriteStamp(a20addr);
+    //pageWriteStampTable.decWriteStamp(a20addr);
 
 #ifdef BX_LITTLE_ENDIAN
     data_ptr = (Bit8u *) data;
@@ -382,7 +382,7 @@ void BX_MEM_C::dmaWritePhysicalPage(bx_phy_address addr, unsigned len, Bit8u *da
 
   Bit8u *memptr = getHostMemAddr(NULL, addr, BX_WRITE);
   if (memptr != NULL) {
-    pageWriteStampTable.decWriteStamp(addr);
+    //pageWriteStampTable.decWriteStamp(addr);
     memcpy(memptr, data, len);
   }
   else {

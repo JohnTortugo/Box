@@ -22,15 +22,14 @@
 
 #include "bochs.h"
 #include "paramtree.h"
+#include "../debug.h"
 
 /////////////////////////////////////////////////////////////////////////
 // define methods of bx_param_* and family
 /////////////////////////////////////////////////////////////////////////
 
-extern bx_simulator_interface_c *SIM;
-extern logfunctions *siminterface_log;
 extern bx_list_c *root_param;
-#define LOG_THIS siminterface_log->
+Bit32u gen_param_id();
 
 const char* bx_param_c::default_text_format = NULL;
 
@@ -160,7 +159,7 @@ bx_param_num_c::bx_param_num_c(bx_param_c *parent,
     const char *description,
     Bit64s min, Bit64s max, Bit64s initial_val,
     bx_bool is_shadow)
-  : bx_param_c(SIM->gen_param_id(), name, label, description)
+  : bx_param_c(gen_param_id(), name, label, description)
 {
   set_type(BXT_PARAM_NUM);
   this->min = min;
@@ -662,7 +661,7 @@ bx_param_string_c::bx_param_string_c(bx_param_c *parent,
     const char *description,
     const char *initial_val,
     int maxsize)
-  : bx_param_c(SIM->gen_param_id(), name, label, description)
+  : bx_param_c(gen_param_id(), name, label, description)
 {
   set_type(BXT_PARAM_STRING);
   int initial_val_size = strlen(initial_val) + 1;
@@ -811,7 +810,7 @@ bx_shadow_data_c::bx_shadow_data_c(bx_param_c *parent,
     const char *name,
     Bit8u *ptr_to_data,
     Bit32u data_size)
-  : bx_param_c(SIM->gen_param_id(), name, "")
+  : bx_param_c(gen_param_id(), name, "")
 {
   set_type(BXT_PARAM_DATA);
   this->data_ptr = ptr_to_data;
@@ -825,7 +824,7 @@ bx_shadow_data_c::bx_shadow_data_c(bx_param_c *parent,
   
 bx_shadow_filedata_c::bx_shadow_filedata_c(bx_param_c *parent,
     const char *name, FILE **scratch_file_ptr_ptr)
-  : bx_param_c(SIM->gen_param_id(), name, "")
+  : bx_param_c(gen_param_id(), name, "")
 {
   set_type(BXT_PARAM_FILEDATA);
   this->scratch_fpp = scratch_file_ptr_ptr;
@@ -859,7 +858,7 @@ void bx_shadow_filedata_c::restore(FILE *save_fp)
 }
 
 bx_list_c::bx_list_c(bx_param_c *parent)
-  : bx_param_c(SIM->gen_param_id(), "list", "")
+  : bx_param_c(gen_param_id(), "list", "")
 {
   set_type(BXT_LIST);
   this->size = 0;
@@ -874,7 +873,7 @@ bx_list_c::bx_list_c(bx_param_c *parent)
 }
 
 bx_list_c::bx_list_c(bx_param_c *parent, const char *name)
-  : bx_param_c(SIM->gen_param_id(), name, "")
+  : bx_param_c(gen_param_id(), name, "")
 {
   set_type (BXT_LIST);
   this->size = 0;
@@ -889,7 +888,7 @@ bx_list_c::bx_list_c(bx_param_c *parent, const char *name)
 }
 
 bx_list_c::bx_list_c(bx_param_c *parent, const char *name, const char *title)
-  : bx_param_c(SIM->gen_param_id(), name, "")
+  : bx_param_c(gen_param_id(), name, "")
 {
   set_type (BXT_LIST);
   this->size = 0;
@@ -904,7 +903,7 @@ bx_list_c::bx_list_c(bx_param_c *parent, const char *name, const char *title)
 }
 
 bx_list_c::bx_list_c(bx_param_c *parent, const char *name, const char *title, bx_param_c **init_list)
-  : bx_param_c(SIM->gen_param_id(), name, "")
+  : bx_param_c(gen_param_id(), name, "")
 {
   set_type(BXT_LIST);
   this->size = 0;
@@ -1068,4 +1067,10 @@ void bx_list_c::remove(const char *name)
       prev = item;
     }
   }
+}
+
+
+Bit32u gen_param_id() { 
+ static Bit32u param_id=0;
+ return param_id++; 
 }
