@@ -71,6 +71,15 @@ int bxmain(void) {
                         0xc3                   	                // ret    
                     };
 
+    Bit64u memSize = 64 * BX_CONST64(1024*1024);
+    Bit64u hostMemSize = 512 * BX_CONST64(1024*1024);
+
+    BX_MEM(0)->init_memory(memSize, hostMemSize);
+
+    BX_CPU(0)->initialize();
+    BX_CPU(0)->sanity_checks();
+    BX_CPU(0)->register_state();
+    BX_INSTR_INITIALIZE(0);
 
     RIP = (intptr_t) instr;
 

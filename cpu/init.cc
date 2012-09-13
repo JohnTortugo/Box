@@ -197,8 +197,8 @@ void BX_CPU_C::initialize(void)
   if (! BX_CPU_THIS_PTR cpuid)
     BX_PANIC(("Failed to create CPUID module !"));
 
-  BX_CPU_THIS_PTR isa_extensions_bitmask = cpuid->get_isa_extensions_bitmask();
-  BX_CPU_THIS_PTR cpu_extensions_bitmask = cpuid->get_cpu_extensions_bitmask();
+  BX_CPU_THIS_PTR isa_extensions_bitmask = 0; //cpuid->get_isa_extensions_bitmask();
+  BX_CPU_THIS_PTR cpu_extensions_bitmask = 0; //cpuid->get_cpu_extensions_bitmask();
 #if BX_SUPPORT_VMX
   BX_CPU_THIS_PTR vmx_extensions_bitmask = cpuid->get_vmx_extensions_bitmask();
 #endif
