@@ -130,7 +130,7 @@ all: box
 
 box@EXE@: build-deps
 	@LINK@ @EXPORT_DYNAMIC@ \
-                        runtime/*.o cpu/*.o cpu/cpudb/*.o fpu/*.o  \
+                        runtime/*.o cpu/*.o fpu/*.o  \
 			memory/*.o disasm/*.o elf/*.o \
 			$(MCH_LINK_FLAGS) \
 			$(SIMX86_LINK_FLAGS) \

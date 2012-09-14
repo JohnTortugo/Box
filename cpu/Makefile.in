@@ -124,7 +124,7 @@ $(OBJS): $(BX_INCLUDES)
 
 $(OBJS64): $(BX_INCLUDES)
 
-SUBDIRS = cpudb
+SUBDIRS = 
 
 build-deps:
 	for subdir in $(SUBDIRS); do \

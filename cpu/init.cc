@@ -157,6 +157,8 @@ static Bit64s cpu_param_handler(bx_param_c *param, int set, Bit64s val)
 
 #include "generic_cpuid.h"
 
+extern bx_cpuid_t *create_bx_generic_cpuid(BX_CPU_C *cpu);
+/*
 #define bx_define_cpudb(model) \
   extern bx_cpuid_t *create_ ##model##_cpuid(BX_CPU_C *cpu);
 
@@ -166,8 +168,8 @@ static Bit64s cpu_param_handler(bx_param_c *param, int set, Bit64s val)
 
 static bx_cpuid_t *cpuid_factory(BX_CPU_C *cpu)
 {
-/*
-  unsigned cpu_model = SIM->get_param_enum(BXPN_CPU_MODEL)->get();
+
+  unsigned cpu_model = 0; //bx_generic
 
 #define bx_define_cpudb(model) \
   case bx_cpudb_##model:       \
@@ -179,8 +181,8 @@ static bx_cpuid_t *cpuid_factory(BX_CPU_C *cpu)
     return 0;
   }
 #undef bx_define_cpudb
-*/
 }
+*/
 
 // BX_CPU_C constructor
 void BX_CPU_C::initialize(void)
@@ -189,7 +191,8 @@ void BX_CPU_C::initialize(void)
   // bx_cpu.set_INTR(0);
   BX_INFO(("In Initialize !!!!"));
 
-  BX_CPU_THIS_PTR cpuid = cpuid_factory(this);
+  BX_CPU_THIS_PTR cpuid = create_bx_generic_cpuid(this);
+
   if (! BX_CPU_THIS_PTR cpuid)
     BX_PANIC(("Failed to create CPUID module !"));
 
@@ -1204,7 +1207,7 @@ void BX_CPU_C::sanity_checks(void)
   if (sizeof(Bit64u) != 8  ||  sizeof(Bit64s) != 8)
     BX_PANIC(("data type Bit64u or Bit64u is not of length 8 bytes!"));
 
-  BX_DEBUG(("#(%u)all sanity checks passed!", BX_CPU_ID));
+  BX_DEBUG(("CPU #(%u)all sanity checks passed!", BX_CPU_ID));
 }
 
 void BX_CPU_C::assert_checks(void)

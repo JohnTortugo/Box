@@ -23,6 +23,7 @@
 #define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
 #include "cpu.h"
+#include "../debug.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
 ///////////////////////////
@@ -1924,7 +1925,7 @@ modrm_done:
 #endif
     default:
       if (def != BX_SRC_NONE)
-        printf("fetchdecode32: unknown definition %d for src %d", def, n);
+        BX_INFO(("fetchdecode32: unknown definition %d for src %d", def, n));
     }
   }
 
@@ -2038,11 +2039,11 @@ void BX_CPU_C::init_FetchDecodeTables(void)
   Bit64u features = BX_CPU_THIS_PTR isa_extensions_bitmask;
 #if BX_CPU_LEVEL > 3
   if (! features)
-    printf(("init_FetchDecodeTables: CPU features bitmask is empty !"));
+    BX_ERROR(("init_FetchDecodeTables: CPU features bitmask is empty !"));
 #endif
 
   if (BX_IA_LAST > 0xfff)
-    printf(("init_FetchDecodeTables: too many opcodes defined !"));
+    BX_ERROR(("init_FetchDecodeTables: too many opcodes defined !"));
   
   for (unsigned n=0; n < BX_IA_LAST; n++) {
     Bit64u ia_opcode_features = BxOpcodeFeatures[n];

@@ -2375,7 +2375,7 @@ AC_SUBST(INSTALL_PLUGINS_VAR)
 AC_PATH_PROG(GZIP, gzip)
 AC_PATH_PROG(TAR, tar)
 
-AC_OUTPUT(Makefile cpu/Makefile cpu/cpudb/Makefile \
+AC_OUTPUT(Makefile cpu/Makefile \
           fpu/Makefile elf/Makefile memory/Makefile \
 	  runtime/Makefile disasm/Makefile bxversion.h)
 # gui/Makefile disasm/Makefile ${INSTRUMENT_DIR}/Makefile misc/Makefile \
