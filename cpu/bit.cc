@@ -318,17 +318,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::BSWAP_ERX(bxInstruction_c *i)
   BX_NEXT_INSTR(i);
 }
 
-#if BX_SUPPORT_X86_64
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::BSWAP_RRX(bxInstruction_c *i)
-{
-  Bit64u val64 = BX_READ_64BIT_REG(i->dst());
-
-  BX_WRITE_64BIT_REG(i->dst(), bx_bswap64(val64));
-
-  BX_NEXT_INSTR(i);
-}
-#endif
-
 #if BX_CPU_LEVEL >= 6
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVBE_GwMw(bxInstruction_c *i)
@@ -370,30 +359,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVBE_MdGd(bxInstruction_c *i)
 
   BX_NEXT_INSTR(i);
 }
-
-#if BX_SUPPORT_X86_64
-
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVBE_GqMq(bxInstruction_c *i)
-{
-  bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  Bit64u val64 = read_virtual_qword(i->seg(), eaddr);
-  
-  BX_WRITE_64BIT_REG(i->dst(), bx_bswap64(val64));
-
-  BX_NEXT_INSTR(i);
-}
-
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVBE_MqGq(bxInstruction_c *i)
-{
-  Bit64u val64 = BX_READ_64BIT_REG(i->src());
-
-  bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  write_virtual_qword_64(i->seg(), eaddr, bx_bswap64(val64));
-
-  BX_NEXT_INSTR(i);
-}
-
-#endif // BX_SUPPORT_X86_64
 
 #endif // BX_CPU_LEVEL >= 6
 

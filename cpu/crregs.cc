@@ -200,185 +200,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_RdDd(bxInstruction_c *i)
   BX_NEXT_INSTR(i);
 }
 
-#if BX_SUPPORT_X86_64
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_DqRq(bxInstruction_c *i)
-{
-#if BX_SUPPORT_VMX
-  if (BX_CPU_THIS_PTR in_vmx_guest)
-    VMexit_DR_Access(0 /* write */, i->dst(), i->src());
-#endif
-
-  if (BX_CPU_THIS_PTR cr4.get_DE()) {
-    if ((i->dst() & 0xE) == 4) {
-      BX_ERROR(("MOV_DqRq: access to DR4/DR5 causes #UD"));
-      exception(BX_UD_EXCEPTION, 0);
-    }
-  }
-
-  if (i->dst() >= 8) {
-    BX_ERROR(("MOV_DqRq: #UD - register index out of range"));
-    exception(BX_UD_EXCEPTION, 0);
-  }
-
-  // Note: processor clears GD upon entering debug exception
-  // handler, to allow access to the debug registers
-  if (BX_CPU_THIS_PTR dr7.get_GD()) {
-    BX_ERROR(("MOV_DqRq: DR7 GD bit is set"));
-    BX_CPU_THIS_PTR debug_trap |= BX_DEBUG_DR_ACCESS_BIT;
-    exception(BX_DB_EXCEPTION, 0);
-  }
-
-  /* #GP(0) if CPL is not 0 */
-  if (CPL != 0) {
-    BX_ERROR(("MOV_DqRq: #GP(0) if CPL is not 0"));
-    exception(BX_GP_EXCEPTION, 0);
-  }
-
-#if BX_SUPPORT_SVM
-  if (BX_CPU_THIS_PTR in_svm_guest) {
-    if (SVM_DR_WRITE_INTERCEPTED(i->dst())) Svm_Vmexit(SVM_VMEXIT_DR0_WRITE + i->dst());
-  }
-#endif
-
-  invalidate_prefetch_q();
-
-  Bit64u val_64 = BX_READ_64BIT_REG(i->src());
-
-  switch (i->dst()) {
-    case 0: // DR0
-    case 1: // DR1
-    case 2: // DR2
-    case 3: // DR3
-      BX_CPU_THIS_PTR dr[i->dst()] = val_64;
-      TLB_invlpg(val_64);
-      break;
-
-    case 4: // DR4
-      // DR4 aliased to DR6 by default. With Debug Extensions ON,
-      // access to DR4 causes #UD
-    case 6: // DR6
-      if (GET32H(val_64)) {
-        BX_ERROR(("MOV_DqRq: attempt to set upper part of DR6"));
-        exception(BX_GP_EXCEPTION, 0);
-      }
-      // On Pentium+, bit12 is always zero
-      BX_CPU_THIS_PTR dr6.val32 = (BX_CPU_THIS_PTR dr6.val32 & 0xffff0ff0) |
-                            (val_64 & 0x0000e00f);
-      break;
-
-    case 5: // DR5
-      // DR5 aliased to DR7 by default. With Debug Extensions ON,
-      // access to DR5 causes #UD
-    case 7: // DR7
-      // Note: 486+ ignore GE and LE flags.  On the 386, exact
-      // data breakpoint matching does not occur unless it is enabled
-      // by setting the LE and/or GE flags.
-
-      if (GET32H(val_64)) {
-        BX_ERROR(("MOV_DqRq: attempt to set upper part of DR7"));
-        exception(BX_GP_EXCEPTION, 0);
-      }
-
-      // Pentium+: bits15,14,12 are hardwired to 0, rest are settable.
-      // Even bits 11,10 are changeable though reserved.
-      BX_CPU_THIS_PTR dr7.set32((val_64 & 0xffff2fff) | 0x00000400);
-
-#if BX_X86_DEBUGGER
-      if ((BX_CPU_THIS_PTR dr7.get_R_W0() == BX_HWDebugInstruction && BX_CPU_THIS_PTR dr7.get_LEN0()) ||
-          (BX_CPU_THIS_PTR dr7.get_R_W1() == BX_HWDebugInstruction && BX_CPU_THIS_PTR dr7.get_LEN1()) ||
-          (BX_CPU_THIS_PTR dr7.get_R_W2() == BX_HWDebugInstruction && BX_CPU_THIS_PTR dr7.get_LEN2()) ||
-          (BX_CPU_THIS_PTR dr7.get_R_W3() == BX_HWDebugInstruction && BX_CPU_THIS_PTR dr7.get_LEN3()))
-      {
-        // Instruction breakpoint with LENx not 00b (1-byte length)
-        BX_ERROR(("MOV_DqRq: write of %08x, R/W=00b LEN!=00b", BX_CPU_THIS_PTR dr7.get32()));
-      }
-#endif
-
-      TLB_flush(); // the DR7 write could enable some breakpoints
-      break;
-
-    default:
-      BX_ERROR(("MOV_DqRq: #UD - register index out of range"));
-      exception(BX_UD_EXCEPTION, 0);
-  }
-
-  BX_NEXT_TRACE(i);
-}
-
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_RqDq(bxInstruction_c *i)
-{
-  Bit64u val_64;
-
-#if BX_SUPPORT_VMX
-  if (BX_CPU_THIS_PTR in_vmx_guest)
-    VMexit_DR_Access(1 /* read */, i->src(), i->dst());
-#endif
-
-  if (BX_CPU_THIS_PTR cr4.get_DE()) {
-    if ((i->src() & 0xE) == 4) {
-      BX_ERROR(("MOV_RqDq: access to DR4/DR5 causes #UD"));
-      exception(BX_UD_EXCEPTION, 0);
-    }
-  }
-
-  if (i->src() >= 8) {
-    BX_ERROR(("MOV_RqDq: #UD - register index out of range"));
-    exception(BX_UD_EXCEPTION, 0);
-  }
-
-  // Note: processor clears GD upon entering debug exception
-  // handler, to allow access to the debug registers
-  if (BX_CPU_THIS_PTR dr7.get_GD()) {
-    BX_ERROR(("MOV_RqDq: DR7 GD bit is set"));
-    BX_CPU_THIS_PTR debug_trap |= BX_DEBUG_DR_ACCESS_BIT;
-    exception(BX_DB_EXCEPTION, 0);
-  }
-
-  /* #GP(0) if CPL is not 0 */
-  if (CPL != 0) {
-    BX_ERROR(("MOV_RqDq: #GP(0) if CPL is not 0"));
-    exception(BX_GP_EXCEPTION, 0);
-  }
-
-#if BX_SUPPORT_SVM
-  if (BX_CPU_THIS_PTR in_svm_guest) {
-    if (SVM_DR_READ_INTERCEPTED(i->src())) Svm_Vmexit(SVM_VMEXIT_DR0_READ + i->src());
-  }
-#endif
-
-  switch (i->src()) {
-    case 0: // DR0
-    case 1: // DR1
-    case 2: // DR2
-    case 3: // DR3
-      val_64 = BX_CPU_THIS_PTR dr[i->src()];
-      break;
-
-    case 4: // DR4
-      // DR4 aliased to DR6 by default. With Debug Extensions ON,
-      // access to DR4 causes #UD
-    case 6: // DR6
-      val_64 = BX_CPU_THIS_PTR dr6.get32();
-      break;
-
-    case 5: // DR5
-      // DR5 aliased to DR7 by default. With Debug Extensions ON,
-      // access to DR5 causes #UD
-    case 7: // DR7
-      val_64 = BX_CPU_THIS_PTR dr7.get32();
-      break;
-
-    default:
-      BX_ERROR(("MOV_RqDq: #UD - register index out of range"));
-      exception(BX_UD_EXCEPTION, 0);
-  }
-
-  BX_WRITE_64BIT_REG(i->dst(), val_64);
-
-  BX_NEXT_INSTR(i);
-}
-#endif // #if BX_SUPPORT_X86_64
-
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_CR0Rd(bxInstruction_c *i)
 {
   // CPL is always 0 in real mode
@@ -578,210 +399,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_RdCR4(bxInstruction_c *i)
   BX_NEXT_INSTR(i);
 }
 
-#if BX_SUPPORT_X86_64
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_CR0Rq(bxInstruction_c *i)
-{
-  if (CPL!=0) {
-    BX_ERROR(("MOV_CR0Rq: #GP(0) if CPL is not 0"));
-    exception(BX_GP_EXCEPTION, 0);
-  }
-
-  invalidate_prefetch_q();
-
-  Bit64u val_64 = BX_READ_64BIT_REG(i->src());
-
-  if (i->dst() == 0) {
-    // CR0
-#if BX_SUPPORT_VMX
-    if (BX_CPU_THIS_PTR in_vmx_guest)
-      val_64 = VMexit_CR0_Write(i, val_64);
-#endif
-    if (! SetCR0(val_64))
-      exception(BX_GP_EXCEPTION, 0);
-
-    BX_INSTR_TLB_CNTRL(BX_CPU_ID, BX_INSTR_MOV_CR0, (Bit32u) val_64);
-  }
-  else {
-    WriteCR8(i, val_64);
-  }
-
-  BX_NEXT_TRACE(i);
-}
-
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_CR2Rq(bxInstruction_c *i)
-{
-  if (i->dst() != 2) {
-    BX_ERROR(("MOV_CR2Rq: #UD - register index out of range"));
-    exception(BX_UD_EXCEPTION, 0);
-  }
-
-  if (CPL!=0) {
-    BX_ERROR(("MOV_CR2Rq: #GP(0) if CPL is not 0"));
-    exception(BX_GP_EXCEPTION, 0);
-  }
-
-#if BX_SUPPORT_SVM
-  if (BX_CPU_THIS_PTR in_svm_guest) {
-    if(SVM_CR_WRITE_INTERCEPTED(2)) Svm_Vmexit(SVM_VMEXIT_CR2_WRITE);
-  }
-#endif
-
-  BX_CPU_THIS_PTR cr2 = BX_READ_64BIT_REG(i->src());
-
-  BX_NEXT_INSTR(i);
-}
-
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_CR3Rq(bxInstruction_c *i)
-{
-  if (i->dst() != 3) {
-    BX_ERROR(("MOV_CR3Rq: #UD - register index out of range"));
-    exception(BX_UD_EXCEPTION, 0);
-  }
-
-  if (CPL!=0) {
-    BX_ERROR(("MOV_CR3Rq: #GP(0) if CPL is not 0"));
-    exception(BX_GP_EXCEPTION, 0);
-  }
-
-  invalidate_prefetch_q();
-
-  Bit64u val_64 = BX_READ_64BIT_REG(i->src());
-
-#if BX_SUPPORT_VMX
-  if (BX_CPU_THIS_PTR in_vmx_guest)
-    VMexit_CR3_Write(i, val_64);
-#endif
-
-  // no PDPTR checks in long mode
-  if (! SetCR3(val_64))
-    exception(BX_GP_EXCEPTION, 0);
-
-  BX_INSTR_TLB_CNTRL(BX_CPU_ID, BX_INSTR_MOV_CR3, val_64);
-
-  BX_NEXT_TRACE(i);
-}
-
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_CR4Rq(bxInstruction_c *i)
-{
-  if (i->dst() != 4) {
-    BX_ERROR(("MOV_CR4Rq: #UD - register index out of range"));
-    exception(BX_UD_EXCEPTION, 0);
-  }
-
-  if (CPL!=0) {
-    BX_ERROR(("MOV_CR4Rq: #GP(0) if CPL is not 0"));
-    exception(BX_GP_EXCEPTION, 0);
-  }
-
-  invalidate_prefetch_q();
-
-  Bit64u val_64 = BX_READ_64BIT_REG(i->src());
-#if BX_SUPPORT_VMX
-  if (BX_CPU_THIS_PTR in_vmx_guest)
-    val_64 = VMexit_CR4_Write(i, val_64);
-#endif
-  if (! SetCR4(val_64))
-    exception(BX_GP_EXCEPTION, 0);
-
-  BX_INSTR_TLB_CNTRL(BX_CPU_ID, BX_INSTR_MOV_CR4, (Bit32u) val_64);
-
-  BX_NEXT_TRACE(i);
-}
-
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_RqCR0(bxInstruction_c *i)
-{
-  if (CPL!=0) {
-    BX_ERROR(("MOV_RqCR0: #GP(0) if CPL is not 0"));
-    exception(BX_GP_EXCEPTION, 0);
-  }
-
-  Bit64u val_64;
-
-  if (i->src() == 0) {
-    // CR0
-    val_64 = read_CR0(); /* correctly handle VMX */
-  }
-  else {
-    // CR8
-    val_64 = ReadCR8(i);
-  }
-
-  BX_WRITE_64BIT_REG(i->dst(), val_64);
-
-  BX_NEXT_INSTR(i);
-}
-
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_RqCR2(bxInstruction_c *i)
-{
-  if (i->src() != 2) {
-    BX_ERROR(("MOV_RqCR2: #UD - register index out of range"));
-    exception(BX_UD_EXCEPTION, 0);
-  }
-
-  if (CPL!=0) {
-    BX_ERROR(("MOV_RqCR2: #GP(0) if CPL is not 0"));
-    exception(BX_GP_EXCEPTION, 0);
-  }
-
-#if BX_SUPPORT_SVM
-  if (BX_CPU_THIS_PTR in_svm_guest) {
-    if(SVM_CR_READ_INTERCEPTED(2)) Svm_Vmexit(SVM_VMEXIT_CR2_READ);
-  }
-#endif
-
-  BX_WRITE_64BIT_REG(i->dst(), BX_CPU_THIS_PTR cr2);
-
-  BX_NEXT_INSTR(i);
-}
-
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_RqCR3(bxInstruction_c *i)
-{
-  if (i->src() != 3) {
-    BX_ERROR(("MOV_RqCR3: #UD - register index out of range"));
-    exception(BX_UD_EXCEPTION, 0);
-  }
-
-  if (CPL!=0) {
-    BX_ERROR(("MOV_RqCR3: #GP(0) if CPL is not 0"));
-    exception(BX_GP_EXCEPTION, 0);
-  }
-
-#if BX_SUPPORT_SVM
-  if (BX_CPU_THIS_PTR in_svm_guest) {
-    if(SVM_CR_READ_INTERCEPTED(3)) Svm_Vmexit(SVM_VMEXIT_CR3_READ);
-  }
-#endif
-
-#if BX_SUPPORT_VMX
-  if (BX_CPU_THIS_PTR in_vmx_guest)
-    VMexit_CR3_Read(i);
-#endif
-
-  BX_WRITE_64BIT_REG(i->dst(), BX_CPU_THIS_PTR cr3);
-
-  BX_NEXT_INSTR(i);
-}
-
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_RqCR4(bxInstruction_c *i)
-{
-  if (i->src() != 4) {
-    BX_ERROR(("MOV_RqCR4: #UD - register index out of range"));
-    exception(BX_UD_EXCEPTION, 0);
-  }
-
-  if (CPL!=0) {
-    BX_ERROR(("MOV_RqCR4: #GP(0) if CPL is not 0"));
-    exception(BX_GP_EXCEPTION, 0);
-  }
-
-  Bit64u val_64 = read_CR4(); /* correctly handle VMX */
-
-  BX_WRITE_64BIT_REG(i->dst(), val_64);
-
-  BX_NEXT_INSTR(i);
-}
-#endif // #if BX_SUPPORT_X86_64
-
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LMSW_Ew(bxInstruction_c *i)
 {
   Bit16u msw;
@@ -897,13 +514,6 @@ bx_bool BX_CPP_AttrRegparmN(1) BX_CPU_C::check_CR0(bx_address cr0_val)
 {
   bx_cr0_t temp_cr0;
 
-#if BX_SUPPORT_X86_64
-  if (GET32H(cr0_val)) {
-    BX_ERROR(("check_CR0(): trying to set CR0 > 32 bits"));
-    return 0;
-  }
-#endif
-
   temp_cr0.set32((Bit32u) cr0_val);
 
   if (temp_cr0.get_PG() && !temp_cr0.get_PE()) {
@@ -945,42 +555,6 @@ bx_bool BX_CPP_AttrRegparmN(1) BX_CPU_C::SetCR0(bx_address val)
 #if BX_CPU_LEVEL >= 6
   bx_bool pg = (val_32 >> 31) & 0x1;
 #endif
-
-#if BX_SUPPORT_X86_64
-  if (! BX_CPU_THIS_PTR cr0.get_PG() && pg) {
-    if (BX_CPU_THIS_PTR efer.get_LME()) {
-      if (!BX_CPU_THIS_PTR cr4.get_PAE()) {
-        BX_ERROR(("SetCR0: attempt to enter x86-64 long mode without enabling CR4.PAE !"));
-        return 0;
-      }
-      if (BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.l) {
-        BX_ERROR(("SetCR0: attempt to enter x86-64 long mode with CS.L !"));
-        return 0;
-      }
-      if (BX_CPU_THIS_PTR tr.cache.type <= 3) {
-        BX_ERROR(("SetCR0: attempt to enter x86-64 long mode with TSS286 in TR !"));
-        return 0;
-      }
-      BX_CPU_THIS_PTR efer.set_LMA(1);
-    }
-  }
-  else if (BX_CPU_THIS_PTR cr0.get_PG() && ! pg) {
-    if (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) {
-      BX_ERROR(("SetCR0(): attempt to leave 64 bit mode directly to legacy mode !"));
-      return 0;
-    }
-    if (BX_CPU_THIS_PTR efer.get_LMA()) {
-      if (BX_CPU_THIS_PTR cr4.get_PCIDE()) {
-        BX_ERROR(("SetCR0(): attempt to leave 64 bit mode with CR4.PCIDE set !"));
-        return 0;
-      }
-      if (BX_CPU_THIS_PTR gen_reg[BX_64BIT_REG_RIP].dword.hrx != 0) {
-        BX_PANIC(("SetCR0(): attempt to leave x86-64 LONG mode with RIP upper != 0"));
-      }
-      BX_CPU_THIS_PTR efer.set_LMA(0);
-    }
-  }
-#endif  // #if BX_SUPPORT_X86_64
 
   // handle reserved bits behaviour
 #if BX_CPU_LEVEL == 3
@@ -1114,14 +688,6 @@ Bit32u BX_CPU_C::get_cr4_allow_mask(void)
   if (bx_cpuid_support_smx())
     allowMask |= BX_CR4_SMXE_MASK;
 
-#if BX_SUPPORT_X86_64
-  if (bx_cpuid_support_pcid())
-    allowMask |= BX_CR4_PCIDE_MASK;
-
-  if (bx_cpuid_support_fsgsbase())
-    allowMask |= BX_CR4_FSGSBASE_MASK;
-#endif
-
   /* OSXSAVE */
   if (bx_cpuid_support_xsave())
     allowMask |= BX_CR4_OSXSAVE_MASK;
@@ -1143,22 +709,6 @@ bx_bool BX_CPP_AttrRegparmN(1) BX_CPU_C::check_CR4(bx_address cr4_val)
 
   bx_cr4_t temp_cr4;
   temp_cr4.set32((Bit32u) cr4_val);
-
-#if BX_SUPPORT_X86_64
-  if (long_mode()) {
-    if(! temp_cr4.get_PAE()) {
-      BX_ERROR(("check_CR4(): attempt to clear CR4.PAE when EFER.LMA=1"));
-      return 0;
-    }
-  }
-
-  if (temp_cr4.get_PCIDE()) {
-    if (! long_mode()) {
-      BX_ERROR(("check_CR4(): attempt to set CR4.PCIDE when EFER.LMA=0"));
-      return 0;
-    }
-  }
-#endif
 
 #if BX_SUPPORT_VMX
   if(! temp_cr4.get_VMXE()) {
@@ -1198,17 +748,6 @@ bx_bool BX_CPP_AttrRegparmN(1) BX_CPU_C::SetCR4(bx_address val)
         return 0;
       }
     }
-#if BX_SUPPORT_X86_64
-    else {
-      // if trying to enable CR4.PCIDE
-      if (! BX_CPU_THIS_PTR cr4.get_PCIDE() && (val & BX_CR4_PCIDE_MASK)) {
-        if (BX_CPU_THIS_PTR cr3 & 0xfff) {
-          BX_ERROR(("SetCR4(): Attempt to enable CR4.PCIDE with non-zero PCID !"));
-          return 0;
-        }
-      }
-    }
-#endif
     TLB_flush(); // Flush Global entries also.
   }
 #endif
@@ -1228,15 +767,6 @@ bx_bool BX_CPP_AttrRegparmN(1) BX_CPU_C::SetCR4(bx_address val)
 
 bx_bool BX_CPP_AttrRegparmN(1) BX_CPU_C::SetCR3(bx_address val)
 {
-#if BX_SUPPORT_X86_64
-  if (long_mode()) {
-    if (! IsValidPhyAddr(val)) {
-      BX_ERROR(("SetCR3(): Attempt to write to reserved bits of CR3 !"));
-      return 0;
-    }
-  }
-#endif
-
 #if BX_SUPPORT_SVM
   if (BX_CPU_THIS_PTR in_svm_guest) {
     if(SVM_CR_WRITE_INTERCEPTED(3)) Svm_Vmexit(SVM_VMEXIT_CR3_WRITE);
@@ -1265,16 +795,6 @@ bx_bool BX_CPP_AttrRegparmN(1) BX_CPU_C::SetEFER(bx_address val_64)
     BX_ERROR(("SetEFER(0x%08x): attempt to set reserved bits of EFER MSR !", val32));
     return 0;
   }
-
-#if BX_SUPPORT_X86_64
-  /* #GP(0) if changing EFER.LME when cr0.pg = 1 */
-  if ((BX_CPU_THIS_PTR efer.get_LME() != ((val32 >> 8) & 1)) &&
-       BX_CPU_THIS_PTR  cr0.get_PG())
-  {
-    BX_ERROR(("SetEFER: attempt to change LME when CR0.PG=1"));
-    return 0;
-  }
-#endif
 
   BX_CPU_THIS_PTR efer.set32((val32 & BX_CPU_THIS_PTR efer_suppmask & ~BX_EFER_LMA_MASK)
         | (BX_CPU_THIS_PTR efer.get32() & BX_EFER_LMA_MASK)); // keep LMA untouched

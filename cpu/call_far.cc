@@ -56,38 +56,6 @@ BX_CPU_C::call_protected(bxInstruction_c *i, Bit16u cs_raw, bx_address disp)
   {
     check_cs(&cs_descriptor, cs_raw, BX_SELECTOR_RPL(cs_raw), CPL);
 
-#if BX_SUPPORT_X86_64
-    if (long_mode() && cs_descriptor.u.segment.l) {
-      Bit64u temp_rsp = RSP; 
-      // moving to long mode, push return address onto 64-bit stack
-      if (i->os64L()) {
-        write_new_stack_qword_64(temp_rsp -  8, cs_descriptor.dpl,
-             BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].selector.value);
-        write_new_stack_qword_64(temp_rsp - 16, cs_descriptor.dpl, RIP);
-        temp_rsp -= 16;
-      }
-      else if (i->os32L()) {
-        write_new_stack_dword_64(temp_rsp - 4, cs_descriptor.dpl,
-             BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].selector.value);
-        write_new_stack_dword_64(temp_rsp - 8, cs_descriptor.dpl, EIP);
-        temp_rsp -= 8;
-      }
-      else {
-        write_new_stack_word_64(temp_rsp - 2, cs_descriptor.dpl,
-             BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].selector.value);
-        write_new_stack_word_64(temp_rsp - 4, cs_descriptor.dpl, IP);
-        temp_rsp -= 4;
-      }
-
-      // load code segment descriptor into CS cache
-      // load CS with new code segment selector
-      // set RPL of CS to CPL
-      branch_far64(&cs_selector, &cs_descriptor, disp, CPL);
-
-      RSP = temp_rsp;
-    }
-    else
-#endif
     {
       Bit32u temp_RSP;
 
@@ -97,17 +65,6 @@ BX_CPU_C::call_protected(bxInstruction_c *i, Bit16u cs_raw, bx_address disp)
       else
         temp_RSP = SP;
 
-#if BX_SUPPORT_X86_64
-      if (i->os64L()) {
-        write_new_stack_qword_32(&BX_CPU_THIS_PTR sregs[BX_SEG_REG_SS],
-             temp_RSP -  8, cs_descriptor.dpl,
-             BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].selector.value);
-        write_new_stack_qword_32(&BX_CPU_THIS_PTR sregs[BX_SEG_REG_SS],
-             temp_RSP - 16, cs_descriptor.dpl, RIP);
-        temp_RSP -= 16;
-      }
-      else
-#endif
       if (i->os32L()) {
         write_new_stack_dword_32(&BX_CPU_THIS_PTR sregs[BX_SEG_REG_SS],
              temp_RSP - 4, cs_descriptor.dpl,
@@ -153,24 +110,6 @@ BX_CPU_C::call_protected(bxInstruction_c *i, Bit16u cs_raw, bx_address disp)
       BX_ERROR(("call_protected: descriptor.dpl < selector.rpl"));
       exception(BX_GP_EXCEPTION, cs_raw & 0xfffc);
     }
-
-#if BX_SUPPORT_X86_64
-    if (long_mode()) {
-      // call gate type is higher priority than non-present bit check
-      if (gate_descriptor.type != BX_386_CALL_GATE) {
-        BX_ERROR(("call_protected: gate type %u unsupported in long mode", (unsigned) gate_descriptor.type));
-        exception(BX_GP_EXCEPTION, cs_raw & 0xfffc);
-      }
-      // gate descriptor must be present else #NP(gate selector)
-      if (! IS_PRESENT(gate_descriptor)) {
-        BX_ERROR(("call_protected: call gate not present"));
-        exception(BX_NP_EXCEPTION, cs_raw & 0xfffc);
-      }
-
-      call_gate64(&gate_selector);
-      return;
-    }
-#endif
 
     switch (gate_descriptor.type) {
       case BX_SYS_SEGMENT_AVAIL_286_TSS:
@@ -456,105 +395,3 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::call_gate(bx_descriptor_t *gate_descriptor
   }
 }
 
-#if BX_SUPPORT_X86_64
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::call_gate64(bx_selector_t *gate_selector)
-{
-  bx_selector_t cs_selector;
-  Bit32u dword1, dword2, dword3;
-  bx_descriptor_t cs_descriptor;
-  bx_descriptor_t gate_descriptor;
-
-  // examine code segment selector in call gate descriptor
-  BX_DEBUG(("call_gate64: CALL 64bit call gate"));
-
-  fetch_raw_descriptor_64(gate_selector, &dword1, &dword2, &dword3, BX_GP_EXCEPTION);
-  parse_descriptor(dword1, dword2, &gate_descriptor);
-
-  Bit16u dest_selector = gate_descriptor.u.gate.dest_selector;
-  // selector must not be null else #GP(0)
-  if ((dest_selector & 0xfffc) == 0) {
-    BX_ERROR(("call_gate64: selector in gate null"));
-    exception(BX_GP_EXCEPTION, 0);
-  }
-
-  parse_selector(dest_selector, &cs_selector);
-  // selector must be within its descriptor table limits,
-  //   else #GP(code segment selector)
-  fetch_raw_descriptor(&cs_selector, &dword1, &dword2, BX_GP_EXCEPTION);
-  parse_descriptor(dword1, dword2, &cs_descriptor);
-
-  // find the RIP in the gate_descriptor
-  Bit64u new_RIP = gate_descriptor.u.gate.dest_offset;
-  new_RIP |= ((Bit64u)dword3 << 32);
-
-  // AR byte of selected descriptor must indicate code segment,
-  //   else #GP(code segment selector)
-  // DPL of selected descriptor must be <= CPL,
-  // else #GP(code segment selector)
-  if (cs_descriptor.valid==0 || cs_descriptor.segment==0 ||
-      IS_DATA_SEGMENT(cs_descriptor.type) ||
-      cs_descriptor.dpl > CPL)
-  {
-    BX_ERROR(("call_gate64: selected descriptor is not code"));
-    exception(BX_GP_EXCEPTION, dest_selector & 0xfffc);
-  }
-
-  // In long mode, only 64-bit call gates are allowed, and they must point
-  // to 64-bit code segments, else #GP(selector)
-  if (! IS_LONG64_SEGMENT(cs_descriptor) || cs_descriptor.u.segment.d_b)
-  {
-    BX_ERROR(("call_gate64: not 64-bit code segment in call gate 64"));
-    exception(BX_GP_EXCEPTION, dest_selector & 0xfffc);
-  }
-
-  // code segment must be present else #NP(selector)
-  if (! IS_PRESENT(cs_descriptor)) {
-    BX_ERROR(("call_gate64: code segment not present !"));
-    exception(BX_NP_EXCEPTION, dest_selector & 0xfffc);
-  }
-
-  Bit64u old_CS  = BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].selector.value;
-  Bit64u old_RIP = RIP;
-
-  // CALL GATE TO MORE PRIVILEGE
-  // if non-conforming code segment and DPL < CPL then
-  if (IS_CODE_SEGMENT_NON_CONFORMING(cs_descriptor.type) && (cs_descriptor.dpl < CPL))
-  {
-    BX_DEBUG(("CALL GATE TO MORE PRIVILEGE LEVEL"));
-
-    // get new RSP for new privilege level from TSS
-    Bit64u RSP_for_cpl_x  = get_RSP_from_TSS(cs_descriptor.dpl);
-    Bit64u old_SS  = BX_CPU_THIS_PTR sregs[BX_SEG_REG_SS].selector.value;
-    Bit64u old_RSP = RSP;
-
-    // push old stack long pointer onto new stack
-    write_new_stack_qword_64(RSP_for_cpl_x -  8, cs_descriptor.dpl, old_SS);
-    write_new_stack_qword_64(RSP_for_cpl_x - 16, cs_descriptor.dpl, old_RSP);
-    // push long pointer to return address onto new stack
-    write_new_stack_qword_64(RSP_for_cpl_x - 24, cs_descriptor.dpl, old_CS);
-    write_new_stack_qword_64(RSP_for_cpl_x - 32, cs_descriptor.dpl, old_RIP);
-    RSP_for_cpl_x -= 32;
-
-    // load CS:RIP (guaranteed to be in 64 bit mode)
-    branch_far64(&cs_selector, &cs_descriptor, new_RIP, cs_descriptor.dpl);
-
-    // set up null SS descriptor
-    load_null_selector(&BX_CPU_THIS_PTR sregs[BX_SEG_REG_SS], cs_descriptor.dpl);
-
-    RSP = RSP_for_cpl_x;
-  }
-  else
-  {
-    BX_DEBUG(("CALL GATE TO SAME PRIVILEGE"));
-
-    // push to 64-bit stack, switch to long64 guaranteed
-    write_new_stack_qword_64(RSP -  8, CPL, old_CS);
-    write_new_stack_qword_64(RSP - 16, CPL, old_RIP);
-
-    // load CS:RIP (guaranteed to be in 64 bit mode)
-    branch_far64(&cs_selector, &cs_descriptor, new_RIP, CPL);
-
-    RSP -= 16;
-  }
-}
-#endif

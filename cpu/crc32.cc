@@ -121,28 +121,4 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CRC32_GdEdR(bxInstruction_c *i)
   BX_NEXT_INSTR(i);
 }
 
-#if BX_SUPPORT_X86_64
-
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CRC32_GdEqR(bxInstruction_c *i)
-{
-  Bit32u op2 = BX_READ_32BIT_REG(i->dst());
-  op2 = BitReflect32(op2);
-  Bit64u op1 = BX_READ_64BIT_REG(i->src());
-
-  Bit64u tmp1 = ((Bit64u) BitReflect32(op1 & 0xffffffff)) << 32;
-  Bit64u tmp2 = ((Bit64u) op2) << 32;
-  Bit64u tmp3 = tmp1 ^ tmp2;
-  op2  = mod2_64bit(CRC32_POLYNOMIAL, tmp3);
-  tmp1 = ((Bit64u) BitReflect32(op1 >> 32)) << 32;
-  tmp2 = ((Bit64u) op2) << 32;
-  tmp3 = tmp1 ^ tmp2;
-  op2  = mod2_64bit(CRC32_POLYNOMIAL, tmp3);
-
-  BX_WRITE_32BIT_REGZ(i->dst(), BitReflect32(op2));
-
-  BX_NEXT_INSTR(i);
-}
-
-#endif // BX_SUPPORT_X86_64
-
 #endif // BX_CPU_LEVEL >= 6

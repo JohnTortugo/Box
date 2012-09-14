@@ -576,17 +576,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::VMASKMOVPS_VpsHpsMps(bxInstruction
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-#if BX_SUPPORT_X86_64
-  if (i->as64L()) {
-    for (unsigned n=0; n < (4*len); n++) {
-       if (mask.avx32u(n) & 0x80000000) {
-          if (! IsCanonical(get_laddr64(i->seg(), eaddr + 4*n)))
-             exception(int_number(i->seg()), 0);
-       }
-    }
-  }
-#endif
-
   for (int n=4*len-1; n >= 0; n--) {
     if (mask.avx32u(n) & 0x80000000)
        result.avx32u(n) = read_virtual_dword(i->seg(), (eaddr + 4*n) & i->asize_mask());
@@ -607,17 +596,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::VMASKMOVPD_VpdHpdMpd(bxInstruction
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-#if BX_SUPPORT_X86_64
-  if (i->as64L()) {
-    for (unsigned n=0; n < (2*len); n++) {
-       if (mask.avx32u(n*2+1) & 0x80000000) {
-          if (! IsCanonical(get_laddr64(i->seg(), eaddr + 8*n)))
-             exception(int_number(i->seg()), 0);
-       }
-    }
-  }
-#endif
-
   for (int n=2*len-1; n >= 0; n--) {
     if (mask.avx32u(n*2+1) & 0x80000000)
        result.avx64u(n) = read_virtual_qword(i->seg(), (eaddr + 8*n) & i->asize_mask());
@@ -637,17 +615,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::VMASKMOVPS_MpsHpsVps(bxInstruction
   unsigned len = i->getVL();
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-
-#if BX_SUPPORT_X86_64
-  if (i->as64L()) {
-    for (unsigned n=0; n < (4*len); n++) {
-       if (mask.avx32u(n) & 0x80000000) {
-          if (! IsCanonical(get_laddr64(i->seg(), eaddr + 4*n)))
-             exception(int_number(i->seg()), 0);
-       }
-    }
-  }
-#endif
 
   // see you can successfully write all the elements first
   for (int n=4*len-1; n >= 0; n--) {
@@ -670,17 +637,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::VMASKMOVPD_MpdHpdVpd(bxInstruction
   unsigned len = i->getVL();
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-
-#if BX_SUPPORT_X86_64
-  if (i->as64L()) {
-    for (unsigned n=0; n < (2*len); n++) {
-       if (mask.avx32u(n*2+1) & 0x80000000) {
-          if (! IsCanonical(get_laddr64(i->seg(), eaddr + 8*n)))
-             exception(int_number(i->seg()), 0);
-       }
-    }
-  }
-#endif
 
   // see you can successfully write all the elements first
   for (int n=2*len-1; n >= 0; n--) {
