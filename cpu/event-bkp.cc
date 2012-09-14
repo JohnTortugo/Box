@@ -419,6 +419,8 @@ void BX_CPU_C::deliver_SMI(void)
   BX_CPU_THIS_PTR async_event = 1;
 }
 
+// something to do with exception handling
+// http://pdos.csail.mit.edu/6.828/2005/lec/lec8-slides.pdf
 void BX_CPU_C::set_INTR(bx_bool value)
 {
   BX_CPU_THIS_PTR INTR = value;

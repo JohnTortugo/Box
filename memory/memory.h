@@ -172,14 +172,12 @@ BOCHSAPI extern BX_MEM_C bx_mem;
 // must be power of two
 #define BX_MEM_BLOCK_LEN (1024*1024) /* 1M blocks */
 
-/*
 BX_CPP_INLINE Bit8u* BX_MEM_C::get_vector(bx_phy_address addr)
 {
   return (BX_MEM_THIS vector + addr);
 }
-*/
 
-
+/*
 BX_CPP_INLINE Bit8u* BX_MEM_C::get_vector(bx_phy_address addr)
 {
   Bit32u block = (Bit32u)(addr / BX_MEM_BLOCK_LEN);
@@ -192,6 +190,7 @@ BX_CPP_INLINE Bit8u* BX_MEM_C::get_vector(bx_phy_address addr)
 
   return BX_MEM_THIS blocks[block] + (Bit32u)(addr & (BX_MEM_BLOCK_LEN-1));
 }
+*/
 
 BX_CPP_INLINE Bit64u BX_MEM_C::get_memory_len(void)
 {

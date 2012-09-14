@@ -39,6 +39,7 @@ RANLIB = @RANLIB@
 BX_INCDIRS = -I.. -I$(srcdir)/.. -I../@INSTRUMENT_DIR@ -I$(srcdir)/../@INSTRUMENT_DIR@
 
 BX_OBJS = \
+	misc_mem.o \
 	memory.o
 
 BX_INCLUDES = ../bochs.h ../config.h

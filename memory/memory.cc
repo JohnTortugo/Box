@@ -48,7 +48,7 @@ void BX_MEM_C::writePhysicalPage(BX_CPU_C *cpu, bx_phy_address addr, unsigned le
   }
 
 #if BX_SUPPORT_MONITOR_MWAIT
-  BX_MEM_THIS check_monitor(a20addr, len);
+//  BX_MEM_THIS check_monitor(a20addr, len);
 #endif
 
   bx_bool is_bios = (a20addr >= (bx_phy_address)~BIOS_MASK);
@@ -357,6 +357,7 @@ inc_one:
 
 void BX_MEM_C::dmaReadPhysicalPage(bx_phy_address addr, unsigned len, Bit8u *data)
 {
+	/*
   // Note: accesses should always be contained within a single page
   if ((addr>>12) != ((addr+len-1)>>12)) {
     BX_PANIC(("dmaReadPhysicalPage: cross page access at address 0x" FMT_PHY_ADDRX ", len=%d", addr, len));
@@ -371,6 +372,7 @@ void BX_MEM_C::dmaReadPhysicalPage(bx_phy_address addr, unsigned len, Bit8u *dat
       readPhysicalPage(NULL, addr+i, 1, &data[i]);
     }
   }
+  */
 }
 
 void BX_MEM_C::dmaWritePhysicalPage(bx_phy_address addr, unsigned len, Bit8u *data)
@@ -380,7 +382,8 @@ void BX_MEM_C::dmaWritePhysicalPage(bx_phy_address addr, unsigned len, Bit8u *da
     BX_PANIC(("dmaWritePhysicalPage: cross page access at address 0x" FMT_PHY_ADDRX ", len=%d", addr, len));
   }
 
-  Bit8u *memptr = getHostMemAddr(NULL, addr, BX_WRITE);
+  // cesar
+  Bit8u *memptr = 0; //getHostMemAddr(NULL, addr, BX_WRITE);
   if (memptr != NULL) {
     //pageWriteStampTable.decWriteStamp(addr);
     memcpy(memptr, data, len);

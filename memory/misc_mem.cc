@@ -93,7 +93,7 @@ void BX_MEM_C::init_memory(Bit64u guest, Bit64u host)
 {
   unsigned idx;
 
-  BX_DEBUG(("Init $Id: misc_mem.cc 11027 2012-02-12 18:43:20Z vruppert $"));
+  BX_DEBUG(("Init $Id: misc_mem.cc 11027 2012-02-12 18:43:20Z vruppert $\n"));
 
   // accept only memory size which is multiply of 1M
   BX_ASSERT((host & 0xfffff) == 0);

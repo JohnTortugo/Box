@@ -11,3 +11,4 @@ libtool
 *~
 *.o
 *.a
+.project

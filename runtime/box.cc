@@ -23,6 +23,7 @@
 #include "debug.h"
 #include "bxversion.h"
 #include "cpu/cpu.h"
+#include "memory/memory.h"
 
 extern "C" {
 #include <signal.h>
@@ -74,11 +75,11 @@ int bxmain(void) {
     Bit64u memSize = 64 * BX_CONST64(1024*1024);
     Bit64u hostMemSize = 512 * BX_CONST64(1024*1024);
 
-    BX_MEM(0)->init_memory(memSize, hostMemSize);
+    bx_mem.init_memory(memSize, hostMemSize);
 
-    BX_CPU(0)->initialize();
-    BX_CPU(0)->sanity_checks();
-    BX_CPU(0)->register_state();
+    bx_cpu.initialize();
+    bx_cpu.sanity_checks();
+    bx_cpu.register_state();
     BX_INSTR_INITIALIZE(0);
 
     RIP = (intptr_t) instr;

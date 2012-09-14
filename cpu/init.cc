@@ -155,8 +155,6 @@ static Bit64s cpu_param_handler(bx_param_c *param, int set, Bit64s val)
 
 #endif
 
-#if BX_CPU_LEVEL >= 4
-
 #include "generic_cpuid.h"
 
 #define bx_define_cpudb(model) \
@@ -184,15 +182,13 @@ static bx_cpuid_t *cpuid_factory(BX_CPU_C *cpu)
 */
 }
 
-#endif
-
 // BX_CPU_C constructor
 void BX_CPU_C::initialize(void)
 {
-  //BX_CPU_THIS_PTR set_INTR(0);
-  BX_INFO(("INTR(0) !!!!"));
+  // exception value equal 0
+  // bx_cpu.set_INTR(0);
+  BX_INFO(("In Initialize !!!!"));
 
-#if BX_CPU_LEVEL >= 4
   BX_CPU_THIS_PTR cpuid = cpuid_factory(this);
   if (! BX_CPU_THIS_PTR cpuid)
     BX_PANIC(("Failed to create CPUID module !"));
@@ -204,7 +200,6 @@ void BX_CPU_C::initialize(void)
 #endif
 #if BX_SUPPORT_SVM
   BX_CPU_THIS_PTR svm_extensions_bitmask = cpuid->get_svm_extensions_bitmask();
-#endif
 #endif
 
   init_FetchDecodeTables(); // must be called after init_isa_features_bitmask()
@@ -218,9 +213,7 @@ void BX_CPU_C::initialize(void)
 #endif
 
   // ignore bad MSRS if user asked for it
-#if BX_CPU_LEVEL >= 5
   //BX_CPU_THIS_PTR ignore_bad_msrs = SIM->get_param_bool(BXPN_IGNORE_BAD_MSRS)->get();
-#endif
 
   init_SMRAM();
 
