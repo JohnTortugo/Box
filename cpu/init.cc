@@ -196,14 +196,8 @@ void BX_CPU_C::initialize(void)
   if (! BX_CPU_THIS_PTR cpuid)
     BX_PANIC(("Failed to create CPUID module !"));
 
-  BX_CPU_THIS_PTR isa_extensions_bitmask = 0; //cpuid->get_isa_extensions_bitmask();
-  BX_CPU_THIS_PTR cpu_extensions_bitmask = 0; //cpuid->get_cpu_extensions_bitmask();
-#if BX_SUPPORT_VMX
-  BX_CPU_THIS_PTR vmx_extensions_bitmask = cpuid->get_vmx_extensions_bitmask();
-#endif
-#if BX_SUPPORT_SVM
-  BX_CPU_THIS_PTR svm_extensions_bitmask = cpuid->get_svm_extensions_bitmask();
-#endif
+  BX_CPU_THIS_PTR isa_extensions_bitmask = cpuid->get_isa_extensions_bitmask();
+  BX_CPU_THIS_PTR cpu_extensions_bitmask = cpuid->get_cpu_extensions_bitmask();
 
   init_FetchDecodeTables(); // must be called after init_isa_features_bitmask()
 
@@ -219,140 +213,7 @@ void BX_CPU_C::initialize(void)
   //BX_CPU_THIS_PTR ignore_bad_msrs = SIM->get_param_bool(BXPN_IGNORE_BAD_MSRS)->get();
 
   init_SMRAM();
-
-#if BX_SUPPORT_VMX
-  init_VMCS();
-#endif
-
-#if BX_WITH_WX
-  register_wx_state();
-#endif
 }
-
-#if BX_WITH_WX
-void BX_CPU_C::register_wx_state(void)
-{
-  if (SIM->get_param(BXPN_WX_CPU_STATE) != NULL) {
-    // Register some of the CPUs variables as shadow parameters so that
-    // they can be visible in the config interface.
-    // (Experimental, obviously not a complete list)
-    bx_param_num_c *param;
-    char cpu_name[10], cpu_title[10], cpu_pname[16];
-    const char *fmt16 = "%04X";
-    const char *fmt32 = "%08X";
-    Bit32u oldbase = bx_param_num_c::set_default_base(16);
-    const char *oldfmt = bx_param_num_c::set_default_format(fmt32);
-    sprintf(cpu_name, "%d", BX_CPU_ID);
-    sprintf(cpu_title, "CPU %d", BX_CPU_ID);
-    sprintf(cpu_pname, "%s.%d", BXPN_WX_CPU_STATE, BX_CPU_ID);
-    if (SIM->get_param(cpu_pname) == NULL) {
-      bx_list_c *list = new bx_list_c(SIM->get_param(BXPN_WX_CPU_STATE),
-         cpu_name, cpu_title);
-
-#define DEFPARAM_NORMAL(name,field) \
-    new bx_shadow_num_c(list, #name, &(field))
-
-      DEFPARAM_NORMAL(EAX, EAX);
-      DEFPARAM_NORMAL(EBX, EBX);
-      DEFPARAM_NORMAL(ECX, ECX);
-      DEFPARAM_NORMAL(EDX, EDX);
-      DEFPARAM_NORMAL(ESP, ESP);
-      DEFPARAM_NORMAL(EBP, EBP);
-      DEFPARAM_NORMAL(ESI, ESI);
-      DEFPARAM_NORMAL(EDI, EDI);
-      DEFPARAM_NORMAL(EIP, EIP);
-      DEFPARAM_NORMAL(DR0, dr[0]);
-      DEFPARAM_NORMAL(DR1, dr[1]);
-      DEFPARAM_NORMAL(DR2, dr[2]);
-      DEFPARAM_NORMAL(DR3, dr[3]);
-      DEFPARAM_NORMAL(DR6, dr6.val32);
-      DEFPARAM_NORMAL(DR7, dr7.val32);
-      DEFPARAM_NORMAL(CR0, cr0.val32);
-      DEFPARAM_NORMAL(CR2, cr2);
-      DEFPARAM_NORMAL(CR3, cr3);
-#if BX_CPU_LEVEL >= 5
-      DEFPARAM_NORMAL(CR4, cr4.val32);
-#endif
-
-      // segment registers require a handler function because they have
-      // special get/set requirements.
-#define DEFPARAM_SEG_REG(x) \
-    param = new bx_param_num_c(list, \
-      #x, #x, "", 0, 0xffff, 0); \
-    param->set_handler(cpu_param_handler); \
-    param->set_format(fmt16);
-#define DEFPARAM_GLOBAL_SEG_REG(name,field) \
-    param = new bx_shadow_num_c(list, \
-        #name"_base", &(field.base)); \
-    param = new bx_shadow_num_c(list, \
-        #name"_limit", &(field.limit));
-
-      DEFPARAM_SEG_REG(CS);
-      DEFPARAM_SEG_REG(DS);
-      DEFPARAM_SEG_REG(SS);
-      DEFPARAM_SEG_REG(ES);
-      DEFPARAM_SEG_REG(FS);
-      DEFPARAM_SEG_REG(GS);
-      DEFPARAM_SEG_REG(LDTR);
-      DEFPARAM_SEG_REG(TR);
-      DEFPARAM_GLOBAL_SEG_REG(GDTR, BX_CPU_THIS_PTR gdtr);
-      DEFPARAM_GLOBAL_SEG_REG(IDTR, BX_CPU_THIS_PTR idtr);
-#undef DEFPARAM_NORMAL
-#undef DEFPARAM_SEG_REG
-#undef DEFPARAM_GLOBAL_SEG_REG
-
-      param = new bx_shadow_num_c(list, "EFLAGS",
-          &BX_CPU_THIS_PTR eflags);
-
-      // flags implemented in lazy_flags.cc must be done with a handler
-      // that calls their get function, to force them to be computed.
-#define DEFPARAM_EFLAG(name) \
-    param = new bx_param_bool_c(list, \
-            #name, #name, "", get_##name()); \
-    param->set_handler(cpu_param_handler);
-#define DEFPARAM_LAZY_EFLAG(name) \
-    param = new bx_param_bool_c(list, \
-            #name, #name, "", get_##name()); \
-    param->set_handler(cpu_param_handler);
-
-#if BX_CPU_LEVEL >= 4
-      DEFPARAM_EFLAG(ID);
-      DEFPARAM_EFLAG(VIP);
-      DEFPARAM_EFLAG(VIF);
-      DEFPARAM_EFLAG(AC);
-#endif
-#if BX_CPU_LEVEL >= 3
-      DEFPARAM_EFLAG(VM);
-      DEFPARAM_EFLAG(RF);
-#endif
-#if BX_CPU_LEVEL >= 2
-      DEFPARAM_EFLAG(NT);
-      // IOPL is a special case because it is 2 bits wide.
-      param = new bx_shadow_num_c(
-              list,
-              "IOPL",
-              &BX_CPU_THIS_PTR eflags, 10,
-              12, 13);
-      param->set_range(0, 3);
-      param->set_format("%d");
-#endif
-      DEFPARAM_LAZY_EFLAG(OF);
-      DEFPARAM_EFLAG(DF);
-      DEFPARAM_EFLAG(IF);
-      DEFPARAM_EFLAG(TF);
-      DEFPARAM_LAZY_EFLAG(SF);
-      DEFPARAM_LAZY_EFLAG(ZF);
-      DEFPARAM_LAZY_EFLAG(AF);
-      DEFPARAM_LAZY_EFLAG(PF);
-      DEFPARAM_LAZY_EFLAG(CF);
-
-      // restore defaults
-      bx_param_num_c::set_default_base(oldbase);
-      bx_param_num_c::set_default_format(oldfmt);
-    }
-  }
-}
-#endif
 
 // save/restore functionality
 void BX_CPU_C::register_state(void)
