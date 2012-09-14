@@ -74,11 +74,7 @@
 #define BX_64BIT_REG_R14 14
 #define BX_64BIT_REG_R15 15
 
-#if BX_SUPPORT_X86_64
-# define BX_GENERAL_REGISTERS 16
-#else
 # define BX_GENERAL_REGISTERS 8
-#endif
 
 #define BX_TMP_REGISTER (BX_GENERAL_REGISTERS)
 
@@ -139,43 +135,6 @@
 
 #define TMP32 (BX_CPU_THIS_PTR gen_reg[BX_TMP_REGISTER].dword.erx)
 
-#if BX_SUPPORT_X86_64
-
-// accesss to 64 bit general registers
-#define RAX (BX_CPU_THIS_PTR gen_reg[0].rrx)
-#define RCX (BX_CPU_THIS_PTR gen_reg[1].rrx)
-#define RDX (BX_CPU_THIS_PTR gen_reg[2].rrx)
-#define RBX (BX_CPU_THIS_PTR gen_reg[3].rrx)
-#define RSP (BX_CPU_THIS_PTR gen_reg[4].rrx)
-#define RBP (BX_CPU_THIS_PTR gen_reg[5].rrx)
-#define RSI (BX_CPU_THIS_PTR gen_reg[6].rrx)
-#define RDI (BX_CPU_THIS_PTR gen_reg[7].rrx)
-#define R8  (BX_CPU_THIS_PTR gen_reg[8].rrx)
-#define R9  (BX_CPU_THIS_PTR gen_reg[9].rrx)
-#define R10 (BX_CPU_THIS_PTR gen_reg[10].rrx)
-#define R11 (BX_CPU_THIS_PTR gen_reg[11].rrx)
-#define R12 (BX_CPU_THIS_PTR gen_reg[12].rrx)
-#define R13 (BX_CPU_THIS_PTR gen_reg[13].rrx)
-#define R14 (BX_CPU_THIS_PTR gen_reg[14].rrx)
-#define R15 (BX_CPU_THIS_PTR gen_reg[15].rrx)
-
-// access to 64 bit instruction pointer
-#define RIP (BX_CPU_THIS_PTR gen_reg[BX_64BIT_REG_RIP].rrx)
-
-#define TMP64 (BX_CPU_THIS_PTR gen_reg[BX_TMP_REGISTER].rrx)
-
-#define PREV_RIP (BX_CPU_THIS_PTR prev_rip)
-
-// access to 64 bit MSR registers
-#define MSR_FSBASE  (BX_CPU_THIS_PTR sregs[BX_SEG_REG_FS].cache.u.segment.base)
-#define MSR_GSBASE  (BX_CPU_THIS_PTR sregs[BX_SEG_REG_GS].cache.u.segment.base)
-#define MSR_LSTAR   (BX_CPU_THIS_PTR msr.lstar)
-#define MSR_CSTAR   (BX_CPU_THIS_PTR msr.cstar)
-#define MSR_FMASK   (BX_CPU_THIS_PTR msr.fmask)
-#define MSR_KERNELGSBASE   (BX_CPU_THIS_PTR msr.kernelgsbase)
-#define MSR_TSC_AUX (BX_CPU_THIS_PTR msr.tsc_aux)
-
-#else // simplify merge between 32-bit and 64-bit mode
 
 #define RAX EAX
 #define RCX ECX
@@ -187,20 +146,11 @@
 #define RDI EDI
 #define RIP EIP
 
-#endif // BX_SUPPORT_X86_64 == 0
 
-#if BX_SUPPORT_X86_64
-#define BX_READ_8BIT_REGx(index,extended)  ((((index) & 4) == 0 || (extended)) ? \
-  (BX_CPU_THIS_PTR gen_reg[index].word.byte.rl) : \
-  (BX_CPU_THIS_PTR gen_reg[(index)-4].word.byte.rh))
-#define BX_READ_64BIT_REG(index) (BX_CPU_THIS_PTR gen_reg[index].rrx)
-#define BX_READ_64BIT_REG_HIGH(index) (BX_CPU_THIS_PTR gen_reg[index].dword.hrx)
-#else
 #define BX_READ_8BIT_REG(index)  (((index) & 4) ? \
   (BX_CPU_THIS_PTR gen_reg[(index)-4].word.byte.rh) : \
   (BX_CPU_THIS_PTR gen_reg[index].word.byte.rl))
 #define BX_READ_8BIT_REGx(index,ext) BX_READ_8BIT_REG(index)
-#endif
 
 #define BX_READ_8BIT_REGH(index) (BX_CPU_THIS_PTR gen_reg[index].word.byte.rh)
 #define BX_READ_16BIT_REG(index) (BX_CPU_THIS_PTR gen_reg[index].word.rx)
@@ -220,27 +170,6 @@
 }
 */
 
-#if BX_SUPPORT_X86_64
-
-#define BX_WRITE_8BIT_REGx(index, extended, val) {\
-  if (((index) & 4) == 0 || (extended)) \
-    BX_CPU_THIS_PTR gen_reg[index].word.byte.rl = val; \
-  else \
-    BX_CPU_THIS_PTR gen_reg[(index)-4].word.byte.rh = val; \
-}
-
-#define BX_WRITE_32BIT_REGZ(index, val) {\
-  BX_CPU_THIS_PTR gen_reg[index].rrx = (Bit32u) val; \
-}
-
-#define BX_WRITE_64BIT_REG(index, val) {\
-  BX_CPU_THIS_PTR gen_reg[index].rrx = val; \
-}
-#define BX_CLEAR_64BIT_HIGH(index) {\
-  BX_CPU_THIS_PTR gen_reg[index].dword.hrx = 0; \
-}
-
-#else
 
 #define BX_WRITE_8BIT_REG(index, val) {\
   if ((index) & 4) \
@@ -258,7 +187,6 @@
 
 #define BX_CLEAR_64BIT_HIGH(index)
 
-#endif
 
 #define CPL       (BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].selector.rpl)
 
@@ -467,9 +395,6 @@ enum {
 
 extern const char* cpu_mode_string(unsigned cpu_mode);
 
-#if BX_SUPPORT_X86_64
-#define IsCanonical(offset) ((Bit64u)((((Bit64s)(offset)) >> (BX_LIN_ADDRESS_WIDTH-1)) + 1) < 2)
-#endif
 
 #define IsValidPhyAddr(addr) ((addr & BX_PHY_ADDRESS_RESERVED_BITS) == 0)
 
@@ -670,13 +595,6 @@ typedef struct
 
   // SYSCALL/SYSRET instruction msr's
   Bit64u star;
-#if BX_SUPPORT_X86_64
-  Bit64u lstar;
-  Bit64u cstar;
-  Bit32u fmask;
-  Bit64u kernelgsbase;
-  Bit32u tsc_aux;
-#endif
 
 #if BX_CPU_LEVEL >= 6
   // SYSENTER/SYSEXIT instruction msr's
@@ -732,11 +650,7 @@ typedef struct {
   Bit32u lpf_mask;      // linear address mask of the page size
 } bx_TLB_entry;
 
-#if BX_SUPPORT_X86_64
-  #define LPF_MASK BX_CONST64(0xfffffffffffff000)
-#else
   #define LPF_MASK (0xfffff000)
-#endif
 
 #if BX_PHY_ADDRESS_LONG
   #define PPF_MASK BX_CONST64(0xfffffffffffff000)
@@ -755,55 +669,6 @@ typedef struct {
 // #include "icache.h"
 
 // general purpose register
-#if BX_SUPPORT_X86_64
-
-#ifdef BX_BIG_ENDIAN
-typedef struct {
-  union {
-    struct {
-      Bit32u dword_filler;
-      Bit16u  word_filler;
-      union {
-        Bit16u rx;
-        struct {
-          Bit8u rh;
-          Bit8u rl;
-        } byte;
-      };
-    } word;
-    Bit64u rrx;
-    struct {
-      Bit32u hrx;  // hi 32 bits
-      Bit32u erx;  // lo 32 bits
-    } dword;
-  };
-} bx_gen_reg_t;
-#else
-typedef struct {
-  union {
-    struct {
-      union {
-        Bit16u rx;
-        struct {
-          Bit8u rl;
-          Bit8u rh;
-        } byte;
-      };
-      Bit16u  word_filler;
-      Bit32u dword_filler;
-    } word;
-    Bit64u rrx;
-    struct {
-      Bit32u erx;  // lo 32 bits
-      Bit32u hrx;  // hi 32 bits
-    } dword;
-  };
-} bx_gen_reg_t;
-
-#endif
-
-#else  // #if BX_SUPPORT_X86_64
-
 #ifdef BX_BIG_ENDIAN
 typedef struct {
   union {
@@ -841,8 +706,6 @@ typedef struct {
   };
 } bx_gen_reg_t;
 #endif
-
-#endif  // #if BX_SUPPORT_X86_64
 
 #if BX_SUPPORT_FPU
 #include "i387.h"
@@ -1993,9 +1856,7 @@ public: // for now...
   BX_SMF BX_INSF_TYPE LOAD_Eb(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
   BX_SMF BX_INSF_TYPE LOAD_Ew(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
   BX_SMF BX_INSF_TYPE LOAD_Ed(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#if BX_SUPPORT_X86_64
-  BX_SMF BX_INSF_TYPE LOAD_Eq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#endif
+
   BX_SMF BX_INSF_TYPE LOADU_Wdq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
   BX_SMF BX_INSF_TYPE LOAD_Wdq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
   BX_SMF BX_INSF_TYPE LOAD_Wss(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
@@ -2551,9 +2412,7 @@ public: // for now...
   BX_SMF BX_INSF_TYPE CRC32_GdEbR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
   BX_SMF BX_INSF_TYPE CRC32_GdEwR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
   BX_SMF BX_INSF_TYPE CRC32_GdEdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#if BX_SUPPORT_X86_64
-  BX_SMF BX_INSF_TYPE CRC32_GdEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#endif
+
   BX_SMF BX_INSF_TYPE PCMPGTQ_VdqWdqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
   BX_SMF BX_INSF_TYPE PCMPESTRM_VdqWdqIbR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
   BX_SMF BX_INSF_TYPE PCMPESTRI_VdqWdqIbR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
@@ -2566,10 +2425,6 @@ public: // for now...
   BX_SMF BX_INSF_TYPE MOVBE_GdMd(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
   BX_SMF BX_INSF_TYPE MOVBE_MwGw(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
   BX_SMF BX_INSF_TYPE MOVBE_MdGd(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#if BX_SUPPORT_X86_64
-  BX_SMF BX_INSF_TYPE MOVBE_GqMq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOVBE_MqGq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#endif
   /* MOVBE Intel Atom(R) instruction */
 #endif
 
@@ -3027,16 +2882,10 @@ public: // for now...
 
   BX_SMF BX_INSF_TYPE LZCNT_GwEwR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
   BX_SMF BX_INSF_TYPE LZCNT_GdEdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#if BX_SUPPORT_X86_64
-  BX_SMF BX_INSF_TYPE LZCNT_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#endif
 
   /* BMI - TZCNT */
   BX_SMF BX_INSF_TYPE TZCNT_GwEwR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
   BX_SMF BX_INSF_TYPE TZCNT_GdEdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#if BX_SUPPORT_X86_64
-  BX_SMF BX_INSF_TYPE TZCNT_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#endif
   /* BMI - TZCNT */
 
   /* SSE4A */
@@ -3139,331 +2988,9 @@ public: // for now...
 
   BX_SMF BX_INSF_TYPE POPCNT_GwEwR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
   BX_SMF BX_INSF_TYPE POPCNT_GdEdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#if BX_SUPPORT_X86_64
-  BX_SMF BX_INSF_TYPE POPCNT_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#endif
 
   BX_SMF BX_INSF_TYPE ADCX_GdEdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
   BX_SMF BX_INSF_TYPE ADOX_GdEdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#if BX_SUPPORT_X86_64
-  BX_SMF BX_INSF_TYPE ADCX_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE ADOX_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#endif
-
-#if BX_SUPPORT_X86_64
-  // 64 bit extensions
-  BX_SMF BX_INSF_TYPE ADD_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE OR_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE ADC_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SBB_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE AND_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SUB_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE XOR_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMP_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE ADD_GqEqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE OR_GqEqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE ADC_GqEqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SBB_GqEqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE AND_GqEqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SUB_GqEqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE XOR_GqEqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMP_GqEqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE ADD_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE OR_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE ADC_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SBB_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE AND_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SUB_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE XOR_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMP_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE ADD_EqIdM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE OR_EqIdM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE ADC_EqIdM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SBB_EqIdM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE AND_EqIdM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SUB_EqIdM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE XOR_EqIdM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMP_EqIdM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE ADD_EqIdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE OR_EqIdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE ADC_EqIdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SBB_EqIdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE AND_EqIdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SUB_EqIdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE XOR_EqIdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMP_EqIdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE TEST_EqGqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE TEST_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE TEST_RAXId(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE XCHG_EqGqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE XCHG_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE LEA_GqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE MOV_RAXOq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_OqRAX(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_EAXOq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_OqEAX(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_AXOq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_OqAX(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_ALOq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_OqAL(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE MOV_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_GqEqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_EqIdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_EqIdM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE MOV64S_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV64S_GqEqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  // repeatable instructions
-  BX_SMF BX_INSF_TYPE REP_MOVSQ_XqYq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE REP_CMPSQ_XqYq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE REP_STOSQ_YqRAX(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE REP_LODSQ_RAXXq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE REP_SCASQ_RAXXq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  // qualified by address size
-  BX_SMF void CMPSB64_XbYb(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void CMPSW64_XwYw(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void CMPSD64_XdYd(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void SCASB64_ALXb(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void SCASW64_AXXw(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void SCASD64_EAXXd(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void LODSB64_ALXb(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void LODSW64_AXXw(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void LODSD64_EAXXd(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void STOSB64_YbAL(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void STOSW64_YwAX(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void STOSD64_YdEAX(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void MOVSB64_XbYb(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void MOVSW64_XwYw(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void MOVSD64_XdYd(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF void CMPSQ32_XqYq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void CMPSQ64_XqYq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void SCASQ32_RAXXq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void SCASQ64_RAXXq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void LODSQ32_RAXXq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void LODSQ64_RAXXq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void STOSQ32_YqRAX(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void STOSQ64_YqRAX(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void MOVSQ32_XqYq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void MOVSQ64_XqYq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF void INSB64_YbDX(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void INSW64_YwDX(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void INSD64_YdDX(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF void OUTSB64_DXXb(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void OUTSW64_DXXw(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF void OUTSD64_DXXd(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE CALL_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JMP_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE JO_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JNO_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JB_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JNB_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JZ_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JNZ_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JBE_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JNBE_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JS_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JNS_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JP_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JNP_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JL_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JNL_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JLE_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JNLE_Jq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE ENTER64_IwIb(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE LEAVE64(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE IRET64(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE MOV_CR0Rq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_CR2Rq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_CR3Rq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_CR4Rq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_RqCR0(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_RqCR2(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_RqCR3(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_RqCR4(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_DqRq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV_RqDq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE SHLD_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SHLD_EqGqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SHRD_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SHRD_EqGqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE MOV64_GdEdM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOV64_EdGdM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE MOVZX_GqEbM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOVZX_GqEwM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOVSX_GqEbM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOVSX_GqEwM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOVSX_GqEdM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE MOVZX_GqEbR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOVZX_GqEwR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOVSX_GqEbR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOVSX_GqEwR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOVSX_GqEdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE BSF_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE BSR_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE BT_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE BTS_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE BTR_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE BTC_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE BT_EqGqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE BTS_EqGqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE BTR_EqGqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE BTC_EqGqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE BT_EqIbM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE BTS_EqIbM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE BTR_EqIbM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE BTC_EqIbM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE BT_EqIbR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE BTS_EqIbR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE BTR_EqIbR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE BTC_EqIbR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE BSWAP_RRX(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE ROL_EqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE ROR_EqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE RCL_EqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE RCR_EqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SHL_EqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SHR_EqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SAR_EqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE ROL_EqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE ROR_EqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE RCL_EqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE RCR_EqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SHL_EqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SHR_EqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SAR_EqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE NOT_EqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE NEG_EqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE NOT_EqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE NEG_EqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE TEST_EqIdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE TEST_EqIdM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE MUL_RAXEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE IMUL_RAXEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE DIV_RAXEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE IDIV_RAXEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE IMUL_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE IMUL_GqEqIdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE INC_EqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE DEC_EqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE INC_EqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE DEC_EqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CALL_EqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CALL64_Ep(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JMP_EqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JMP64_Ep(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE PUSHF_Fq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE POPF_Fq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE CMPXCHG_EqGqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMPXCHG_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE CDQE(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CQO(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE XADD_EqGqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE XADD_EqGqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE RETnear64_Iw(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE RETnear64(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE RETfar64_Iw(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE CMOVO_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMOVNO_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMOVB_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMOVNB_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMOVZ_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMOVNZ_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMOVBE_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMOVNBE_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMOVS_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMOVNS_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMOVP_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMOVNP_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMOVL_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMOVNL_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMOVLE_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CMOVNLE_GqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE MOV_RRXIq(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE PUSH_EqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE PUSH_RRX(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE POP_EqM(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE POP_RRX(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE XCHG_RRXRAX(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE PUSH64_Id(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE PUSH64_Sw(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE POP64_Sw(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE LSS_GqMp(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE LFS_GqMp(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE LGS_GqMp(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE SGDT64_Ms(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE SIDT64_Ms(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE LGDT64_Ms(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE LIDT64_Ms(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE CMPXCHG16B(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE SWAPGS(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE RDFSBASE(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE RDGSBASE(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE WRFSBASE(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE WRGSBASE(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE LOOPNE64_Jb(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE LOOPE64_Jb(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE LOOP64_Jb(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE JRCXZ_Jb(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE MOVQ_EqPqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOVQ_EqVqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOVQ_PqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE MOVQ_VdqEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-
-  BX_SMF BX_INSF_TYPE CVTSI2SS_VssEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CVTSI2SD_VsdEqR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CVTTSD2SI_GqWsdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CVTTSS2SI_GqWssR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CVTSD2SI_GqWsdR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF BX_INSF_TYPE CVTSS2SI_GqWssR(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#endif  // #if BX_SUPPORT_X86_64
 
   BX_SMF BX_INSF_TYPE RDTSCP(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
 
@@ -3493,32 +3020,12 @@ public: // for now...
   BX_SMF bx_address BxResolve16BaseIndex(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
   BX_SMF bx_address BxResolve32Base(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
   BX_SMF bx_address BxResolve32BaseIndex(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#if BX_SUPPORT_X86_64
-  BX_SMF bx_address BxResolve64Base(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-  BX_SMF bx_address BxResolve64BaseIndex(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#endif
 #if BX_SUPPORT_AVX
   BX_SMF bx_address BxResolveGatherD(bxInstruction_c *, unsigned) BX_CPP_AttrRegparmN(2);
   BX_SMF bx_address BxResolveGatherQ(bxInstruction_c *, unsigned) BX_CPP_AttrRegparmN(2);
 #endif
 // <TAG-CLASS-CPU-END>
 
-#if BX_DEBUGGER
-  BX_SMF void       dbg_take_irq(void);
-  BX_SMF void       dbg_force_interrupt(unsigned vector);
-  BX_SMF void       dbg_take_dma(void);
-  BX_SMF bx_bool    dbg_set_reg(unsigned reg, Bit32u val);
-  BX_SMF bx_bool    dbg_get_sreg(bx_dbg_sreg_t *sreg, unsigned sreg_no);
-  BX_SMF bx_bool    dbg_set_sreg(unsigned sreg_no, bx_segment_reg_t *sreg);
-  BX_SMF void       dbg_get_tr(bx_dbg_sreg_t *sreg);
-  BX_SMF void       dbg_get_ldtr(bx_dbg_sreg_t *sreg);
-  BX_SMF void       dbg_get_gdtr(bx_dbg_global_sreg_t *sreg);
-  BX_SMF void       dbg_get_idtr(bx_dbg_global_sreg_t *sreg);
-  BX_SMF unsigned   dbg_query_pending(void);
-#endif
-#if BX_DEBUGGER || BX_GDBSTUB
-  BX_SMF bx_bool  dbg_instruction_epilog(void);
-#endif
 #if BX_DEBUGGER || BX_DISASM || BX_INSTRUMENTATION || BX_GDBSTUB
   BX_SMF bx_bool  dbg_xlate_linear2phy(bx_address linear, bx_phy_address *phy, bx_bool verbose = 0);
 #if BX_SUPPORT_VMX >= 2
@@ -3532,18 +3039,13 @@ public: // for now...
 
   // now for some ancillary functions...
   BX_SMF void cpu_loop(void);
-#if BX_SUPPORT_SMP
-  BX_SMF void cpu_run_trace(void);
-#endif
   BX_SMF bx_bool handleAsyncEvent(void);
   BX_SMF bx_bool handleWaitForEvent(void);
   BX_SMF bx_bool interrupts_enabled(void);
   BX_SMF void InterruptAcknowledge(void);
 
   BX_SMF int fetchDecode32(const Bit8u *fetchPtr, bxInstruction_c *i, unsigned remainingInPage) BX_CPP_AttrRegparmN(3);
-#if BX_SUPPORT_X86_64
-  BX_SMF int fetchDecode64(const Bit8u *fetchPtr, bxInstruction_c *i, unsigned remainingInPage) BX_CPP_AttrRegparmN(3);
-#endif
+
   BX_SMF void boundaryFetch(const Bit8u *fetchPtr, unsigned remainingInPage, bxInstruction_c *);
 //  BX_SMF bxICacheEntry_c *serveICacheMiss(bxICacheEntry_c *entry, Bit32u eipBiased, bx_phy_address pAddr);
 //  BX_SMF bxICacheEntry_c* getICacheEntry(void);
@@ -3603,173 +3105,18 @@ public: // for now...
   BX_SMF void write_RMW_virtual_dword(Bit32u val32) BX_CPP_AttrRegparmN(1);
   BX_SMF void write_RMW_virtual_qword(Bit64u val64) BX_CPP_AttrRegparmN(1);
 
-#if BX_SUPPORT_X86_64
-  BX_SMF void write_virtual_byte_64(unsigned seg, Bit64u offset, Bit8u data) BX_CPP_AttrRegparmN(3);
-  BX_SMF void write_virtual_word_64(unsigned seg, Bit64u offset, Bit16u data) BX_CPP_AttrRegparmN(3);
-  BX_SMF void write_virtual_dword_64(unsigned seg, Bit64u offset, Bit32u data) BX_CPP_AttrRegparmN(3);
-  BX_SMF void write_virtual_qword_64(unsigned seg, Bit64u offset, Bit64u data) BX_CPP_AttrRegparmN(3);
-  BX_SMF void write_virtual_dqword_64(unsigned seg, Bit64u offset, const BxPackedXmmRegister *data) BX_CPP_AttrRegparmN(3);
-  BX_SMF void write_virtual_dqword_aligned_64(unsigned seg, Bit64u offset, const BxPackedXmmRegister *data) BX_CPP_AttrRegparmN(3);
-#if BX_SUPPORT_AVX
-  BX_SMF void write_virtual_dword_vector_64(unsigned seg, Bit64u offset, unsigned elements, const BxPackedAvxRegister *data);
-  BX_SMF void write_virtual_dword_vector_aligned_64(unsigned seg, Bit64u offset, unsigned elements, const BxPackedAvxRegister *data);
-#endif
-
-  BX_SMF Bit8u read_virtual_byte_64(unsigned seg, Bit64u offset) BX_CPP_AttrRegparmN(2);
-  BX_SMF Bit16u read_virtual_word_64(unsigned seg, Bit64u offset) BX_CPP_AttrRegparmN(2);
-  BX_SMF Bit32u read_virtual_dword_64(unsigned seg, Bit64u offset) BX_CPP_AttrRegparmN(2);
-  BX_SMF Bit64u read_virtual_qword_64(unsigned seg, Bit64u offset) BX_CPP_AttrRegparmN(2);
-  BX_SMF void read_virtual_dqword_64(unsigned seg, Bit64u off, BxPackedXmmRegister *data) BX_CPP_AttrRegparmN(3);
-  BX_SMF void read_virtual_dqword_aligned_64(unsigned seg, Bit64u off, BxPackedXmmRegister *data) BX_CPP_AttrRegparmN(3);
-#if BX_SUPPORT_AVX
-  BX_SMF void read_virtual_dword_vector_64(unsigned seg, Bit64u offset, unsigned elements, BxPackedAvxRegister *data);
-  BX_SMF void read_virtual_dword_vector_aligned_64(unsigned seg, Bit64u offset, unsigned elements, BxPackedAvxRegister *data);
-#endif
-
-  BX_SMF Bit8u read_RMW_virtual_byte_64(unsigned seg, Bit64u offset) BX_CPP_AttrRegparmN(2);
-  BX_SMF Bit16u read_RMW_virtual_word_64(unsigned seg, Bit64u offset) BX_CPP_AttrRegparmN(2);
-  BX_SMF Bit32u read_RMW_virtual_dword_64(unsigned seg, Bit64u offset) BX_CPP_AttrRegparmN(2);
-  BX_SMF Bit64u read_RMW_virtual_qword_64(unsigned seg, Bit64u offset) BX_CPP_AttrRegparmN(2);
-#endif
-
   // write of word/dword to new stack could happen only in legacy mode
   BX_SMF void write_new_stack_word_32(bx_segment_reg_t *seg, Bit32u offset, unsigned curr_pl, Bit16u data);
   BX_SMF void write_new_stack_dword_32(bx_segment_reg_t *seg, Bit32u offset, unsigned curr_pl, Bit32u data);
   BX_SMF void write_new_stack_qword_32(bx_segment_reg_t *seg, Bit32u offset, unsigned curr_pl, Bit64u data);
-#if BX_SUPPORT_X86_64
-  BX_SMF void write_new_stack_word_64(Bit64u offset, unsigned curr_pl, Bit16u data);
-  BX_SMF void write_new_stack_dword_64(Bit64u offset, unsigned curr_pl, Bit32u data);
-  BX_SMF void write_new_stack_qword_64(Bit64u offset, unsigned curr_pl, Bit64u data);
-#endif
-
-#if BX_SUPPORT_X86_64
 
 // write
-#define write_virtual_byte(seg, offset, data)     \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ? \
-      write_virtual_byte_64(seg, (Bit64u) offset, data) : \
-      write_virtual_byte_32(seg, (Bit32u) offset, data)
-
-#define write_virtual_word(seg, offset, data)     \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ? \
-      write_virtual_word_64(seg, (Bit64u) offset, data) : \
-      write_virtual_word_32(seg, (Bit32u) offset, data)
-
-#define write_virtual_dword(seg, offset, data)    \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ? \
-      write_virtual_dword_64(seg, (Bit64u) offset, data) : \
-      write_virtual_dword_32(seg, (Bit32u) offset, data)
-
-#define write_virtual_qword(seg, offset, data)    \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ? \
-      write_virtual_qword_64(seg, (Bit64u) offset, data) : \
-      write_virtual_qword_32(seg, (Bit32u) offset, data)
-
-#define write_virtual_dqword(seg, offset, data)   \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ? \
-      write_virtual_dqword_64(seg, (Bit64u) offset, (const BxPackedXmmRegister*)(data)) : \
-      write_virtual_dqword_32(seg, (Bit32u) offset, (const BxPackedXmmRegister*)(data))
-
-#define write_virtual_dqword_aligned(seg, offset, data) \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ? \
-      write_virtual_dqword_aligned_64(seg, (Bit64u) offset, (const BxPackedXmmRegister*)(data)) : \
-      write_virtual_dqword_aligned_32(seg, (Bit32u) offset, (const BxPackedXmmRegister*)(data))
-
-#if BX_SUPPORT_AVX
-
-#define write_virtual_dword_vector(seg, offset, elements, data)   \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ? \
-      write_virtual_dword_vector_64(seg, (Bit64u) offset, elements, (const BxPackedAvxRegister*)(data)) : \
-      write_virtual_dword_vector_32(seg, (Bit32u) offset, elements, (const BxPackedAvxRegister*)(data))
-
-#define write_virtual_dword_vector_aligned(seg, offset, elements, data) \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ? \
-      write_virtual_dword_vector_aligned_64(seg, (Bit64u) offset, elements, (const BxPackedAvxRegister*)(data)) : \
-      write_virtual_dword_vector_aligned_32(seg, (Bit32u) offset, elements, (const BxPackedAvxRegister*)(data))
-
-#endif
-
-// read
-#define read_virtual_byte(seg, offset)             \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ?  \
-      read_virtual_byte_64(seg, (Bit64u) offset) : \
-      read_virtual_byte_32(seg, (Bit32u) offset)
-
-#define read_virtual_word(seg, offset)             \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ?  \
-      read_virtual_word_64(seg, (Bit64u) offset) : \
-      read_virtual_word_32(seg, (Bit32u) offset)
-
-#define read_virtual_dword(seg, offset)             \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ?   \
-      read_virtual_dword_64(seg, (Bit64u) offset) : \
-      read_virtual_dword_32(seg, (Bit32u) offset)
-
-#define read_virtual_qword(seg, offset)             \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ?   \
-      read_virtual_qword_64(seg, (Bit64u) offset) : \
-      read_virtual_qword_32(seg, (Bit32u) offset)
-
-#define read_virtual_dqword(seg, offset, data)    \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ? \
-      read_virtual_dqword_64(seg, (Bit64u) offset, (BxPackedXmmRegister*)(data)) : \
-      read_virtual_dqword_32(seg, (Bit32u) offset, (BxPackedXmmRegister*)(data))
-
-#define read_virtual_dqword_aligned(seg, offset, data) \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ? \
-      read_virtual_dqword_aligned_64(seg, (Bit64u) offset, (BxPackedXmmRegister*)(data)) : \
-      read_virtual_dqword_aligned_32(seg, (Bit32u) offset, (BxPackedXmmRegister*)(data))
-
-#if BX_SUPPORT_AVX
-
-#define read_virtual_dword_vector(seg, offset, elements, data)    \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ? \
-      read_virtual_dword_vector_64(seg, (Bit64u) offset, elements, (BxPackedAvxRegister*)(data)) : \
-      read_virtual_dword_vector_32(seg, (Bit32u) offset, elements, (BxPackedAvxRegister*)(data))
-
-#define read_virtual_dword_vector_aligned(seg, offset, elements, data) \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ? \
-      read_virtual_dword_vector_aligned_64(seg, (Bit64u) offset, elements, (BxPackedAvxRegister*)(data)) : \
-      read_virtual_dword_vector_aligned_32(seg, (Bit32u) offset, elements, (BxPackedAvxRegister*)(data))
-
-#endif
-
-// RMW
-#define read_RMW_virtual_byte(seg, offset)        \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ? \
-      read_RMW_virtual_byte_64(seg, (Bit64u) offset) : \
-      read_RMW_virtual_byte_32(seg, (Bit32u) offset)
-
-#define read_RMW_virtual_word(seg, offset)        \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ? \
-      read_RMW_virtual_word_64(seg, (Bit64u) offset) : \
-      read_RMW_virtual_word_32(seg, (Bit32u) offset)
-
-#define read_RMW_virtual_dword(seg, offset)       \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ? \
-      read_RMW_virtual_dword_64(seg, (Bit64u) offset) : \
-      read_RMW_virtual_dword_32(seg, (Bit32u) offset)
-
-#define read_RMW_virtual_qword(seg, offset)       \
-  (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) ? \
-      read_RMW_virtual_qword_64(seg, (Bit64u) offset) : \
-      read_RMW_virtual_qword_32(seg, (Bit32u) offset)
-
-#else
-
-// write
-#define write_virtual_byte(seg, offset, data)  \
-  write_virtual_byte_32(seg, offset, data)
-#define write_virtual_word(seg, offset, data)  \
-  write_virtual_word_32(seg, offset, data)
-#define write_virtual_dword(seg, offset, data) \
-  write_virtual_dword_32(seg, offset, data)
-#define write_virtual_qword(seg, offset, data) \
-  write_virtual_qword_32(seg, offset, data)
-#define write_virtual_dqword(seg, offset, data) \
-  write_virtual_dqword_32(seg, offset, (const BxPackedXmmRegister*)(data))
-#define write_virtual_dqword_aligned(seg, offset, data) \
-  write_virtual_dqword_aligned_32(seg, offset, (const BxPackedXmmRegister*)(data))
+#define write_virtual_byte(seg, offset, data)    				write_virtual_byte_32(seg, offset, data)
+#define write_virtual_word(seg, offset, data)    				write_virtual_word_32(seg, offset, data)
+#define write_virtual_dword(seg, offset, data)   				write_virtual_dword_32(seg, offset, data)
+#define write_virtual_qword(seg, offset, data)   				write_virtual_qword_32(seg, offset, data)
+#define write_virtual_dqword(seg, offset, data)  				write_virtual_dqword_32(seg, offset, (const BxPackedXmmRegister*)(data))
+#define write_virtual_dqword_aligned(seg, offset, data) write_virtual_dqword_aligned_32(seg, offset, (const BxPackedXmmRegister*)(data))
 
 #if BX_SUPPORT_AVX
 
@@ -3804,16 +3151,11 @@ public: // for now...
 #endif
 
 // RMW
-#define read_RMW_virtual_byte(seg, offset)  \
-  read_RMW_virtual_byte_32(seg, offset)
-#define read_RMW_virtual_word(seg, offset)  \
-  read_RMW_virtual_word_32(seg, offset)
-#define read_RMW_virtual_dword(seg, offset) \
-  read_RMW_virtual_dword_32(seg, offset)
-#define read_RMW_virtual_qword(seg, offset) \
-  read_RMW_virtual_qword_32(seg, offset)
+#define read_RMW_virtual_byte(seg, offset)    read_RMW_virtual_byte_32(seg, offset)
+#define read_RMW_virtual_word(seg, offset)    read_RMW_virtual_word_32(seg, offset)
+#define read_RMW_virtual_dword(seg, offset)   read_RMW_virtual_dword_32(seg, offset)
+#define read_RMW_virtual_qword(seg, offset)   read_RMW_virtual_qword_32(seg, offset)
 
-#endif
 
   BX_SMF void stack_write_byte(bx_address offset, Bit8u data) BX_CPP_AttrRegparmN(2);
   BX_SMF void stack_write_word(bx_address offset, Bit16u data) BX_CPP_AttrRegparmN(2);
@@ -3841,9 +3183,7 @@ public: // for now...
 
   BX_SMF void branch_near16(Bit16u new_IP) BX_CPP_AttrRegparmN(1);
   BX_SMF void branch_near32(Bit32u new_EIP) BX_CPP_AttrRegparmN(1);
-#if BX_SUPPORT_X86_64
-  BX_SMF void branch_near64(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#endif
+
   BX_SMF void branch_far32(bx_selector_t *selector,
        bx_descriptor_t *descriptor, Bit32u eip, Bit8u cpl);
   BX_SMF void branch_far64(bx_selector_t *selector,
@@ -3874,10 +3214,8 @@ public: // for now...
   BX_SMF void repeat_ZF(bxInstruction_c *i, BxRepIterationPtr_tR execute) BX_CPP_AttrRegparmN(2);
 
   // linear address for access_linear expected to be canonical !
-  BX_SMF void access_read_linear(bx_address laddr, unsigned len, unsigned curr_pl,
-       unsigned rw, void *data);
-  BX_SMF void access_write_linear(bx_address laddr, unsigned len, unsigned curr_pl,
-       void *data);
+  BX_SMF void access_read_linear(bx_address laddr, unsigned len, unsigned curr_pl, unsigned rw, void *data);
+  BX_SMF void access_write_linear(bx_address laddr, unsigned len, unsigned curr_pl, void *data);
   BX_SMF void page_fault(unsigned fault, bx_address laddr, unsigned user, unsigned rw);
 
   BX_SMF void access_read_physical(bx_phy_address paddr, unsigned len, void *data);
@@ -3895,9 +3233,7 @@ public: // for now...
   BX_SMF int check_entry_PAE(const char *s, Bit64u entry, Bit64u reserved, unsigned rw, bx_bool *nx_fault);
   BX_SMF void update_access_dirty_PAE(bx_phy_address *entry_addr, Bit64u *entry, unsigned max_level, unsigned leaf, unsigned write);
 #endif
-#if BX_SUPPORT_X86_64
-  BX_SMF bx_phy_address translate_linear_long_mode(bx_address laddr, Bit32u &lpf_mask, Bit32u &combined_access, unsigned user, unsigned rw);
-#endif
+
 #if BX_SUPPORT_VMX >= 2
   BX_SMF bx_phy_address translate_guest_physical(bx_phy_address guest_paddr, bx_address guest_laddr, bx_bool guest_laddr_valid, bx_bool is_page_walk, unsigned rw);
   BX_SMF void update_ept_access_dirty(bx_phy_address *entry_addr, Bit64u *entry, unsigned leaf, unsigned write);
@@ -3925,10 +3261,7 @@ public: // for now...
   BX_SMF void real_mode_int(Bit8u vector, bx_bool push_error, Bit16u error_code);
   BX_SMF void protected_mode_int(Bit8u vector, unsigned soft_int, bx_bool push_error,
                  Bit16u error_code);
-#if BX_SUPPORT_X86_64
-  BX_SMF void long_mode_int(Bit8u vector, unsigned soft_int, bx_bool push_error,
-                 Bit16u error_code);
-#endif
+
   BX_SMF void exception(unsigned vector, Bit16u error_code)
                   BX_CPP_AttrNoReturn();
   BX_SMF void init_SMRAM(void);
@@ -3975,18 +3308,12 @@ public: // for now...
   BX_SMF void jump_protected(bxInstruction_c *i, Bit16u cs, bx_address disp) BX_CPP_AttrRegparmN(3);
   BX_SMF void jmp_call_gate(bx_selector_t *selector, bx_descriptor_t *gate_descriptor) BX_CPP_AttrRegparmN(2);
   BX_SMF void call_gate(bx_descriptor_t *gate_descriptor) BX_CPP_AttrRegparmN(1);
-#if BX_SUPPORT_X86_64
-  BX_SMF void jmp_call_gate64(bx_selector_t *selector) BX_CPP_AttrRegparmN(1);
-#endif
+
   BX_SMF void call_protected(bxInstruction_c *i, Bit16u cs, bx_address disp) BX_CPP_AttrRegparmN(3);
-#if BX_SUPPORT_X86_64
-  BX_SMF void call_gate64(bx_selector_t *selector) BX_CPP_AttrRegparmN(1);
-#endif
+
   BX_SMF void return_protected(bxInstruction_c *i, Bit16u pop_bytes) BX_CPP_AttrRegparmN(2);
   BX_SMF void iret_protected(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#if BX_SUPPORT_X86_64
-  BX_SMF void long_iret(bxInstruction_c *) BX_CPP_AttrRegparmN(1);
-#endif
+
   BX_SMF void validate_seg_reg(unsigned seg);
   BX_SMF void validate_seg_regs(void);
   BX_SMF void stack_return_to_v86(Bit32u new_eip, Bit32u raw_cs_selector, Bit32u flags32);
@@ -3999,9 +3326,7 @@ public: // for now...
   BX_SMF void task_switch(bxInstruction_c *i, bx_selector_t *selector, bx_descriptor_t *descriptor,
                  unsigned source, Bit32u dword1, Bit32u dword2, bx_bool push_error = 0, Bit32u error_code = 0);
   BX_SMF void get_SS_ESP_from_TSS(unsigned pl, Bit16u *ss, Bit32u *esp);
-#if BX_SUPPORT_X86_64
-  BX_SMF Bit64u get_RSP_from_TSS(unsigned pl);
-#endif
+
   BX_SMF void write_flags(Bit16u flags, bx_bool change_IOPL, bx_bool change_IF) BX_CPP_AttrRegparmN(3);
   BX_SMF void writeEFlags(Bit32u eflags, Bit32u changeMask) BX_CPP_AttrRegparmN(2); // Newer variant.
   BX_SMF void write_eflags_fpu_compare(int float_relation);
@@ -4024,20 +3349,12 @@ public: // for now...
                          Bit32u *dword1, Bit32u *dword2) BX_CPP_AttrRegparmN(3);
   BX_SMF void    load_seg_reg(bx_segment_reg_t *seg, Bit16u new_value) BX_CPP_AttrRegparmN(2);
   BX_SMF void    load_null_selector(bx_segment_reg_t *seg, unsigned value) BX_CPP_AttrRegparmN(2);
-#if BX_SUPPORT_X86_64
-  BX_SMF void    fetch_raw_descriptor_64(const bx_selector_t *selector,
-                         Bit32u *dword1, Bit32u *dword2, Bit32u *dword3, unsigned exception_no);
-  BX_SMF bx_bool fetch_raw_descriptor2_64(const bx_selector_t *selector,
-                         Bit32u *dword1, Bit32u *dword2, Bit32u *dword3);
-#endif
+
   BX_SMF void    push_16(Bit16u value16) BX_CPP_AttrRegparmN(1);
   BX_SMF void    push_32(Bit32u value32) BX_CPP_AttrRegparmN(1);
   BX_SMF Bit16u  pop_16(void);
   BX_SMF Bit32u  pop_32(void);
-#if BX_SUPPORT_X86_64
-  BX_SMF void    push_64(Bit64u value64) BX_CPP_AttrRegparmN(1);
-  BX_SMF Bit64u  pop_64(void);
-#endif
+
   BX_SMF void    sanity_checks(void);
   BX_SMF void    assert_checks(void);
 
@@ -4099,9 +3416,7 @@ public: // for now...
 
   BX_SMF BX_CPP_INLINE Bit32u get_eip(void) { return (BX_CPU_THIS_PTR gen_reg[BX_32BIT_REG_EIP].dword.erx); }
   BX_SMF BX_CPP_INLINE Bit16u get_ip (void) { return (BX_CPU_THIS_PTR gen_reg[BX_16BIT_REG_IP].word.rx); }
-#if BX_SUPPORT_X86_64
-  BX_SMF BX_CPP_INLINE Bit64u get_rip(void) { return (BX_CPU_THIS_PTR gen_reg[BX_64BIT_REG_RIP].rrx); }
-#endif
+
 
   BX_SMF BX_CPP_INLINE Bit8u get_reg8l(unsigned reg);
   BX_SMF BX_CPP_INLINE Bit8u get_reg8h(unsigned reg);
@@ -4112,10 +3427,7 @@ public: // for now...
   BX_SMF BX_CPP_INLINE void   set_reg16(unsigned reg, Bit16u val);
   BX_SMF BX_CPP_INLINE Bit32u get_reg32(unsigned reg);
   BX_SMF BX_CPP_INLINE void   set_reg32(unsigned reg, Bit32u val);
-#if BX_SUPPORT_X86_64
-  BX_SMF BX_CPP_INLINE Bit64u get_reg64(unsigned reg);
-  BX_SMF BX_CPP_INLINE void   set_reg64(unsigned reg, Bit64u val);
-#endif
+
 
 #if BX_CPU_LEVEL >= 6
   BX_SMF BX_CPP_INLINE unsigned get_cr8();
@@ -4131,9 +3443,7 @@ public: // for now...
   BX_SMF bx_address get_laddr(unsigned seg, bx_address offset);
 
   BX_SMF Bit32u get_laddr32(unsigned seg, Bit32u offset);
-#if BX_SUPPORT_X86_64
-  BX_SMF Bit64u get_laddr64(unsigned seg, Bit64u offset);
-#endif
+
 
   DECLARE_EFLAG_ACCESSOR   (ID,  21)
   DECLARE_EFLAG_ACCESSOR   (VIP, 20)
@@ -4236,12 +3546,6 @@ public: // for now...
   BX_SMF void register_vmx_state(bx_param_c *parent);
 #if BX_SUPPORT_VMX >= 2
   BX_SMF Bit16u VMX_Get_Current_VPID(void);
-#endif
-#if BX_SUPPORT_X86_64
-  BX_SMF void VMX_Virtual_Apic_Read(bx_phy_address paddr, unsigned len, void *data);
-  BX_SMF void VMX_Virtual_Apic_Write(bx_phy_address paddr, unsigned len, void *data);
-  BX_SMF Bit32u VMX_Read_VTPR(void);
-  BX_SMF void VMX_Write_VTPR(Bit8u vtpr);
 #endif
   // vmexit reasons
   BX_SMF void VMexit_Instruction(bxInstruction_c *i, Bit32u reason, bx_bool rw = BX_READ) BX_CPP_AttrRegparmN(3);
@@ -4369,9 +3673,7 @@ BX_CPP_INLINE void BX_CPU_C::updateFetchModeMask(void)
 #endif
      (BX_CPU_THIS_PTR sse_ok << 2) |
 #endif
-#if BX_SUPPORT_X86_64
-    ((BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64)<<1) |
-#endif
+
      (BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.d_b);
 
   BX_CPU_THIS_PTR user_pl = // CPL == 3
@@ -4387,11 +3689,6 @@ BX_CPP_INLINE void BX_CPU_C::updateFetchModeMask(void)
 
 BX_CPP_INLINE bx_address BX_CPU_C::get_segment_base(unsigned seg)
 {
-#if BX_SUPPORT_X86_64
-  if (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) {
-    if (seg < BX_SEG_REG_FS) return 0;
-  }
-#endif
   return BX_CPU_THIS_PTR sregs[seg].cache.u.segment.base;
 }
 
@@ -4400,23 +3697,8 @@ BX_CPP_INLINE Bit32u BX_CPU_C::get_laddr32(unsigned seg, Bit32u offset)
   return (Bit32u) BX_CPU_THIS_PTR sregs[seg].cache.u.segment.base + offset;
 }
 
-#if BX_SUPPORT_X86_64
-BX_CPP_INLINE Bit64u BX_CPU_C::get_laddr64(unsigned seg, Bit64u offset)
-{
-  if (seg < BX_SEG_REG_FS)
-    return offset;
-  else
-    return BX_CPU_THIS_PTR sregs[seg].cache.u.segment.base + offset;
-}
-#endif
-
 BX_CPP_INLINE bx_address BX_CPU_C::get_laddr(unsigned seg, bx_address offset)
 {
-#if BX_SUPPORT_X86_64
-  if (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64) {
-    return get_laddr64(seg, offset);
-  }
-#endif
   return get_laddr32(seg, (Bit32u) offset);
 }
 
@@ -4444,17 +3726,10 @@ BX_CPP_INLINE void BX_CPU_C::set_reg8h(unsigned reg, Bit8u val)
   BX_CPU_THIS_PTR gen_reg[reg].word.byte.rh = val;
 }
 
-#if BX_SUPPORT_X86_64
-BX_CPP_INLINE bx_address BX_CPU_C::get_instruction_pointer(void)
-{
-  return BX_CPU_THIS_PTR get_rip();
-}
-#else
 BX_CPP_INLINE bx_address BX_CPU_C::get_instruction_pointer(void)
 {
   return BX_CPU_THIS_PTR get_eip();
 }
-#endif
 
 BX_CPP_INLINE Bit16u BX_CPU_C::get_reg16(unsigned reg)
 {
@@ -4479,20 +3754,6 @@ BX_CPP_INLINE void BX_CPU_C::set_reg32(unsigned reg, Bit32u val)
    assert(reg < BX_GENERAL_REGISTERS);
    BX_CPU_THIS_PTR gen_reg[reg].dword.erx = val;
 }
-
-#if BX_SUPPORT_X86_64
-BX_CPP_INLINE Bit64u BX_CPU_C::get_reg64(unsigned reg)
-{
-   assert(reg < BX_GENERAL_REGISTERS);
-   return (BX_CPU_THIS_PTR gen_reg[reg].rrx);
-}
-
-BX_CPP_INLINE void BX_CPU_C::set_reg64(unsigned reg, Bit64u val)
-{
-   assert(reg < BX_GENERAL_REGISTERS);
-   BX_CPU_THIS_PTR gen_reg[reg].rrx = val;
-}
-#endif
 
 #if BX_CPU_LEVEL >= 6
 // CR8 is aliased to APIC->TASK PRIORITY register
@@ -4528,20 +3789,12 @@ BX_CPP_INLINE bx_bool BX_CPU_C::protected_mode(void)
 
 BX_CPP_INLINE bx_bool BX_CPU_C::long_mode(void)
 {
-#if BX_SUPPORT_X86_64
-  return BX_CPU_THIS_PTR efer.get_LMA();
-#else
   return 0;
-#endif
 }
 
 BX_CPP_INLINE bx_bool BX_CPU_C::long64_mode(void)
 {
-#if BX_SUPPORT_X86_64
-  return (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64);
-#else
   return 0;
-#endif
 }
 
 BX_CPP_INLINE unsigned BX_CPU_C::get_cpu_mode(void)
@@ -4578,20 +3831,12 @@ BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_xsave(void)
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_pcid(void)
 {
-#if BX_SUPPORT_X86_64
-  return (BX_CPU_THIS_PTR cpu_extensions_bitmask & BX_CPU_PCID) != 0;
-#else
   return 0;
-#endif
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_fsgsbase(void)
 {
-#if BX_SUPPORT_X86_64
-  return (BX_CPU_THIS_PTR isa_extensions_bitmask & BX_ISA_FSGSBASE) != 0;
-#else
   return 0;
-#endif
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_smep(void)
@@ -4651,29 +3896,17 @@ BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_fxsave_fxrstor(void)
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_x86_64(void)
 {
-#if BX_SUPPORT_X86_64
-  return (BX_CPU_THIS_PTR cpu_extensions_bitmask & BX_CPU_LONG_MODE) != 0;
-#else
   return 0;
-#endif
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_1g_paging(void)
 {
-#if BX_SUPPORT_X86_64
-  return (BX_CPU_THIS_PTR cpu_extensions_bitmask & BX_CPU_1G_PAGES) != 0;
-#else
   return 0;
-#endif
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_rdtscp(void)
 {
-#if BX_SUPPORT_X86_64
-  return (BX_CPU_THIS_PTR isa_extensions_bitmask & BX_ISA_RDTSCP) != 0;
-#else
   return 0;
-#endif
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_tsc_deadline(void)
@@ -4748,9 +3981,6 @@ enum {
 #define BxImmediate_Iw      0x0004 // 16 bit
 #define BxImmediate_Id      0x0005 // 32 bit
 #define BxImmediate_O       0x0006 // MOV_ALOd, mov_OdAL, mov_eAXOv, mov_OveAX
-#if BX_SUPPORT_X86_64
-#define BxImmediate_Iq      0x0007 // 64 bit override
-#endif
 #define BxImmediate_BrOff8  0x0008 // Relative branch offset byte
 
 #define BxImmediate_Ib4     BxImmediate_Ib // Register encoded in Ib[7:4]

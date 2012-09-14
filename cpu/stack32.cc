@@ -25,7 +25,7 @@
 #include "../debug.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::POP_EdM(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::POP_EdM(bxInstruction_c *i)
 {
   RSP_SPECULATIVE;
 
@@ -43,21 +43,21 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::POP_EdM(bxInstruction_c *i)
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PUSH_ERX(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::PUSH_ERX(bxInstruction_c *i)
 {
   push_32(BX_READ_32BIT_REG(i->dst()));
 
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::POP_ERX(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::POP_ERX(bxInstruction_c *i)
 {
   BX_WRITE_32BIT_REGZ(i->dst(), pop_32());
 
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PUSH32_Sw(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::PUSH32_Sw(bxInstruction_c *i)
 {
   Bit16u val_16 = BX_CPU_THIS_PTR sregs[i->src()].selector.value;
 
@@ -74,7 +74,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PUSH32_Sw(bxInstruction_c *i)
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::POP32_Sw(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::POP32_Sw(bxInstruction_c *i)
 {
   Bit16u selector;
 
@@ -101,14 +101,14 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::POP32_Sw(bxInstruction_c *i)
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PUSH_Id(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::PUSH_Id(bxInstruction_c *i)
 {
   push_32(i->Id());
 
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PUSH_EdM(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::PUSH_EdM(bxInstruction_c *i)
 {
   Bit32u eaddr = (Bit32u) BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
@@ -119,7 +119,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PUSH_EdM(bxInstruction_c *i)
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PUSHAD32(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::PUSHAD32(bxInstruction_c *i)
 {
   Bit32u temp_ESP = ESP;
   Bit16u temp_SP  = SP;
@@ -152,7 +152,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PUSHAD32(bxInstruction_c *i)
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::POPAD32(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::POPAD32(bxInstruction_c *i)
 {
   Bit32u edi, esi, ebp, ebx, edx, ecx, eax;
 
@@ -194,7 +194,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::POPAD32(bxInstruction_c *i)
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::ENTER32_IwIb(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::ENTER32_IwIb(bxInstruction_c *i)
 {
   Bit16u imm16 = i->Iw();
   Bit8u level = i->Ib2();
@@ -257,7 +257,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::ENTER32_IwIb(bxInstruction_c *i)
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LEAVE32(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::LEAVE32(bxInstruction_c *i)
 {
   BX_ASSERT(BX_CPU_THIS_PTR cpu_mode != BX_MODE_LONG_64);
 

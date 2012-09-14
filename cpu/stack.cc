@@ -26,7 +26,7 @@
 #include "cpu.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
-void BX_CPP_AttrRegparmN(2) BX_CPU_C::stackPrefetch(bx_address offset, unsigned len)
+void BX_CPU_C::stackPrefetch(bx_address offset, unsigned len)
 {
   bx_address laddr;
   unsigned pageOffset;
@@ -36,20 +36,6 @@ void BX_CPP_AttrRegparmN(2) BX_CPU_C::stackPrefetch(bx_address offset, unsigned 
 
   len--;
 
-#if BX_SUPPORT_X86_64
-  if (long64_mode()) {
-    laddr = offset;
-    pageOffset = PAGE_OFFSET(offset);
-
-    // canonical violations will miss the TLB below
-
-    if (pageOffset + len >= 4096) // don't care for page split accesses
-      return;
-
-    BX_CPU_THIS_PTR espPageWindowSize = 4096;
-  }
-  else
-#endif
   {
     laddr = get_laddr32(BX_SEG_REG_SS, offset);
     pageOffset = PAGE_OFFSET(laddr);
@@ -122,7 +108,7 @@ void BX_CPP_AttrRegparmN(2) BX_CPU_C::stackPrefetch(bx_address offset, unsigned 
     BX_CPU_THIS_PTR espPageWindowSize -= 7;
 }
 
-void BX_CPP_AttrRegparmN(2) BX_CPU_C::stack_write_byte(bx_address offset, Bit8u data)
+void BX_CPU_C::stack_write_byte(bx_address offset, Bit8u data)
 {
   bx_address espBiased = offset + BX_CPU_THIS_PTR espPageBias;
 
@@ -143,7 +129,7 @@ void BX_CPP_AttrRegparmN(2) BX_CPU_C::stack_write_byte(bx_address offset, Bit8u 
   }
 }
 
-void BX_CPP_AttrRegparmN(2) BX_CPU_C::stack_write_word(bx_address offset, Bit16u data)
+void BX_CPU_C::stack_write_word(bx_address offset, Bit16u data)
 {
   bx_address espBiased = offset + BX_CPU_THIS_PTR espPageBias;
 
@@ -170,7 +156,7 @@ void BX_CPP_AttrRegparmN(2) BX_CPU_C::stack_write_word(bx_address offset, Bit16u
   }
 }
 
-void BX_CPP_AttrRegparmN(2) BX_CPU_C::stack_write_dword(bx_address offset, Bit32u data)
+void BX_CPU_C::stack_write_dword(bx_address offset, Bit32u data)
 {
   bx_address espBiased = offset + BX_CPU_THIS_PTR espPageBias;
 
@@ -197,7 +183,7 @@ void BX_CPP_AttrRegparmN(2) BX_CPU_C::stack_write_dword(bx_address offset, Bit32
   }
 }
 
-void BX_CPP_AttrRegparmN(2) BX_CPU_C::stack_write_qword(bx_address offset, Bit64u data)
+void BX_CPU_C::stack_write_qword(bx_address offset, Bit64u data)
 {
   bx_address espBiased = offset + BX_CPU_THIS_PTR espPageBias;
 
@@ -224,7 +210,7 @@ void BX_CPP_AttrRegparmN(2) BX_CPU_C::stack_write_qword(bx_address offset, Bit64
   }
 }
 
-Bit8u BX_CPP_AttrRegparmN(1) BX_CPU_C::stack_read_byte(bx_address offset)
+Bit8u BX_CPU_C::stack_read_byte(bx_address offset)
 {
   bx_address espBiased = offset + BX_CPU_THIS_PTR espPageBias;
 
@@ -245,7 +231,7 @@ Bit8u BX_CPP_AttrRegparmN(1) BX_CPU_C::stack_read_byte(bx_address offset)
   }
 }
 
-Bit16u BX_CPP_AttrRegparmN(1) BX_CPU_C::stack_read_word(bx_address offset)
+Bit16u BX_CPU_C::stack_read_word(bx_address offset)
 {
   bx_address espBiased = offset + BX_CPU_THIS_PTR espPageBias;
 
@@ -275,7 +261,7 @@ Bit16u BX_CPP_AttrRegparmN(1) BX_CPU_C::stack_read_word(bx_address offset)
   }
 }
 
-Bit32u BX_CPP_AttrRegparmN(1) BX_CPU_C::stack_read_dword(bx_address offset)
+Bit32u BX_CPU_C::stack_read_dword(bx_address offset)
 {
   bx_address espBiased = offset + BX_CPU_THIS_PTR espPageBias;
 
@@ -305,7 +291,7 @@ Bit32u BX_CPP_AttrRegparmN(1) BX_CPU_C::stack_read_dword(bx_address offset)
   }
 }
 
-Bit64u BX_CPP_AttrRegparmN(1) BX_CPU_C::stack_read_qword(bx_address offset)
+Bit64u BX_CPU_C::stack_read_qword(bx_address offset)
 {
   bx_address espBiased = offset + BX_CPU_THIS_PTR espPageBias;
 
