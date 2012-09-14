@@ -42,6 +42,14 @@ BOCHSAPI BX_MEM_C bx_mem;
 void bx_print_header() {
 }
 
+const char *cpu_modes[] = {
+ "IA32_REAL",
+ "IA32_V8086",
+ "IA32_PROTECTED",
+ "LONG_COMPAT",
+ "LONG_64"
+};
+
 int bxmain(void) {
     char instr[] =  {
                         0xb8,0x01,0x00,0x00,0x00,      	        // mov    $0x1,%eax
@@ -80,6 +88,9 @@ int bxmain(void) {
     bx_cpu.initialize();
     bx_cpu.sanity_checks();
     bx_cpu.register_state();
+
+    BX_DEBUG(("CPU mode: %s", cpu_modes[bx_cpu.get_cpu_mode()]));
+
     BX_INSTR_INITIALIZE(0);
 
     RIP = (intptr_t) instr;

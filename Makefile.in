@@ -120,9 +120,11 @@ BX_INCLUDES = bochs.h config.h
 .c.o:
 	$(CC) @DASH@c $(BX_INCDIRS) $(CFLAGS) $(FPU_FLAGS) $< @OFP@$@
 
-$(BX_OBJS): $(BX_INCLUDES)
-
 SUBDIRS = cpu fpu runtime elf disasm memory
+
+BX_OBJS = $(wildcard $(addsuffix /*.o, $(SUBDIRS)))
+
+.PHONY: build-deps clean dist-clean $(SUBDIRS)
 
 all: @PRIMARY_TARGET@
 
@@ -130,8 +132,7 @@ all: box
 
 box@EXE@: build-deps
 	@LINK@ @EXPORT_DYNAMIC@ \
-                        runtime/*.o cpu/*.o fpu/*.o  \
-			memory/*.o disasm/*.o elf/*.o \
+			$(BX_OBJS) \
 			$(MCH_LINK_FLAGS) \
 			$(SIMX86_LINK_FLAGS) \
 			$(READLINE_LIB) \
