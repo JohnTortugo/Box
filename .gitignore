@@ -12,3 +12,5 @@ libtool
 *.o
 *.a
 .project
+.cproject
+html/

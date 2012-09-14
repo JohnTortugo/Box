@@ -185,14 +185,6 @@ Bit32u crc32(const Bit8u *buf, int len);
 
 #  define A20ADDR(x)                ((bx_phy_address)(x))
 
-// you can't use static member functions on the CPU, if there are going
-// to be 2 cpus.  Check this early on.
-#if BX_SUPPORT_SMP
-#  if BX_USE_CPU_SMF
-#    error For SMP simulation, BX_USE_CPU_SMF must be 0.
-#  endif
-#endif
-
 //
 // Ways for the the external environment to report back information
 // to the debugger.

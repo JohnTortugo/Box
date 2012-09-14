@@ -36,7 +36,7 @@ BX_INSF_TYPE BX_CPU_C::POP_EdM(bxInstruction_c *i)
   // pop is used to calculate the address.
   Bit32u eaddr = (Bit32u) BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  bx_mem.write_dword(i->seg(), eaddr, val32);
+  write_virtual_dword_32(i->seg(), eaddr, val32);
 
   RSP_COMMIT;
 
@@ -225,7 +225,7 @@ BX_INSF_TYPE BX_CPU_C::ENTER32_IwIb(bxInstruction_c *i)
     // ENTER finishes with memory write check on the final stack pointer
     // the memory is touched but no write actually occurs
     // emulate it by doing RMW read access from SS:ESP
-    bx_mem.read_dword(BX_SEG_REG_SS, ESP);
+    read_RMW_virtual_dword_32(BX_SEG_REG_SS, ESP);
   }
   else {
     Bit16u bp = BP;
@@ -247,7 +247,7 @@ BX_INSF_TYPE BX_CPU_C::ENTER32_IwIb(bxInstruction_c *i)
     // ENTER finishes with memory write check on the final stack pointer
     // the memory is touched but no write actually occurs
     // emulate it by doing RMW read access from SS:SP
-    bx_mem.read_dword(BX_SEG_REG_SS, SP);
+    read_RMW_virtual_dword_32(BX_SEG_REG_SS, SP);
   }
 
   EBP = frame_ptr32;

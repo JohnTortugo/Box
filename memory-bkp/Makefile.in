@@ -39,6 +39,7 @@ RANLIB = @RANLIB@
 BX_INCDIRS = -I.. -I$(srcdir)/.. -I../@INSTRUMENT_DIR@ -I$(srcdir)/../@INSTRUMENT_DIR@
 
 BX_OBJS = \
+	misc_mem.o \
 	memory.o
 
 BX_INCLUDES = ../bochs.h ../config.h
@@ -69,3 +70,11 @@ memory.o: memory.@CPP_SUFFIX@ ../bochs.h ../config.h ../osdep.h ../bx_debug/debu
  ../cpu/lazy_flags.h ../cpu/i387.h \
  ../fpu/softfloat.h ../fpu/tag_w.h ../fpu/status_w.h ../fpu/control_w.h \
  ../cpu/xmm.h ../cpu/vmx.h ../param_names.h
+misc_mem.o: misc_mem.@CPP_SUFFIX@ ../bochs.h ../config.h ../osdep.h \
+ ../bx_debug/debug.h ../config.h ../osdep.h \
+ ../cpudb.h ../memory/memory.h \
+ ../instrument/stubs/instrument.h ../param_names.h \
+ ../cpu/cpu.h ../cpu/cpuid.h ../cpu/crregs.h ../cpu/descriptor.h \
+ ../cpu/instr.h ../cpu/ia_opcodes.h ../cpu/lazy_flags.h \
+ ../cpu/i387.h ../fpu/softfloat.h ../fpu/tag_w.h \
+ ../fpu/status_w.h ../fpu/control_w.h ../cpu/xmm.h ../cpu/vmx.h

@@ -42,7 +42,7 @@ void BX_CPU_C::cpu_loop(void) {
 
 #define BX_REPEAT_TIME_UPDATE_INTERVAL (BX_MAX_TRACE_LENGTH-1)
 
-void BX_CPP_AttrRegparmN(2) BX_CPU_C::repeat(bxInstruction_c *i, BxRepIterationPtr_tR execute)
+void BX_CPU_C::repeat(bxInstruction_c *i, BxRepIterationPtr_tR execute)
 {
   // non repeated instruction
   if (! i->repUsedL()) {
@@ -54,28 +54,6 @@ void BX_CPP_AttrRegparmN(2) BX_CPU_C::repeat(bxInstruction_c *i, BxRepIterationP
   BX_CPU_THIS_PTR in_repeat = 0;
 #endif
 
-#if BX_SUPPORT_X86_64
-  if (i->as64L()) {
-    while(1) {
-      if (RCX != 0) {
-        BX_CPU_CALL_REP_ITERATION(execute, (i));
-        BX_INSTR_REPEAT_ITERATION(BX_CPU_ID, i);
-        RCX --;
-      }
-      if (RCX == 0) return;
-
-#if BX_DEBUGGER == 0
-      if (BX_CPU_THIS_PTR async_event)
-#endif
-        break; // exit always if debugger enabled
-
-      BX_CPU_THIS_PTR icount++;
-
-     // BX_SYNC_TIME_IF_SINGLE_PROCESSOR(BX_REPEAT_TIME_UPDATE_INTERVAL);
-    }
-  }
-  else
-#endif
   if (i->as32L()) {
     while(1) {
       if (ECX != 0) {
@@ -276,3 +254,5 @@ void BX_CPP_AttrRegparmN(2) BX_CPU_C::repeat_ZF(bxInstruction_c *i, BxRepIterati
   // assert magic async_event to stop trace execution
   BX_CPU_THIS_PTR async_event |= BX_ASYNC_EVENT_STOP_TRACE;
 }
+
+

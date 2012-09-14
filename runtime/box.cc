@@ -36,8 +36,8 @@ extern int CacheSize;
 
 typedef BX_CPU_C *BX_CPU_C_PTR;
 
-BOCHSAPI BX_CPU_C bx_cpu;
-BOCHSAPI BX_MEM_C bx_mem;
+BX_CPU_C bx_cpu;
+BX_MEM_C bx_mem;
 
 void bx_print_header() {
 }
@@ -80,10 +80,10 @@ int bxmain(void) {
                         0xc3                   	                // ret    
                     };
 
-    Bit64u memSize = 64 * BX_CONST64(1024*1024);
-    Bit64u hostMemSize = 512 * BX_CONST64(1024*1024);
+    //Bit64u memSize = 64 * BX_CONST64(1024*1024);
+    //Bit64u hostMemSize = 512 * BX_CONST64(1024*1024);
 
-    bx_mem.init_memory(memSize, hostMemSize);
+    //bx_mem.init_memory(memSize, hostMemSize);
 
     bx_cpu.initialize();
     bx_cpu.sanity_checks();
@@ -93,7 +93,8 @@ int bxmain(void) {
 
     BX_INSTR_INITIALIZE(0);
 
-    RIP = (intptr_t) instr;
+    //RIP = (intptr_t) instr;
+    bx_cpu.gen_reg[BX_32BIT_REG_EIP].dword.erx = (intptr_t) instr;
 
     CacheSize = sizeof(instr);
 
