@@ -31,6 +31,7 @@ extern "C" {
 
 void bx_init_hardware(void);
 void bx_init_options(void);
+void bx_load_null_kernel_hack(void);
 
 extern int CacheSize;
 
@@ -46,6 +47,11 @@ extern const char* cpu_mode_string(unsigned cpu_mode);
 
 int bxmain(void) {
     char instr[] =  {
+			0xe4,0x92,				// in     $0x92,%al
+			0x0c,0x02,				// or     $0x2,%al
+			0xe6,0x92				// out    %al,$0x92
+};
+/*
                         0xb8,0x01,0x00,0x00,0x00,      	        // mov    $0x1,%eax
                         0xbb,0x02,0x00,0x00,0x00,      	        // mov    $0x2,%ebx
                         0x89,0xc6,				// mov    %eax,%esi
@@ -76,7 +82,7 @@ int bxmain(void) {
                         0xc9,					// leave  
                         0xc3					// ret    
                     };
-
+*/
     //Bit64u memSize = 64 * BX_CONST64(1024*1024);
     //Bit64u hostMemSize = 512 * BX_CONST64(1024*1024);
 
@@ -86,9 +92,15 @@ int bxmain(void) {
     bx_cpu.sanity_checks();
     bx_cpu.register_state();
 
+    BX_INSTR_INITIALIZE(0);
+
     BX_DEBUG(("CPU mode: %s", cpu_mode_string(bx_cpu.get_cpu_mode())));
 
-    BX_INSTR_INITIALIZE(0);
+    bx_load_null_kernel_hack();
+
+    BX_DEBUG(("CPU mode: %s", cpu_mode_string(bx_cpu.get_cpu_mode())));
+
+    exit(0);
 
     //RIP = (intptr_t) instr;
     bx_cpu.gen_reg[BX_32BIT_REG_EIP].dword.erx = (intptr_t) instr;
@@ -467,4 +479,32 @@ void CDECL bx_signal_handler(int signum)
   else
    BX_PANIC(("SIGNAL %u caught", signum));
 */
+}
+
+void bx_load_null_kernel_hack(void)
+{
+  // The RESET function will have been called first.
+  // Set CPU and memory features which are assumed at this point.
+  //
+  //bx_load_kernel_image(SIM->get_param_string(BXPN_LOAD32BITOS_PATH)->getptr(), 0x100000);
+  
+  // EIP deltas
+  BX_CPU(0)->prev_rip = BX_CPU(0)->gen_reg[BX_32BIT_REG_EIP].dword.erx = 0x100000;
+  
+  // CS deltas
+  BX_CPU(0)->sregs[BX_SEG_REG_CS].cache.u.segment.base = 0x00000000;
+  BX_CPU(0)->sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled = 0xFFFFFFFF;
+  BX_CPU(0)->sregs[BX_SEG_REG_CS].cache.u.segment.g   = 1; // page granularity
+  BX_CPU(0)->sregs[BX_SEG_REG_CS].cache.u.segment.d_b = 1; // 32bit
+  
+  // DS deltas
+  BX_CPU(0)->sregs[BX_SEG_REG_DS].cache.u.segment.base = 0x00000000;
+  BX_CPU(0)->sregs[BX_SEG_REG_DS].cache.u.segment.limit_scaled = 0xFFFFFFFF;
+  BX_CPU(0)->sregs[BX_SEG_REG_DS].cache.u.segment.g   = 1; // page granularity
+  BX_CPU(0)->sregs[BX_SEG_REG_DS].cache.u.segment.d_b = 1; // 32bit
+  
+  // CR0 deltas
+  BX_CPU(0)->cr0.set_PE(1); // protected mode
+  
+  BX_CPU(0)->handleCpuModeChange();
 }
