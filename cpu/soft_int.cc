@@ -22,16 +22,17 @@
 #define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
 #include "cpu.h"
+#include "syscall/syscall.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::BOUND_GwMa(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::BOUND_GwMa(bxInstruction_c *i)
 {
   Bit16s op1_16 = BX_READ_16BIT_REG(i->dst());
 
   Bit32u eaddr = (Bit32u) BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit16s bound_min = (Bit16s) read_virtual_word_32(i->seg(), eaddr);
-  Bit16s bound_max = (Bit16s) read_virtual_word_32(i->seg(), (eaddr+2) & i->asize_mask());
+  Bit16s bound_min = (Bit16s) bx_mem.read_word(i->seg(), eaddr);
+  Bit16s bound_max = (Bit16s) bx_mem.read_word(i->seg(), (eaddr+2) & i->asize_mask());
 
   if (op1_16 < bound_min || op1_16 > bound_max) {
     printf("BOUND_GdMa: fails bounds test");
@@ -41,14 +42,14 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::BOUND_GwMa(bxInstruction_c *i)
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::BOUND_GdMa(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::BOUND_GdMa(bxInstruction_c *i)
 {
   Bit32s op1_32 = BX_READ_32BIT_REG(i->dst());
 
   Bit32u eaddr = (Bit32u) BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit32s bound_min = (Bit32s) read_virtual_dword_32(i->seg(), eaddr);
-  Bit32s bound_max = (Bit32s) read_virtual_dword_32(i->seg(), (eaddr+4) & i->asize_mask());
+  Bit32s bound_min = (Bit32s) bx_mem.read_dword(i->seg(), eaddr);
+  Bit32s bound_max = (Bit32s) bx_mem.read_dword(i->seg(), (eaddr+4) & i->asize_mask());
 
   if (op1_32 < bound_min || op1_32 > bound_max) {
     printf("BOUND_GdMa: fails bounds test");
@@ -60,7 +61,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::BOUND_GdMa(bxInstruction_c *i)
 
 // This is an undocumented instrucion (opcode 0xf1) which
 // is useful for an ICE system
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::INT1(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::INT1(bxInstruction_c *i)
 {
 #if BX_SUPPORT_VMX
   VMexit_Event(BX_PRIVILEGED_SOFTWARE_INTERRUPT, 1, 0, 0);
@@ -90,7 +91,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::INT1(bxInstruction_c *i)
   BX_NEXT_TRACE(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::INT3(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::INT3(bxInstruction_c *i)
 {
   // INT 3 is not IOPL sensitive
 
@@ -116,41 +117,40 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::INT3(bxInstruction_c *i)
   BX_NEXT_TRACE(i);
 }
 
-
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::INT_Ib(bxInstruction_c *i)
-{
-  Bit8u vector = i->Ib();
+/*
+ * Interruption with immediate byte.
+ */
+BX_INSF_TYPE BX_CPU_C::INT_Ib(bxInstruction_c *i) {
+	Bit8u vector = i->Ib();
 
 #if BX_SUPPORT_VMX
-  VMexit_Event(BX_SOFTWARE_INTERRUPT, vector, 0, 0);
+	VMexit_Event(BX_SOFTWARE_INTERRUPT, vector, 0, 0);
 #endif
 
 #if BX_SUPPORT_SVM
-  if (BX_CPU_THIS_PTR in_svm_guest) {
-    if (SVM_INTERCEPT(SVM_INTERCEPT0_SOFTINT)) Svm_Vmexit(SVM_VMEXIT_SOFTWARE_INTERRUPT);
-  }
+	if (BX_CPU_THIS_PTR in_svm_guest) {
+		if (SVM_INTERCEPT(SVM_INTERCEPT0_SOFTINT))
+			Svm_Vmexit(SVM_VMEXIT_SOFTWARE_INTERRUPT);
+	}
 #endif
 
 #ifdef SHOW_EXIT_STATUS
-  if ((vector == 0x21) && (AH == 0x4c)) {
-    printf("INT 21/4C called AL=0x%02x, BX=0x%04x", (unsigned) AL, (unsigned) BX);
-  }
+	if ((vector == 0x21) && (AH == 0x4c)) {
+		printf("INT 21/4C called AL=0x%02x, BX=0x%04x", (unsigned) AL, (unsigned) BX);
+	}
 #endif
 
-#if BX_DEBUGGER
-  BX_CPU_THIS_PTR show_flag |= Flag_softint;
-#endif
+	/* handling syscalls */
+	if (vector == 0x80) {
+		bx_sys.handle();
+	}
 
-  interrupt(vector, BX_SOFTWARE_INTERRUPT, 0, 0);
+	//interrupt(vector, BX_SOFTWARE_INTERRUPT, 0, 0);
 
-  BX_INSTR_FAR_BRANCH(BX_CPU_ID, BX_INSTR_IS_INT,
-                      BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].selector.value,
-                      EIP);
-
-  BX_NEXT_TRACE(i);
+	BX_NEXT_TRACE(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::INTO(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::INTO(bxInstruction_c *i)
 {
   if (get_OF()) {
 

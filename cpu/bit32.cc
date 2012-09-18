@@ -86,7 +86,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::BT_EdGdM(bxInstruction_c *i)
   op1_addr = eaddr + 4 * displacement32;
 
   /* pointer, segment address pair */
-  op1_32 = read_virtual_dword(i->seg(), op1_addr & i->asize_mask());
+  op1_32 = bx_mem.read_dword(i->seg(), op1_addr & i->asize_mask());
 
   set_CF((op1_32 >> index) & 0x01);
 
@@ -237,7 +237,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::BT_EdIbM(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit32u op1_32 = read_virtual_dword(i->seg(), eaddr);
+  Bit32u op1_32 = bx_mem.read_dword(i->seg(), eaddr);
   Bit8u  op2_8  = i->Ib() & 0x1f;
 
   set_CF((op1_32 >> op2_8) & 0x01);

@@ -51,7 +51,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XSAVE(bxInstruction_c *i)
   // We will go feature-by-feature and not run over all XCR0 bits
   //
 
-  Bit64u header1 = read_virtual_qword(i->seg(), (eaddr + 512) & asize_mask);
+  Bit64u header1 = bx_mem.read_qword(i->seg(), (eaddr + 512) & asize_mask);
 
   Bit32u features_save_enable_mask = BX_CPU_THIS_PTR xcr0.get32() & EAX;
 
@@ -101,13 +101,13 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XSAVE(bxInstruction_c *i)
      */
 #if BX_SUPPORT_X86_64
     if (i->os64L()) {
-      write_virtual_qword(i->seg(), (eaddr + 16) & asize_mask, BX_CPU_THIS_PTR the_i387.fdp);
+    	bx_mem.write_qword(i->seg(), (eaddr + 16) & asize_mask, BX_CPU_THIS_PTR the_i387.fdp);
     }
     else
 #endif
     {
-      write_virtual_dword(i->seg(), (eaddr + 16) & asize_mask, (Bit32u) BX_CPU_THIS_PTR the_i387.fdp);
-      write_virtual_dword(i->seg(), (eaddr + 20) & asize_mask, (Bit32u) BX_CPU_THIS_PTR the_i387.fds);
+    	bx_mem.write_dword(i->seg(), (eaddr + 16) & asize_mask, (Bit32u) BX_CPU_THIS_PTR the_i387.fdp);
+    	bx_mem.write_dword(i->seg(), (eaddr + 20) & asize_mask, (Bit32u) BX_CPU_THIS_PTR the_i387.fds);
     }
     /* do not touch MXCSR state */
 
@@ -130,8 +130,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XSAVE(bxInstruction_c *i)
   if ((features_save_enable_mask & (BX_XCR0_SSE_MASK | BX_XCR0_AVX_MASK)) != 0)
   {
     // store MXCSR
-    write_virtual_dword(i->seg(), (eaddr + 24) & asize_mask, BX_MXCSR_REGISTER);
-    write_virtual_dword(i->seg(), (eaddr + 28) & asize_mask, MXCSR_MASK);
+	  bx_mem.write_dword(i->seg(), (eaddr + 24) & asize_mask, BX_MXCSR_REGISTER);
+	  bx_mem.write_dword(i->seg(), (eaddr + 28) & asize_mask, MXCSR_MASK);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -169,7 +169,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XSAVE(bxInstruction_c *i)
 #endif
 
   // always update header to 'dirty' state
-  write_virtual_qword(i->seg(), (eaddr + 512) & asize_mask, header1);
+  bx_mem.write_qword(i->seg(), (eaddr + 512) & asize_mask, header1);
 #endif
 
   BX_NEXT_INSTR(i);
@@ -196,9 +196,9 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XRSTOR(bxInstruction_c *i)
 
   bx_address asize_mask = i->asize_mask();
 
-  Bit64u header1 = read_virtual_qword(i->seg(), (eaddr + 512) & asize_mask);
-  Bit64u header2 = read_virtual_qword(i->seg(), (eaddr + 520) & asize_mask);
-  Bit64u header3 = read_virtual_qword(i->seg(), (eaddr + 528) & asize_mask);
+  Bit64u header1 = bx_mem.read_qword(i->seg(), (eaddr + 512) & asize_mask);
+  Bit64u header2 = bx_mem.read_qword(i->seg(), (eaddr + 520) & asize_mask);
+  Bit64u header3 = bx_mem.read_qword(i->seg(), (eaddr + 528) & asize_mask);
 
   if ((~BX_CPU_THIS_PTR xcr0.get32() & header1) != 0) {
     printf("XRSTOR: Broken header state");
@@ -269,8 +269,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XRSTOR(bxInstruction_c *i)
       for(index=0; index < 8; index++)
       {
         floatx80 reg;
-        reg.fraction = read_virtual_qword(i->seg(), (eaddr+index*16+32) & asize_mask);
-        reg.exp      = read_virtual_word (i->seg(), (eaddr+index*16+40) & asize_mask);
+        reg.fraction = bx_mem.read_qword(i->seg(), (eaddr+index*16+32) & asize_mask);
+        reg.exp      = bx_mem.read_word(i->seg(), (eaddr+index*16+40) & asize_mask);
 
         // update tag only if it is not empty
         BX_WRITE_FPU_REGISTER_AND_TAG(reg,
@@ -304,7 +304,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XRSTOR(bxInstruction_c *i)
   /////////////////////////////////////////////////////////////////////////////
   if ((features_load_enable_mask & (BX_XCR0_SSE_MASK | BX_XCR0_AVX_MASK)) != 0)
   {
-    Bit32u new_mxcsr = read_virtual_dword(i->seg(), (eaddr + 24) & asize_mask);
+    Bit32u new_mxcsr = bx_mem.read_dword(i->seg(), (eaddr + 24) & asize_mask);
     if(new_mxcsr & ~MXCSR_MASK)
        exception(BX_GP_EXCEPTION, 0);
     BX_MXCSR_REGISTER = new_mxcsr;

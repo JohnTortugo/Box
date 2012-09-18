@@ -23,9 +23,9 @@
 #  define BX_CPU_H 1
 
 #include "config.h"
+#include "syscall/syscall.h"
 #include <setjmp.h>
 
-// <TAG-DEFINES-DECODE-START>
 // segment register encoding
 #define BX_SEG_REG_ES    0
 #define BX_SEG_REG_CS    1
@@ -36,7 +36,6 @@
 // NULL now has to fit in 3 bits.
 #define BX_SEG_REG_NULL  7
 #define BX_NULL_SEG_REG(seg) ((seg) == BX_SEG_REG_NULL)
-// <TAG-DEFINES-DECODE-END>
 
 #define BX_16BIT_REG_AX 0
 #define BX_16BIT_REG_CX 1
@@ -56,31 +55,12 @@
 #define BX_32BIT_REG_ESI 6
 #define BX_32BIT_REG_EDI 7
 
-#define BX_64BIT_REG_RAX 0
-#define BX_64BIT_REG_RCX 1
-#define BX_64BIT_REG_RDX 2
-#define BX_64BIT_REG_RBX 3
-#define BX_64BIT_REG_RSP 4
-#define BX_64BIT_REG_RBP 5
-#define BX_64BIT_REG_RSI 6
-#define BX_64BIT_REG_RDI 7
-
-#define BX_64BIT_REG_R8  8
-#define BX_64BIT_REG_R9  9
-#define BX_64BIT_REG_R10 10
-#define BX_64BIT_REG_R11 11
-#define BX_64BIT_REG_R12 12
-#define BX_64BIT_REG_R13 13
-#define BX_64BIT_REG_R14 14
-#define BX_64BIT_REG_R15 15
-
 # define BX_GENERAL_REGISTERS 8
 
 #define BX_TMP_REGISTER (BX_GENERAL_REGISTERS)
 
 #define BX_16BIT_REG_IP  (BX_GENERAL_REGISTERS+1)
 #define BX_32BIT_REG_EIP (BX_GENERAL_REGISTERS+1)
-#define BX_64BIT_REG_RIP (BX_GENERAL_REGISTERS+1)
 
 #define BX_NIL_REGISTER  (BX_GENERAL_REGISTERS+2)
 
@@ -94,46 +74,46 @@
 */
 
 // access to 8 bit general registers
-#define AL (BX_CPU_THIS_PTR gen_reg[0].word.byte.rl)
-#define CL (BX_CPU_THIS_PTR gen_reg[1].word.byte.rl)
-#define DL (BX_CPU_THIS_PTR gen_reg[2].word.byte.rl)
-#define BL (BX_CPU_THIS_PTR gen_reg[3].word.byte.rl)
-#define AH (BX_CPU_THIS_PTR gen_reg[0].word.byte.rh)
-#define CH (BX_CPU_THIS_PTR gen_reg[1].word.byte.rh)
-#define DH (BX_CPU_THIS_PTR gen_reg[2].word.byte.rh)
-#define BH (BX_CPU_THIS_PTR gen_reg[3].word.byte.rh)
+#define AL (bx_cpu.gen_reg[0].word.byte.rl)
+#define CL (bx_cpu.gen_reg[1].word.byte.rl)
+#define DL (bx_cpu.gen_reg[2].word.byte.rl)
+#define BL (bx_cpu.gen_reg[3].word.byte.rl)
+#define AH (bx_cpu.gen_reg[0].word.byte.rh)
+#define CH (bx_cpu.gen_reg[1].word.byte.rh)
+#define DH (bx_cpu.gen_reg[2].word.byte.rh)
+#define BH (bx_cpu.gen_reg[3].word.byte.rh)
 
-#define TMP8L (BX_CPU_THIS_PTR gen_reg[BX_TMP_REGISTER].word.byte.rl)
+#define TMP8L (bx_cpu.gen_reg[BX_TMP_REGISTER].word.byte.rl)
 
 // access to 16 bit general registers
-#define AX (BX_CPU_THIS_PTR gen_reg[0].word.rx)
-#define CX (BX_CPU_THIS_PTR gen_reg[1].word.rx)
-#define DX (BX_CPU_THIS_PTR gen_reg[2].word.rx)
-#define BX (BX_CPU_THIS_PTR gen_reg[3].word.rx)
-#define SP (BX_CPU_THIS_PTR gen_reg[4].word.rx)
-#define BP (BX_CPU_THIS_PTR gen_reg[5].word.rx)
-#define SI (BX_CPU_THIS_PTR gen_reg[6].word.rx)
-#define DI (BX_CPU_THIS_PTR gen_reg[7].word.rx)
+#define AX (bx_cpu.gen_reg[0].word.rx)
+#define CX (bx_cpu.gen_reg[1].word.rx)
+#define DX (bx_cpu.gen_reg[2].word.rx)
+#define BX (bx_cpu.gen_reg[3].word.rx)
+#define SP (bx_cpu.gen_reg[4].word.rx)
+#define BP (bx_cpu.gen_reg[5].word.rx)
+#define SI (bx_cpu.gen_reg[6].word.rx)
+#define DI (bx_cpu.gen_reg[7].word.rx)
 
 // access to 16 bit instruction pointer
-#define IP (BX_CPU_THIS_PTR gen_reg[BX_16BIT_REG_IP].word.rx)
+#define IP (bx_cpu.gen_reg[BX_16BIT_REG_IP].word.rx)
 
-#define TMP16 (BX_CPU_THIS_PTR gen_reg[BX_TMP_REGISTER].word.rx)
+#define TMP16 (bx_cpu.gen_reg[BX_TMP_REGISTER].word.rx)
 
 // accesss to 32 bit general registers
-#define EAX (BX_CPU_THIS_PTR gen_reg[0].dword.erx)
-#define ECX (BX_CPU_THIS_PTR gen_reg[1].dword.erx)
-#define EDX (BX_CPU_THIS_PTR gen_reg[2].dword.erx)
-#define EBX (BX_CPU_THIS_PTR gen_reg[3].dword.erx)
-#define ESP (BX_CPU_THIS_PTR gen_reg[4].dword.erx)
-#define EBP (BX_CPU_THIS_PTR gen_reg[5].dword.erx)
-#define ESI (BX_CPU_THIS_PTR gen_reg[6].dword.erx)
-#define EDI (BX_CPU_THIS_PTR gen_reg[7].dword.erx)
+#define EAX (bx_cpu.gen_reg[0].dword.erx)
+#define ECX (bx_cpu.gen_reg[1].dword.erx)
+#define EDX (bx_cpu.gen_reg[2].dword.erx)
+#define EBX (bx_cpu.gen_reg[3].dword.erx)
+#define ESP (bx_cpu.gen_reg[4].dword.erx)
+#define EBP (bx_cpu.gen_reg[5].dword.erx)
+#define ESI (bx_cpu.gen_reg[6].dword.erx)
+#define EDI (bx_cpu.gen_reg[7].dword.erx)
 
 // access to 32 bit instruction pointer
-#define EIP (BX_CPU_THIS_PTR gen_reg[BX_32BIT_REG_EIP].dword.erx)
+#define EIP (bx_cpu.gen_reg[BX_32BIT_REG_EIP].dword.erx)
 
-#define TMP32 (BX_CPU_THIS_PTR gen_reg[BX_TMP_REGISTER].dword.erx)
+#define TMP32 (bx_cpu.gen_reg[BX_TMP_REGISTER].dword.erx)
 
 
 #define RAX EAX
@@ -148,55 +128,48 @@
 
 
 #define BX_READ_8BIT_REG(index)  (((index) & 4) ? \
-  (BX_CPU_THIS_PTR gen_reg[(index)-4].word.byte.rh) : \
-  (BX_CPU_THIS_PTR gen_reg[index].word.byte.rl))
+  (bx_cpu.gen_reg[(index)-4].word.byte.rh) : \
+  (bx_cpu.gen_reg[index].word.byte.rl))
 #define BX_READ_8BIT_REGx(index,ext) BX_READ_8BIT_REG(index)
 
-#define BX_READ_8BIT_REGH(index) (BX_CPU_THIS_PTR gen_reg[index].word.byte.rh)
-#define BX_READ_16BIT_REG(index) (BX_CPU_THIS_PTR gen_reg[index].word.rx)
-#define BX_READ_32BIT_REG(index) (BX_CPU_THIS_PTR gen_reg[index].dword.erx)
+#define BX_READ_8BIT_REGH(index) (bx_cpu.gen_reg[index].word.byte.rh)
+#define BX_READ_16BIT_REG(index) (bx_cpu.gen_reg[index].word.rx)
+#define BX_READ_32BIT_REG(index) (bx_cpu.gen_reg[index].dword.erx)
 
 #define BX_WRITE_8BIT_REGH(index, val) {\
-  BX_CPU_THIS_PTR gen_reg[index].word.byte.rh = val; \
+  bx_cpu.gen_reg[index].word.byte.rh = val; \
 }
 
 #define BX_WRITE_16BIT_REG(index, val) {\
-  BX_CPU_THIS_PTR gen_reg[index].word.rx = val; \
+  bx_cpu.gen_reg[index].word.rx = val; \
 }
 
 /*
 #define BX_WRITE_32BIT_REG(index, val) {\
-  BX_CPU_THIS_PTR gen_reg[index].dword.erx = val; \
+  bx_cpu.gen_reg[index].dword.erx = val; \
 }
 */
 
 
 #define BX_WRITE_8BIT_REG(index, val) {\
   if ((index) & 4) \
-    BX_CPU_THIS_PTR gen_reg[(index)-4].word.byte.rh = val; \
+    bx_cpu.gen_reg[(index)-4].word.byte.rh = val; \
   else \
-    BX_CPU_THIS_PTR gen_reg[index].word.byte.rl = val; \
+    bx_cpu.gen_reg[index].word.byte.rl = val; \
 }
 #define BX_WRITE_8BIT_REGx(index, ext, val) BX_WRITE_8BIT_REG(index, val)
 
 // For x86-32, I just pretend this one is like the macro above,
 // so common code can be used.
 #define BX_WRITE_32BIT_REGZ(index, val) {\
-  BX_CPU_THIS_PTR gen_reg[index].dword.erx = (Bit32u) val; \
+  bx_cpu.gen_reg[index].dword.erx = (Bit32u) val; \
 }
 
 #define BX_CLEAR_64BIT_HIGH(index)
 
-
-#define CPL       (BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].selector.rpl)
-
-#define USER_PL   (BX_CPU_THIS_PTR user_pl) /* CPL == 3 */
-
-#if BX_SUPPORT_SMP
-#define BX_CPU_ID (BX_CPU_THIS_PTR bx_cpuid)
-#else
+#define CPL       (bx_cpu.sregs[BX_SEG_REG_CS].selector.rpl)
+#define USER_PL   (bx_cpu.user_pl) /* CPL == 3 */
 #define BX_CPU_ID (0)
-#endif
 
 #endif  // defined(NEED_CPU_REG_SHORTCUTS)
 
@@ -398,7 +371,7 @@ extern const char* cpu_mode_string(unsigned cpu_mode);
 
 #define IsValidPhyAddr(addr) ((addr & BX_PHY_ADDRESS_RESERVED_BITS) == 0)
 
-  #define BX_CPU_INTR  (BX_CPU_THIS_PTR INTR)
+#define BX_CPU_INTR  (bx_cpu.INTR)
 
 #define CACHE_LINE_SIZE 64
 
@@ -421,15 +394,10 @@ class BX_MEM_C;
 #  define BX_CPU_CALL_REP_ITERATION(func, args) \
             (this->*((BxRepIterationPtr_tR) (func))) args
 
-/*
-#if BX_SUPPORT_SMP
-// multiprocessor simulation, we need an array of cpus and memories
-BOCHSAPI extern BX_CPU_C **bx_cpu_array;
-#else */
 // single processor simulation, so there's one of everything
 extern BX_CPU_C   bx_cpu;
 extern BX_MEM_C   bx_mem;
-// #endif
+extern BX_SYSCALL bx_sys;
 
 // notify internal debugger/instrumentation about memory access
 #define BX_NOTIFY_LIN_MEMORY_ACCESS(laddr, paddr, size, pl, rw, dataptr) {              \
@@ -454,38 +422,38 @@ extern BX_MEM_C   bx_mem;
 
 #define IMPLEMENT_EFLAG_ACCESSOR(name,bitnum)                   \
   BX_CPP_INLINE bx_bool BX_CPU_C::getB_##name () {              \
-    return 1 & (BX_CPU_THIS_PTR eflags >> bitnum);              \
+    return 1 & (bx_cpu.eflags >> bitnum);              \
   }                                                             \
   BX_CPP_INLINE Bit32u  BX_CPU_C::get_##name () {               \
-    return BX_CPU_THIS_PTR eflags & (1 << bitnum);              \
+    return bx_cpu.eflags & (1 << bitnum);              \
   }
 
 #define IMPLEMENT_EFLAG_SET_ACCESSOR(name,bitnum)               \
   BX_CPP_INLINE void BX_CPU_C::assert_##name () {               \
-    BX_CPU_THIS_PTR eflags |= (1<<bitnum);                      \
+    bx_cpu.eflags |= (1<<bitnum);                      \
   }                                                             \
   BX_CPP_INLINE void BX_CPU_C::clear_##name () {                \
-    BX_CPU_THIS_PTR eflags &= ~(1<<bitnum);                     \
+    bx_cpu.eflags &= ~(1<<bitnum);                     \
   }                                                             \
   BX_CPP_INLINE void BX_CPU_C::set_##name (bx_bool val) {       \
-    BX_CPU_THIS_PTR eflags =                                    \
-      (BX_CPU_THIS_PTR eflags&~(1<<bitnum))|((val)<<bitnum);    \
+    bx_cpu.eflags =                                    \
+      (bx_cpu.eflags&~(1<<bitnum))|((val)<<bitnum);    \
   }
 
 #if BX_CPU_LEVEL >= 4
 
 #define IMPLEMENT_EFLAG_SET_ACCESSOR_AC(bitnum)                 \
   BX_CPP_INLINE void BX_CPU_C::assert_AC () {                   \
-    BX_CPU_THIS_PTR eflags |= (1<<bitnum);                      \
+    bx_cpu.eflags |= (1<<bitnum);                      \
     handleAlignmentCheck();                                     \
   }                                                             \
   BX_CPP_INLINE void BX_CPU_C::clear_AC() {                     \
-    BX_CPU_THIS_PTR eflags &= ~(1<<bitnum);                     \
+    bx_cpu.eflags &= ~(1<<bitnum);                     \
     handleAlignmentCheck();                                     \
   }                                                             \
   BX_CPP_INLINE void BX_CPU_C::set_AC(bx_bool val) {            \
-    BX_CPU_THIS_PTR eflags =                                    \
-      (BX_CPU_THIS_PTR eflags&~(1<<bitnum))|((val)<<bitnum);    \
+    bx_cpu.eflags =                                    \
+      (bx_cpu.eflags&~(1<<bitnum))|((val)<<bitnum);    \
     handleAlignmentCheck();                                     \
   }
 
@@ -500,8 +468,8 @@ extern BX_MEM_C   bx_mem;
   }                                                             \
   BX_CPP_INLINE void BX_CPU_C::set_VM(bx_bool val) {            \
     if (!long_mode()) {                                         \
-      BX_CPU_THIS_PTR eflags =                                  \
-        (BX_CPU_THIS_PTR eflags&~(1<<bitnum))|((val)<<bitnum);  \
+      bx_cpu.eflags =                                  \
+        (bx_cpu.eflags&~(1<<bitnum))|((val)<<bitnum);  \
       handleCpuModeChange();                                    \
     }                                                           \
   }
@@ -509,31 +477,31 @@ extern BX_MEM_C   bx_mem;
 // assert async_event when IF or TF is set
 #define IMPLEMENT_EFLAG_SET_ACCESSOR_IF_TF(name,bitnum)         \
   BX_CPP_INLINE void BX_CPU_C::assert_##name() {                \
-    BX_CPU_THIS_PTR async_event = 1;                            \
-    BX_CPU_THIS_PTR eflags |= (1<<bitnum);                      \
+    bx_cpu.async_event = 1;                            \
+    bx_cpu.eflags |= (1<<bitnum);                      \
   }                                                             \
   BX_CPP_INLINE void BX_CPU_C::clear_##name() {                 \
-    BX_CPU_THIS_PTR eflags &= ~(1<<bitnum);                     \
+    bx_cpu.eflags &= ~(1<<bitnum);                     \
   }                                                             \
   BX_CPP_INLINE void BX_CPU_C::set_##name(bx_bool val) {        \
-    if (val) BX_CPU_THIS_PTR async_event = 1;                   \
-    BX_CPU_THIS_PTR eflags =                                    \
-      (BX_CPU_THIS_PTR eflags&~(1<<bitnum))|((val)<<bitnum);    \
+    if (val) bx_cpu.async_event = 1;                   \
+    bx_cpu.eflags =                                    \
+      (bx_cpu.eflags&~(1<<bitnum))|((val)<<bitnum);    \
   }
 
 // invalidate prefetch queue and call prefetch() when RF is set
 #define IMPLEMENT_EFLAG_SET_ACCESSOR_RF(name,bitnum)            \
   BX_CPP_INLINE void BX_CPU_C::assert_##name() {                \
     invalidate_prefetch_q();                                    \
-    BX_CPU_THIS_PTR eflags |= (1<<bitnum);                      \
+    bx_cpu.eflags |= (1<<bitnum);                      \
   }                                                             \
   BX_CPP_INLINE void BX_CPU_C::clear_##name() {                 \
-    BX_CPU_THIS_PTR eflags &= ~(1<<bitnum);                     \
+    bx_cpu.eflags &= ~(1<<bitnum);                     \
   }                                                             \
   BX_CPP_INLINE void BX_CPU_C::set_##name(bx_bool val) {        \
     if (val) invalidate_prefetch_q();                           \
-    BX_CPU_THIS_PTR eflags =                                    \
-      (BX_CPU_THIS_PTR eflags&~(1<<bitnum))|((val)<<bitnum);    \
+    bx_cpu.eflags =                                    \
+      (bx_cpu.eflags&~(1<<bitnum))|((val)<<bitnum);    \
   }
 
 #define DECLARE_EFLAG_ACCESSOR_IOPL(bitnum)                     \
@@ -542,11 +510,11 @@ extern BX_MEM_C   bx_mem;
 
 #define IMPLEMENT_EFLAG_ACCESSOR_IOPL(bitnum)                   \
   BX_CPP_INLINE void BX_CPU_C::set_IOPL(Bit32u val) {           \
-    BX_CPU_THIS_PTR eflags &= ~(3<<12);                         \
-    BX_CPU_THIS_PTR eflags |= ((3&val) << 12);                  \
+    bx_cpu.eflags &= ~(3<<12);                         \
+    bx_cpu.eflags |= ((3&val) << 12);                  \
   }                                                             \
   BX_CPP_INLINE Bit32u BX_CPU_C::get_IOPL() {                   \
-    return 3 & (BX_CPU_THIS_PTR eflags >> 12);                  \
+    return 3 & (bx_cpu.eflags >> 12);                  \
   }
 
 #define EFlagsCFMask   (1 <<  0)
@@ -579,7 +547,7 @@ extern BX_MEM_C   bx_mem;
 typedef struct
 {
 
-#define MSR_STAR   (BX_CPU_THIS_PTR msr.star)
+#define MSR_STAR   (bx_cpu.msr.star)
 
   // SYSCALL/SYSRET instruction msr's
   Bit64u star;
@@ -753,16 +721,16 @@ public: // for now...
 #endif
 
 #define BX_CPUID_SUPPORT_ISA_EXTENSION(feature) \
-   (BX_CPU_THIS_PTR isa_extensions_bitmask & (feature))
+   (bx_cpu.isa_extensions_bitmask & (feature))
 
 #define BX_CPUID_SUPPORT_CPU_EXTENSION(feature) \
-   (BX_CPU_THIS_PTR cpu_extensions_bitmask & (feature))
+   (bx_cpu.cpu_extensions_bitmask & (feature))
 
 #define BX_SUPPORT_VMX_EXTENSION(feature) \
-   (BX_CPU_THIS_PTR vmx_extensions_bitmask & (feature))
+   (bx_cpu.vmx_extensions_bitmask & (feature))
 
 #define BX_SUPPORT_SVM_EXTENSION(feature) \
-   (BX_CPU_THIS_PTR svm_extensions_bitmask & (feature))
+   (bx_cpu.svm_extensions_bitmask & (feature))
 
   // General register set
   // rax: accumulator
@@ -913,7 +881,7 @@ public: // for now...
   VMCB_CACHE vmcb;
 
 // make SVM integration easier
-#define SVM_GIF (BX_CPU_THIS_PTR svm_gif)
+#define SVM_GIF (bx_cpu.svm_gif)
 
 #else
 
@@ -1051,8 +1019,8 @@ public: // for now...
  
   BX_CPP_INLINE void SET_FLAGS_OxxxxC(Bit32u new_of, Bit32u new_cf) {
     Bit32u temp_po = new_of ^ new_cf;
-    BX_CPU_THIS_PTR oszapc.auxbits &= ~(LF_MASK_PO | LF_MASK_CF);
-    BX_CPU_THIS_PTR oszapc.auxbits |=
+    bx_cpu.oszapc.auxbits &= ~(LF_MASK_PO | LF_MASK_CF);
+    bx_cpu.oszapc.auxbits |=
                   (temp_po << LF_BIT_PO) | (new_cf << LF_BIT_CF);
   }
  
@@ -1062,7 +1030,7 @@ public: // for now...
  
   // ZF
   BX_CPP_INLINE bx_bool getB_ZF(void) {
-    return (0 == BX_CPU_THIS_PTR oszapc.result);
+    return (0 == bx_cpu.oszapc.result);
   }
 
   BX_CPP_INLINE bx_bool get_ZF(void) { return getB_ZF(); }
@@ -1073,29 +1041,29 @@ public: // for now...
   }
 
   BX_CPP_INLINE void clear_ZF(void) {
-    BX_CPU_THIS_PTR oszapc.result |= (1 << 8);
+    bx_cpu.oszapc.result |= (1 << 8);
   }
 
   BX_CPP_INLINE void assert_ZF(void) {
     // merge the sign bit into the Sign Delta
 
-    BX_CPU_THIS_PTR oszapc.auxbits ^=
-      (((BX_CPU_THIS_PTR oszapc.result >> BX_LF_SIGN_BIT) & 1) << LF_BIT_SD);
+    bx_cpu.oszapc.auxbits ^=
+      (((bx_cpu.oszapc.result >> BX_LF_SIGN_BIT) & 1) << LF_BIT_SD);
 
     // merge the parity bits into the Parity Delta Byte
 
-    Bit32u temp_pdb = (255 & BX_CPU_THIS_PTR oszapc.result);
-    BX_CPU_THIS_PTR oszapc.auxbits ^= (temp_pdb << LF_BIT_PDB);
+    Bit32u temp_pdb = (255 & bx_cpu.oszapc.result);
+    bx_cpu.oszapc.auxbits ^= (temp_pdb << LF_BIT_PDB);
 
     // now zero the .result value
 
-    BX_CPU_THIS_PTR oszapc.result = 0;
+    bx_cpu.oszapc.result = 0;
   }
 
   // SF
   BX_CPP_INLINE bx_bool getB_SF(void) {
-    return ((BX_CPU_THIS_PTR oszapc.result >> BX_LF_SIGN_BIT) ^
-            (BX_CPU_THIS_PTR oszapc.auxbits >> LF_BIT_SD)) & 1;
+    return ((bx_cpu.oszapc.result >> BX_LF_SIGN_BIT) ^
+            (bx_cpu.oszapc.auxbits >> LF_BIT_SD)) & 1;
   }
 
   BX_CPP_INLINE bx_bool get_SF(void) { return getB_SF(); }
@@ -1103,7 +1071,7 @@ public: // for now...
   BX_CPP_INLINE void set_SF(bx_bool val) {
     bx_bool temp_sf = getB_SF();
 
-    BX_CPU_THIS_PTR oszapc.auxbits ^= (temp_sf ^ val) << LF_BIT_SD;
+    bx_cpu.oszapc.auxbits ^= (temp_sf ^ val) << LF_BIT_SD;
   }
 
   BX_CPP_INLINE void clear_SF(void) {
@@ -1116,8 +1084,8 @@ public: // for now...
 
   // PF - bit 2 in EFLAGS, represented by lower 8 bits of oszapc.result
   BX_CPP_INLINE bx_bool getB_PF(void) {
-    Bit32u temp = (255 & BX_CPU_THIS_PTR oszapc.result);
-    temp = temp ^ (255 & (BX_CPU_THIS_PTR oszapc.auxbits >> LF_BIT_PDB));
+    Bit32u temp = (255 & bx_cpu.oszapc.result);
+    temp = temp ^ (255 & (bx_cpu.oszapc.auxbits >> LF_BIT_PDB));
     temp = (temp ^ (temp >> 4)) & 0x0F;
     return (0x9669U >> temp) & 1;
   }
@@ -1125,10 +1093,10 @@ public: // for now...
   BX_CPP_INLINE bx_bool get_PF(void) { return getB_PF(); }
 
   BX_CPP_INLINE void set_PF(bx_bool val) {
-    Bit32u temp_pdb = (255 & BX_CPU_THIS_PTR oszapc.result) ^ (!val);
+    Bit32u temp_pdb = (255 & bx_cpu.oszapc.result) ^ (!val);
 
-    BX_CPU_THIS_PTR oszapc.auxbits &= ~(LF_MASK_PDB);
-    BX_CPU_THIS_PTR oszapc.auxbits |= (temp_pdb << LF_BIT_PDB);
+    bx_cpu.oszapc.auxbits &= ~(LF_MASK_PDB);
+    bx_cpu.oszapc.auxbits |= (temp_pdb << LF_BIT_PDB);
   }
 
   BX_CPP_INLINE void clear_PF(void) {
@@ -1141,31 +1109,31 @@ public: // for now...
 
   // AF - bit 4 in EFLAGS, represented by bit LF_BIT_AF of oszapc.auxbits
   BX_CPP_INLINE bx_bool getB_AF(void) {
-    return ((BX_CPU_THIS_PTR oszapc.auxbits >> LF_BIT_AF) & 1);
+    return ((bx_cpu.oszapc.auxbits >> LF_BIT_AF) & 1);
   }
 
   BX_CPP_INLINE bx_bool get_AF(void) { return getB_AF(); }
 
   BX_CPP_INLINE void set_AF(bx_bool val) {
-    BX_CPU_THIS_PTR oszapc.auxbits &= ~(LF_MASK_AF);
-    BX_CPU_THIS_PTR oszapc.auxbits |= (val) << LF_BIT_AF;
+    bx_cpu.oszapc.auxbits &= ~(LF_MASK_AF);
+    bx_cpu.oszapc.auxbits |= (val) << LF_BIT_AF;
   }
   
   BX_CPP_INLINE void clear_AF(void) {
-    BX_CPU_THIS_PTR oszapc.auxbits &= ~(LF_MASK_AF);
+    bx_cpu.oszapc.auxbits &= ~(LF_MASK_AF);
   }
 
   BX_CPP_INLINE void assert_AF(void) {
-    BX_CPU_THIS_PTR oszapc.auxbits |= (LF_MASK_AF);
+    bx_cpu.oszapc.auxbits |= (LF_MASK_AF);
   }
 
   // CF
   BX_CPP_INLINE bx_bool getB_CF(void) {
-    return ((BX_CPU_THIS_PTR oszapc.auxbits >> LF_BIT_CF) & 1);
+    return ((bx_cpu.oszapc.auxbits >> LF_BIT_CF) & 1);
   }
 
   BX_CPP_INLINE bx_bool get_CF(void) {
-    return BX_CPU_THIS_PTR oszapc.auxbits & (1U << LF_BIT_CF);
+    return bx_cpu.oszapc.auxbits & (1U << LF_BIT_CF);
   }
 
   BX_CPP_INLINE void set_CF(bx_bool val) {
@@ -1185,11 +1153,11 @@ public: // for now...
 
   // OF
   BX_CPP_INLINE bx_bool getB_OF(void) {
-    return ((BX_CPU_THIS_PTR oszapc.auxbits + (1U << LF_BIT_PO)) >> LF_BIT_CF) & 1;
+    return ((bx_cpu.oszapc.auxbits + (1U << LF_BIT_PO)) >> LF_BIT_CF) & 1;
   }
 
   BX_CPP_INLINE bx_bool get_OF(void) {
-    return (BX_CPU_THIS_PTR oszapc.auxbits + (1U << LF_BIT_PO)) & (1U << LF_BIT_CF);
+    return (bx_cpu.oszapc.auxbits + (1U << LF_BIT_PO)) & (1U << LF_BIT_CF);
   }
 
   BX_CPP_INLINE void set_OF(bx_bool val) {
@@ -3049,22 +3017,18 @@ public: // for now...
   void updateFetchModeMask(void);
   BX_CPP_INLINE void invalidate_prefetch_q(void)
   {
-    BX_CPU_THIS_PTR eipPageWindowSize = 0;
+    bx_cpu.eipPageWindowSize = 0;
   }
 
   BX_CPP_INLINE void invalidate_stack_cache(void)
   {
-    BX_CPU_THIS_PTR espPageWindowSize = 0;
+    bx_cpu.espPageWindowSize = 0;
   }
 
   bx_bool write_virtual_checks(bx_segment_reg_t *seg, Bit32u offset, unsigned len) BX_CPP_AttrRegparmN(3);
   bx_bool read_virtual_checks(bx_segment_reg_t *seg, Bit32u offset, unsigned len) BX_CPP_AttrRegparmN(3);
   bx_bool execute_virtual_checks(bx_segment_reg_t *seg, Bit32u offset, unsigned len) BX_CPP_AttrRegparmN(3);
 
-  Bit8u read_virtual_byte_32(unsigned seg, Bit32u offset) BX_CPP_AttrRegparmN(2);
-  Bit16u read_virtual_word_32(unsigned seg, Bit32u offset) BX_CPP_AttrRegparmN(2);
-  Bit32u read_virtual_dword_32(unsigned seg, Bit32u offset) BX_CPP_AttrRegparmN(2);
-  Bit64u read_virtual_qword_32(unsigned seg, Bit32u offset) BX_CPP_AttrRegparmN(2);
 #if BX_CPU_LEVEL >= 6
   void read_virtual_dqword_32(unsigned seg, Bit32u off, BxPackedXmmRegister *data) BX_CPP_AttrRegparmN(3);
   void read_virtual_dqword_aligned_32(unsigned seg, Bit32u off, BxPackedXmmRegister *data) BX_CPP_AttrRegparmN(3);
@@ -3074,10 +3038,6 @@ public: // for now...
 #endif
 #endif
 
-  void write_virtual_byte_32(unsigned seg, Bit32u offset, Bit8u data) BX_CPP_AttrRegparmN(3);
-  void write_virtual_word_32(unsigned seg, Bit32u offset, Bit16u data) BX_CPP_AttrRegparmN(3);
-  void write_virtual_dword_32(unsigned seg, Bit32u offset, Bit32u data) BX_CPP_AttrRegparmN(3);
-  void write_virtual_qword_32(unsigned seg, Bit32u offset, Bit64u data) BX_CPP_AttrRegparmN(3);
 #if BX_CPU_LEVEL >= 6
   void write_virtual_dqword_32(unsigned seg, Bit32u offset, const BxPackedXmmRegister *data) BX_CPP_AttrRegparmN(3);
   void write_virtual_dqword_aligned_32(unsigned seg, Bit32u offset, const BxPackedXmmRegister *data) BX_CPP_AttrRegparmN(3);
@@ -3323,7 +3283,7 @@ public: // for now...
   void writeEFlags(Bit32u eflags, Bit32u changeMask) BX_CPP_AttrRegparmN(2); // Newer variant.
   void write_eflags_fpu_compare(int float_relation);
   Bit32u force_flags(void);
-  Bit32u read_eflags(void) { return BX_CPU_THIS_PTR force_flags(); }
+  Bit32u read_eflags(void) { return bx_cpu.force_flags(); }
 
   bx_bool allow_io(bxInstruction_c *i, Bit16u addr, unsigned len) BX_CPP_AttrRegparmN(3);
   Bit32u  get_descriptor_l(const bx_descriptor_t *) BX_CPP_AttrRegparmN(1);
@@ -3399,15 +3359,15 @@ public: // for now...
   BX_CPP_INLINE int bx_cpuid_support_rdtscp(void);
   BX_CPP_INLINE int bx_cpuid_support_tsc_deadline(void);
 
-  BX_CPP_INLINE unsigned which_cpu(void) { return BX_CPU_THIS_PTR bx_cpuid; }
-  BX_CPP_INLINE Bit64u get_icount(void) { return BX_CPU_THIS_PTR icount; }
-  BX_CPP_INLINE Bit64u get_icount_last_sync(void) { return BX_CPU_THIS_PTR icount_last_sync; }
-  BX_CPP_INLINE const bx_gen_reg_t *get_gen_regfile() { return BX_CPU_THIS_PTR gen_reg; }
+  BX_CPP_INLINE unsigned which_cpu(void) { return bx_cpu.bx_cpuid; }
+  BX_CPP_INLINE Bit64u get_icount(void) { return bx_cpu.icount; }
+  BX_CPP_INLINE Bit64u get_icount_last_sync(void) { return bx_cpu.icount_last_sync; }
+  BX_CPP_INLINE const bx_gen_reg_t *get_gen_regfile() { return bx_cpu.gen_reg; }
 
   BX_CPP_INLINE bx_address get_instruction_pointer(void);
 
-  BX_CPP_INLINE Bit32u get_eip(void) { return (BX_CPU_THIS_PTR gen_reg[BX_32BIT_REG_EIP].dword.erx); }
-  BX_CPP_INLINE Bit16u get_ip (void) { return (BX_CPU_THIS_PTR gen_reg[BX_16BIT_REG_IP].word.rx); }
+  BX_CPP_INLINE Bit32u get_eip(void) { return (bx_cpu.gen_reg[BX_32BIT_REG_EIP].dword.erx); }
+  BX_CPP_INLINE Bit16u get_ip (void) { return (bx_cpu.gen_reg[BX_16BIT_REG_IP].word.rx); }
 
 
   BX_CPP_INLINE Bit8u get_reg8l(unsigned reg);
@@ -3601,10 +3561,10 @@ public: // for now...
 #if BX_CPU_LEVEL >= 5
 BX_CPP_INLINE void BX_CPU_C::prepareMMX(void)
 {
-  if(BX_CPU_THIS_PTR cr0.get_EM())
+  if(bx_cpu.cr0.get_EM())
     exception(BX_UD_EXCEPTION, 0);
 
-  if(BX_CPU_THIS_PTR cr0.get_TS())
+  if(bx_cpu.cr0.get_TS())
     exception(BX_NM_EXCEPTION, 0);
 
   /* check floating point status word for a pending FPU exceptions */
@@ -3613,34 +3573,34 @@ BX_CPP_INLINE void BX_CPU_C::prepareMMX(void)
 
 BX_CPP_INLINE void BX_CPU_C::prepareFPU2MMX(void)
 {
-  BX_CPU_THIS_PTR the_i387.twd = 0;
-  BX_CPU_THIS_PTR the_i387.tos = 0; /* reset FPU Top-Of-Stack */
+  bx_cpu.the_i387.twd = 0;
+  bx_cpu.the_i387.tos = 0; /* reset FPU Top-Of-Stack */
 }
 #endif
 
 #if BX_CPU_LEVEL >= 6
 BX_CPP_INLINE void BX_CPU_C::prepareXSAVE(void)
 {
-  if(! BX_CPU_THIS_PTR cr4.get_OSXSAVE())
+  if(! bx_cpu.cr4.get_OSXSAVE())
     exception(BX_UD_EXCEPTION, 0);
 
-  if(BX_CPU_THIS_PTR cr0.get_TS())
+  if(bx_cpu.cr0.get_TS())
     exception(BX_NM_EXCEPTION, 0);
 }
 #endif
 
 // Can be used as LHS or RHS.
-#define RMAddr(i)  (BX_CPU_THIS_PTR address_xlation.rm_addr)
+#define RMAddr(i)  (bx_cpu.address_xlation.rm_addr)
 
 #if defined(NEED_CPU_REG_SHORTCUTS)
 
 #define RSP_SPECULATIVE {              \
-  BX_CPU_THIS_PTR speculative_rsp = 1; \
-  BX_CPU_THIS_PTR prev_rsp = RSP;      \
+  bx_cpu.speculative_rsp = 1; \
+  bx_cpu.prev_rsp = RSP;      \
 }
 
 #define RSP_COMMIT {                   \
-  BX_CPU_THIS_PTR speculative_rsp = 0; \
+  bx_cpu.speculative_rsp = 0; \
 }
 
 #endif // defined(NEED_CPU_REG_SHORTCUTS)
@@ -3656,35 +3616,28 @@ BX_CPP_INLINE void BX_CPU_C::prepareXSAVE(void)
 //
 BX_CPP_INLINE void BX_CPU_C::updateFetchModeMask(void)
 {
-  BX_CPU_THIS_PTR fetchModeMask =
+  bx_cpu.fetchModeMask =
 #if BX_CPU_LEVEL >= 6
 #if BX_SUPPORT_AVX
-     (BX_CPU_THIS_PTR avx_ok << 3) |
+     (bx_cpu.avx_ok << 3) |
 #endif
-     (BX_CPU_THIS_PTR sse_ok << 2) |
+     (bx_cpu.sse_ok << 2) |
 #endif
 
-     (BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.d_b);
+     (bx_cpu.sregs[BX_SEG_REG_CS].cache.u.segment.d_b);
 
-  BX_CPU_THIS_PTR user_pl = // CPL == 3
-     (BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].selector.rpl == 3);
+  bx_cpu.user_pl = // CPL == 3
+     (bx_cpu.sregs[BX_SEG_REG_CS].selector.rpl == 3);
 }
-
-#if BX_X86_DEBUGGER
-#define BX_HWDebugInstruction   0x00
-#define BX_HWDebugMemW          0x01
-#define BX_HWDebugIO            0x02
-#define BX_HWDebugMemRW         0x03
-#endif
 
 BX_CPP_INLINE bx_address BX_CPU_C::get_segment_base(unsigned seg)
 {
-  return BX_CPU_THIS_PTR sregs[seg].cache.u.segment.base;
+  return bx_cpu.sregs[seg].cache.u.segment.base;
 }
 
 BX_CPP_INLINE Bit32u BX_CPU_C::get_laddr32(unsigned seg, Bit32u offset)
 {
-  return (Bit32u) BX_CPU_THIS_PTR sregs[seg].cache.u.segment.base + offset;
+  return (Bit32u) bx_cpu.sregs[seg].cache.u.segment.base + offset;
 }
 
 BX_CPP_INLINE bx_address BX_CPU_C::get_laddr(unsigned seg, bx_address offset)
@@ -3695,54 +3648,54 @@ BX_CPP_INLINE bx_address BX_CPU_C::get_laddr(unsigned seg, bx_address offset)
 BX_CPP_INLINE Bit8u BX_CPU_C::get_reg8l(unsigned reg)
 {
   assert(reg < BX_GENERAL_REGISTERS);
-  return (BX_CPU_THIS_PTR gen_reg[reg].word.byte.rl);
+  return (bx_cpu.gen_reg[reg].word.byte.rl);
 }
 
 BX_CPP_INLINE void BX_CPU_C::set_reg8l(unsigned reg, Bit8u val)
 {
   assert(reg < BX_GENERAL_REGISTERS);
-  BX_CPU_THIS_PTR gen_reg[reg].word.byte.rl = val;
+  bx_cpu.gen_reg[reg].word.byte.rl = val;
 }
 
 BX_CPP_INLINE Bit8u BX_CPU_C::get_reg8h(unsigned reg)
 {
   assert(reg < BX_GENERAL_REGISTERS);
-  return (BX_CPU_THIS_PTR gen_reg[reg].word.byte.rh);
+  return (bx_cpu.gen_reg[reg].word.byte.rh);
 }
 
 BX_CPP_INLINE void BX_CPU_C::set_reg8h(unsigned reg, Bit8u val)
 {
   assert(reg < BX_GENERAL_REGISTERS);
-  BX_CPU_THIS_PTR gen_reg[reg].word.byte.rh = val;
+  bx_cpu.gen_reg[reg].word.byte.rh = val;
 }
 
 BX_CPP_INLINE bx_address BX_CPU_C::get_instruction_pointer(void)
 {
-  return BX_CPU_THIS_PTR get_eip();
+  return bx_cpu.get_eip();
 }
 
 BX_CPP_INLINE Bit16u BX_CPU_C::get_reg16(unsigned reg)
 {
   assert(reg < BX_GENERAL_REGISTERS);
-  return (BX_CPU_THIS_PTR gen_reg[reg].word.rx);
+  return (bx_cpu.gen_reg[reg].word.rx);
 }
 
 BX_CPP_INLINE void BX_CPU_C::set_reg16(unsigned reg, Bit16u val)
 {
   assert(reg < BX_GENERAL_REGISTERS);
-  BX_CPU_THIS_PTR gen_reg[reg].word.rx = val;
+  bx_cpu.gen_reg[reg].word.rx = val;
 }
 
 BX_CPP_INLINE Bit32u BX_CPU_C::get_reg32(unsigned reg)
 {
   assert(reg < BX_GENERAL_REGISTERS);
-  return (BX_CPU_THIS_PTR gen_reg[reg].dword.erx);
+  return (bx_cpu.gen_reg[reg].dword.erx);
 }
 
 BX_CPP_INLINE void BX_CPU_C::set_reg32(unsigned reg, Bit32u val)
 {
    assert(reg < BX_GENERAL_REGISTERS);
-   BX_CPU_THIS_PTR gen_reg[reg].dword.erx = val;
+   bx_cpu.gen_reg[reg].dword.erx = val;
 }
 
 #if BX_CPU_LEVEL >= 6
@@ -3759,22 +3712,22 @@ BX_CPP_INLINE unsigned BX_CPU_C::get_cr8(void)
 
 BX_CPP_INLINE bx_bool BX_CPU_C::real_mode(void)
 {
-  return (BX_CPU_THIS_PTR cpu_mode == BX_MODE_IA32_REAL);
+  return (bx_cpu.cpu_mode == BX_MODE_IA32_REAL);
 }
 
 BX_CPP_INLINE bx_bool BX_CPU_C::smm_mode(void)
 {
-  return (BX_CPU_THIS_PTR in_smm);
+  return (bx_cpu.in_smm);
 }
 
 BX_CPP_INLINE bx_bool BX_CPU_C::v8086_mode(void)
 {
-  return (BX_CPU_THIS_PTR cpu_mode == BX_MODE_IA32_V8086);
+  return (bx_cpu.cpu_mode == BX_MODE_IA32_V8086);
 }
 
 BX_CPP_INLINE bx_bool BX_CPU_C::protected_mode(void)
 {
-  return (BX_CPU_THIS_PTR cpu_mode >= BX_MODE_IA32_PROTECTED);
+  return (bx_cpu.cpu_mode >= BX_MODE_IA32_PROTECTED);
 }
 
 BX_CPP_INLINE bx_bool BX_CPU_C::long_mode(void)
@@ -3789,34 +3742,34 @@ BX_CPP_INLINE bx_bool BX_CPU_C::long64_mode(void)
 
 BX_CPP_INLINE unsigned BX_CPU_C::get_cpu_mode(void)
 {
-  return (BX_CPU_THIS_PTR cpu_mode);
+  return (bx_cpu.cpu_mode);
 }
 
 #if BX_SUPPORT_ALIGNMENT_CHECK && BX_CPU_LEVEL >= 4
 BX_CPP_INLINE bx_bool BX_CPU_C::alignment_check(void)
 {
-  return BX_CPU_THIS_PTR alignment_check_mask;
+  return bx_cpu.alignment_check_mask;
 }
 #endif
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_svm(void)
 {
-  return (BX_CPU_THIS_PTR isa_extensions_bitmask & BX_ISA_SVM) != 0;
+  return (bx_cpu.isa_extensions_bitmask & BX_ISA_SVM) != 0;
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_smx(void)
 {
-  return (BX_CPU_THIS_PTR isa_extensions_bitmask & BX_ISA_SMX) != 0;
+  return (bx_cpu.isa_extensions_bitmask & BX_ISA_SMX) != 0;
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_vmx(void)
 {
-  return (BX_CPU_THIS_PTR isa_extensions_bitmask & BX_ISA_VMX) != 0;
+  return (bx_cpu.isa_extensions_bitmask & BX_ISA_VMX) != 0;
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_xsave(void)
 {
-  return (BX_CPU_THIS_PTR isa_extensions_bitmask & BX_ISA_XSAVE) != 0;
+  return (bx_cpu.isa_extensions_bitmask & BX_ISA_XSAVE) != 0;
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_pcid(void)
@@ -3831,57 +3784,57 @@ BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_fsgsbase(void)
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_smep(void)
 {
-  return (BX_CPU_THIS_PTR cpu_extensions_bitmask & BX_CPU_SMEP) != 0;
+  return (bx_cpu.cpu_extensions_bitmask & BX_CPU_SMEP) != 0;
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_vme(void)
 {
-  return (BX_CPU_THIS_PTR cpu_extensions_bitmask & BX_CPU_VME) != 0;
+  return (bx_cpu.cpu_extensions_bitmask & BX_CPU_VME) != 0;
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_tsc(void)
 {
-  return (BX_CPU_THIS_PTR isa_extensions_bitmask & BX_ISA_PENTIUM) != 0;
+  return (bx_cpu.isa_extensions_bitmask & BX_ISA_PENTIUM) != 0;
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_debug_extensions(void)
 {
-  return (BX_CPU_THIS_PTR cpu_extensions_bitmask & BX_CPU_DEBUG_EXTENSIONS) != 0;
+  return (bx_cpu.cpu_extensions_bitmask & BX_CPU_DEBUG_EXTENSIONS) != 0;
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_pse(void)
 {
-  return (BX_CPU_THIS_PTR cpu_extensions_bitmask & BX_CPU_PSE) != 0;
+  return (bx_cpu.cpu_extensions_bitmask & BX_CPU_PSE) != 0;
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_pae(void)
 {
-  return (BX_CPU_THIS_PTR cpu_extensions_bitmask & BX_CPU_PAE) != 0;
+  return (bx_cpu.cpu_extensions_bitmask & BX_CPU_PAE) != 0;
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_pge(void)
 {
-  return (BX_CPU_THIS_PTR cpu_extensions_bitmask & BX_CPU_PGE) != 0;
+  return (bx_cpu.cpu_extensions_bitmask & BX_CPU_PGE) != 0;
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_mmx(void)
 {
-  return (BX_CPU_THIS_PTR isa_extensions_bitmask & BX_ISA_MMX) != 0;
+  return (bx_cpu.isa_extensions_bitmask & BX_ISA_MMX) != 0;
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_sse(void)
 {
-  return (BX_CPU_THIS_PTR isa_extensions_bitmask & BX_ISA_SSE) != 0;
+  return (bx_cpu.isa_extensions_bitmask & BX_ISA_SSE) != 0;
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_sep(void)
 {
-  return (BX_CPU_THIS_PTR isa_extensions_bitmask & BX_ISA_SYSENTER_SYSEXIT) != 0;
+  return (bx_cpu.isa_extensions_bitmask & BX_ISA_SYSENTER_SYSEXIT) != 0;
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_fxsave_fxrstor(void)
 {
-  return (BX_CPU_THIS_PTR isa_extensions_bitmask & BX_ISA_SSE) != 0;
+  return (bx_cpu.isa_extensions_bitmask & BX_ISA_SSE) != 0;
 }
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_x86_64(void)
@@ -3901,7 +3854,7 @@ BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_rdtscp(void)
 
 BX_CPP_INLINE int BX_CPU_C::bx_cpuid_support_tsc_deadline(void)
 {
-  return (BX_CPU_THIS_PTR cpu_extensions_bitmask & BX_CPU_TSC_DEADLINE) != 0;
+  return (bx_cpu.cpu_extensions_bitmask & BX_CPU_TSC_DEADLINE) != 0;
 }
 
 IMPLEMENT_EFLAG_ACCESSOR   (ID,  21)

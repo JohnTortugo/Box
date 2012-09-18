@@ -512,7 +512,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::REP_OUTSB_DXXb(bxInstruction_c *i)
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSB16_DXXb(bxInstruction_c *i)
 {
 /*
-  Bit8u value8 = read_virtual_byte_32(i->seg(), SI);
+  Bit8u value8 = bx_mem.read_byte(i->seg(), SI);
   BX_OUTP(DX, value8, 1);
 
   if (BX_CPU_THIS_PTR get_DF())
@@ -526,7 +526,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSB16_DXXb(bxInstruction_c *i)
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSB32_DXXb(bxInstruction_c *i)
 {
 /*
-  Bit8u value8 = read_virtual_byte(i->seg(), ESI);
+  Bit8u value8 = bx_mem.read_byte(i->seg(), ESI);
   BX_OUTP(DX, value8, 1);
 
   if (BX_CPU_THIS_PTR get_DF())
@@ -584,7 +584,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::REP_OUTSW_DXXw(bxInstruction_c *i)
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSW16_DXXw(bxInstruction_c *i)
 {
 /*
-  Bit16u value16 = read_virtual_word_32(i->seg(), SI);
+  Bit16u value16 = bx_mem.read_word(i->seg(), SI);
   BX_OUTP(DX, value16, 2);
 
   if (BX_CPU_THIS_PTR get_DF())
@@ -616,14 +616,14 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSW32_DXXw(bxInstruction_c *i)
       incr = wordCount << 1; // count * 2.
     }
     else {
-      value16 = read_virtual_word(i->seg(), esi);
+      value16 = bx_mem.read_word(i->seg(), esi);
       BX_OUTP(DX, value16, 2);
     }
   }
   else
 #endif
   {
-    value16 = read_virtual_word(i->seg(), esi);
+    value16 = bx_mem.read_word(i->seg(), esi);
     BX_OUTP(DX, value16, 2);
   }
 
@@ -680,7 +680,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::REP_OUTSD_DXXd(bxInstruction_c *i)
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSD16_DXXd(bxInstruction_c *i)
 {
 /*
-  Bit32u value32 = read_virtual_dword_32(i->seg(), SI);
+  Bit32u value32 = bx_mem.read_dword(i->seg(), SI);
   BX_OUTP(DX, value32, 4);
 
   if (BX_CPU_THIS_PTR get_DF())
@@ -694,7 +694,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSD16_DXXd(bxInstruction_c *i)
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::OUTSD32_DXXd(bxInstruction_c *i)
 {
 /*
-  Bit32u value32 = read_virtual_dword(i->seg(), ESI);
+  Bit32u value32 = bx_mem.read_dword(i->seg(), ESI);
   BX_OUTP(DX, value32, 4);
 
   if (BX_CPU_THIS_PTR get_DF())

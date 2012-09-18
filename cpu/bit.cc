@@ -32,7 +32,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SETO_EbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit8u result_8 = getB_OF();
-  write_virtual_byte(i->seg(), eaddr, result_8);
+  bx_mem.write_byte(i->seg(), eaddr, result_8);
 
   BX_NEXT_INSTR(i);
 }
@@ -49,7 +49,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SETNO_EbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit8u result_8 = !getB_OF();
-  write_virtual_byte(i->seg(), eaddr, result_8);
+  bx_mem.write_byte(i->seg(), eaddr, result_8);
 
   BX_NEXT_INSTR(i);
 }
@@ -66,7 +66,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SETB_EbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit8u result_8 = getB_CF();
-  write_virtual_byte(i->seg(), eaddr, result_8);
+  bx_mem.write_byte(i->seg(), eaddr, result_8);
 
   BX_NEXT_INSTR(i);
 }
@@ -83,7 +83,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SETNB_EbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit8u result_8 = !getB_CF();
-  write_virtual_byte(i->seg(), eaddr, result_8);
+  bx_mem.write_byte(i->seg(), eaddr, result_8);
 
   BX_NEXT_INSTR(i);
 }
@@ -100,7 +100,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SETZ_EbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit8u result_8 = getB_ZF();
-  write_virtual_byte(i->seg(), eaddr, result_8);
+  bx_mem.write_byte(i->seg(), eaddr, result_8);
 
   BX_NEXT_INSTR(i);
 }
@@ -117,7 +117,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SETNZ_EbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit8u result_8 = !getB_ZF();
-  write_virtual_byte(i->seg(), eaddr, result_8);
+  bx_mem.write_byte(i->seg(), eaddr, result_8);
 
   BX_NEXT_INSTR(i);
 }
@@ -134,7 +134,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SETBE_EbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit8u result_8 = (getB_CF() | getB_ZF());
-  write_virtual_byte(i->seg(), eaddr, result_8);
+  bx_mem.write_byte(i->seg(), eaddr, result_8);
 
   BX_NEXT_INSTR(i);
 }
@@ -151,7 +151,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SETNBE_EbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit8u result_8 = !(getB_CF() | getB_ZF());
-  write_virtual_byte(i->seg(), eaddr, result_8);
+  bx_mem.write_byte(i->seg(), eaddr, result_8);
 
   BX_NEXT_INSTR(i);
 }
@@ -168,7 +168,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SETS_EbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit8u result_8 = getB_SF();
-  write_virtual_byte(i->seg(), eaddr, result_8);
+  bx_mem.write_byte(i->seg(), eaddr, result_8);
 
   BX_NEXT_INSTR(i);
 }
@@ -185,7 +185,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SETNS_EbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit8u result_8 = !getB_SF();
-  write_virtual_byte(i->seg(), eaddr, result_8);
+  bx_mem.write_byte(i->seg(), eaddr, result_8);
 
   BX_NEXT_INSTR(i);
 }
@@ -202,7 +202,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SETP_EbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit8u result_8 = getB_PF();
-  write_virtual_byte(i->seg(), eaddr, result_8);
+  bx_mem.write_byte(i->seg(), eaddr, result_8);
 
   BX_NEXT_INSTR(i);
 }
@@ -219,7 +219,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SETNP_EbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit8u result_8 = !getB_PF();
-  write_virtual_byte(i->seg(), eaddr, result_8);
+  bx_mem.write_byte(i->seg(), eaddr, result_8);
 
   BX_NEXT_INSTR(i);
 }
@@ -236,7 +236,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SETL_EbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit8u result_8 = (getB_SF() ^ getB_OF());
-  write_virtual_byte(i->seg(), eaddr, result_8);
+  bx_mem.write_byte(i->seg(), eaddr, result_8);
 
   BX_NEXT_INSTR(i);
 }
@@ -253,7 +253,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SETNL_EbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit8u result_8 = !(getB_SF() ^ getB_OF());
-  write_virtual_byte(i->seg(), eaddr, result_8);
+  bx_mem.write_byte(i->seg(), eaddr, result_8);
 
   BX_NEXT_INSTR(i);
 }
@@ -270,7 +270,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SETLE_EbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit8u result_8 = getB_ZF() | (getB_SF() ^ getB_OF());
-  write_virtual_byte(i->seg(), eaddr, result_8);
+  bx_mem.write_byte(i->seg(), eaddr, result_8);
 
   BX_NEXT_INSTR(i);
 }
@@ -288,7 +288,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SETNLE_EbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit8u result_8 = !(getB_ZF() | (getB_SF() ^ getB_OF()));
-  write_virtual_byte(i->seg(), eaddr, result_8);
+  bx_mem.write_byte(i->seg(), eaddr, result_8);
 
   BX_NEXT_INSTR(i);
 }
@@ -323,7 +323,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::BSWAP_ERX(bxInstruction_c *i)
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVBE_GwMw(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  Bit16u val16 = read_virtual_word(i->seg(), eaddr);
+  Bit16u val16 = bx_mem.read_word(i->seg(), eaddr);
   
   BX_WRITE_16BIT_REG(i->dst(), bx_bswap16(val16));
 
@@ -335,7 +335,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVBE_MwGw(bxInstruction_c *i)
   Bit16u val16 = BX_READ_16BIT_REG(i->src());
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  write_virtual_word(i->seg(), eaddr, bx_bswap16(val16));
+  bx_mem.write_word(i->seg(), eaddr, bx_bswap16(val16));
 
   BX_NEXT_INSTR(i);
 }
@@ -343,7 +343,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVBE_MwGw(bxInstruction_c *i)
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVBE_GdMd(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  Bit32u val32 = read_virtual_dword(i->seg(), eaddr);
+  Bit32u val32 = bx_mem.read_dword(i->seg(), eaddr);
   
   BX_WRITE_32BIT_REGZ(i->dst(), bx_bswap32(val32));
 
@@ -355,7 +355,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVBE_MdGd(bxInstruction_c *i)
   Bit32u val32 = BX_READ_32BIT_REG(i->src());
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  write_virtual_dword(i->seg(), eaddr, bx_bswap32(val32));
+  bx_mem.write_byte(i->seg(), eaddr, bx_bswap32(val32));
 
   BX_NEXT_INSTR(i);
 }

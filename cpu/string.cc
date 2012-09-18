@@ -465,8 +465,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::REP_MOVSD_XdYd(bxInstruction_c *i)
 // 16 bit address size
 void BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVSB16_XbYb(bxInstruction_c *i)
 {
-  Bit8u temp8 = read_virtual_byte_32(i->seg(), SI);
-  write_virtual_byte_32(BX_SEG_REG_ES, DI, temp8);
+  Bit8u temp8 = bx_mem.read_byte(i->seg(), SI);
+  bx_mem.write_byte(BX_SEG_REG_ES, DI, temp8);
 
   if (BX_CPU_THIS_PTR get_DF()) {
     /* decrement SI, DI */
@@ -514,8 +514,8 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVSB32_XbYb(bxInstruction_c *i)
   else
 #endif
   {
-    temp8 = read_virtual_byte(i->seg(), ESI);
-    write_virtual_byte(BX_SEG_REG_ES, EDI, temp8);
+    temp8 = bx_mem.read_byte(i->seg(), ESI);
+    bx_mem.write_byte(BX_SEG_REG_ES, EDI, temp8);
   }
 
   if (BX_CPU_THIS_PTR get_DF()) {
@@ -534,8 +534,8 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVSW16_XwYw(bxInstruction_c *i)
   Bit16u si = SI;
   Bit16u di = DI;
 
-  Bit16u temp16 = read_virtual_word_32(i->seg(), si);
-  write_virtual_word_32(BX_SEG_REG_ES, di, temp16);
+  Bit16u temp16 = bx_mem.read_word(i->seg(), si);
+  bx_mem.write_word(BX_SEG_REG_ES, di, temp16);
 
   if (BX_CPU_THIS_PTR get_DF()) {
     /* decrement SI, DI */
@@ -560,8 +560,8 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVSW32_XwYw(bxInstruction_c *i)
   Bit32u esi = ESI;
   Bit32u edi = EDI;
 
-  temp16 = read_virtual_word(i->seg(), esi);
-  write_virtual_word(BX_SEG_REG_ES, edi, temp16);
+  temp16 = bx_mem.read_word(i->seg(), esi);
+  bx_mem.write_word(BX_SEG_REG_ES, edi, temp16);
 
   if (BX_CPU_THIS_PTR get_DF()) {
     esi -= 2;
@@ -585,8 +585,8 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVSD16_XdYd(bxInstruction_c *i)
   Bit16u si = SI;
   Bit16u di = DI;
 
-  temp32 = read_virtual_dword_32(i->seg(), si);
-  write_virtual_dword_32(BX_SEG_REG_ES, di, temp32);
+  temp32 = bx_mem.read_dword(i->seg(), si);
+  bx_mem.write_dword(BX_SEG_REG_ES, di, temp32);
 
   if (BX_CPU_THIS_PTR get_DF()) {
     si -= 4;
@@ -632,15 +632,15 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVSD32_XdYd(bxInstruction_c *i)
       incr = dwordCount << 2; // count * 4
     }
     else {
-      temp32 = read_virtual_dword(i->seg(), esi);
-      write_virtual_dword(BX_SEG_REG_ES, edi, temp32);
+      temp32 = bx_mem.read_dword(i->seg(), esi);
+      bx_mem.write_dword(BX_SEG_REG_ES, edi, temp32);
     }
   }
   else
 #endif
   {
-    temp32 = read_virtual_dword(i->seg(), esi);
-    write_virtual_dword(BX_SEG_REG_ES, edi, temp32);
+    temp32 = bx_mem.read_dword(i->seg(), esi);
+    bx_mem.write_dword(BX_SEG_REG_ES, edi, temp32);
   }
 
   if (BX_CPU_THIS_PTR get_DF()) {
@@ -716,8 +716,8 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::CMPSB16_XbYb(bxInstruction_c *i)
   Bit16u si = SI;
   Bit16u di = DI;
 
-  op1_8 = read_virtual_byte_32(i->seg(), si);
-  op2_8 = read_virtual_byte_32(BX_SEG_REG_ES, di);
+  op1_8 = bx_mem.read_byte(i->seg(), si);
+  op2_8 = bx_mem.read_byte(BX_SEG_REG_ES, di);
 
   diff_8 = op1_8 - op2_8;
 
@@ -744,8 +744,8 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::CMPSB32_XbYb(bxInstruction_c *i)
   Bit32u esi = ESI;
   Bit32u edi = EDI;
 
-  op1_8 = read_virtual_byte(i->seg(), esi);
-  op2_8 = read_virtual_byte(BX_SEG_REG_ES, edi);
+  op1_8 = bx_mem.read_byte(i->seg(), esi);
+  op2_8 = bx_mem.read_byte(BX_SEG_REG_ES, edi);
 
   diff_8 = op1_8 - op2_8;
 
@@ -773,8 +773,8 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::CMPSW16_XwYw(bxInstruction_c *i)
   Bit16u si = SI;
   Bit16u di = DI;
 
-  op1_16 = read_virtual_word_32(i->seg(), si);
-  op2_16 = read_virtual_word_32(BX_SEG_REG_ES, di);
+  op1_16 = bx_mem.read_word(i->seg(), si);
+  op2_16 = bx_mem.read_word(BX_SEG_REG_ES, di);
 
   diff_16 = op1_16 - op2_16;
 
@@ -801,8 +801,8 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::CMPSW32_XwYw(bxInstruction_c *i)
   Bit32u esi = ESI;
   Bit32u edi = EDI;
 
-  op1_16 = read_virtual_word(i->seg(), esi);
-  op2_16 = read_virtual_word(BX_SEG_REG_ES, edi);
+  op1_16 = bx_mem.read_word(i->seg(), esi);
+  op2_16 = bx_mem.read_word(BX_SEG_REG_ES, edi);
 
   diff_16 = op1_16 - op2_16;
 
@@ -830,8 +830,8 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::CMPSD16_XdYd(bxInstruction_c *i)
   Bit16u si = SI;
   Bit16u di = DI;
 
-  op1_32 = read_virtual_dword_32(i->seg(), si);
-  op2_32 = read_virtual_dword_32(BX_SEG_REG_ES, di);
+  op1_32 = bx_mem.read_dword(i->seg(), si);
+  op2_32 = bx_mem.read_dword(BX_SEG_REG_ES, di);
 
   diff_32 = op1_32 - op2_32;
 
@@ -858,8 +858,8 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::CMPSD32_XdYd(bxInstruction_c *i)
   Bit32u esi = ESI;
   Bit32u edi = EDI;
 
-  op1_32 = read_virtual_dword(i->seg(), esi);
-  op2_32 = read_virtual_dword(BX_SEG_REG_ES, edi);
+  op1_32 = bx_mem.read_dword(i->seg(), esi);
+  op2_32 = bx_mem.read_dword(BX_SEG_REG_ES, edi);
 
   diff_32 = op1_32 - op2_32;
 
@@ -933,7 +933,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::SCASB16_ALXb(bxInstruction_c *i)
 
   Bit16u di = DI;
 
-  op2_8 = read_virtual_byte_32(BX_SEG_REG_ES, di);
+  op2_8 = bx_mem.read_byte(BX_SEG_REG_ES, di);
 
   diff_8 = op1_8 - op2_8;
 
@@ -956,7 +956,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::SCASB32_ALXb(bxInstruction_c *i)
 
   Bit32u edi = EDI;
 
-  op2_8 = read_virtual_byte(BX_SEG_REG_ES, edi);
+  op2_8 = bx_mem.read_byte(BX_SEG_REG_ES, edi);
   diff_8 = op1_8 - op2_8;
 
   SET_FLAGS_OSZAPC_SUB_8(op1_8, op2_8, diff_8);
@@ -979,7 +979,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::SCASW16_AXXw(bxInstruction_c *i)
 
   Bit16u di = DI;
 
-  op2_16 = read_virtual_word_32(BX_SEG_REG_ES, di);
+  op2_16 = bx_mem.read_word(BX_SEG_REG_ES, di);
   diff_16 = op1_16 - op2_16;
 
   SET_FLAGS_OSZAPC_SUB_16(op1_16, op2_16, diff_16);
@@ -1001,7 +1001,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::SCASW32_AXXw(bxInstruction_c *i)
 
   Bit32u edi = EDI;
 
-  op2_16 = read_virtual_word(BX_SEG_REG_ES, edi);
+  op2_16 = bx_mem.read_word(BX_SEG_REG_ES, edi);
   diff_16 = op1_16 - op2_16;
 
   SET_FLAGS_OSZAPC_SUB_16(op1_16, op2_16, diff_16);
@@ -1024,7 +1024,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::SCASD16_EAXXd(bxInstruction_c *i)
 
   Bit16u di = DI;
 
-  op2_32 = read_virtual_dword_32(BX_SEG_REG_ES, di);
+  op2_32 = bx_mem.read_dword(BX_SEG_REG_ES, di);
   diff_32 = op1_32 - op2_32;
 
   SET_FLAGS_OSZAPC_SUB_32(op1_32, op2_32, diff_32);
@@ -1046,7 +1046,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::SCASD32_EAXXd(bxInstruction_c *i)
 
   Bit32u edi = EDI;
 
-  op2_32 = read_virtual_dword(BX_SEG_REG_ES, edi);
+  op2_32 = bx_mem.read_dword(BX_SEG_REG_ES, edi);
   diff_32 = op1_32 - op2_32;
 
   SET_FLAGS_OSZAPC_SUB_32(op1_32, op2_32, diff_32);
@@ -1115,7 +1115,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::STOSB16_YbAL(bxInstruction_c *i)
 {
   Bit16u di = DI;
 
-  write_virtual_byte_32(BX_SEG_REG_ES, di, AL);
+  bx_mem.write_byte(BX_SEG_REG_ES, di, AL);
 
   if (BX_CPU_THIS_PTR get_DF()) {
     di--;
@@ -1160,7 +1160,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::STOSB32_YbAL(bxInstruction_c *i)
   else
 #endif
   {
-    write_virtual_byte(BX_SEG_REG_ES, edi, AL);
+	  bx_mem.write_byte(BX_SEG_REG_ES, edi, AL);
   }
 
   if (BX_CPU_THIS_PTR get_DF()) {
@@ -1179,7 +1179,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::STOSW16_YwAX(bxInstruction_c *i)
 {
   Bit16u di = DI;
 
-  write_virtual_word_32(BX_SEG_REG_ES, di, AX);
+  bx_mem.write_word(BX_SEG_REG_ES, di, AX);
 
   if (BX_CPU_THIS_PTR get_DF()) {
     di -= 2;
@@ -1196,7 +1196,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::STOSW32_YwAX(bxInstruction_c *i)
 {
   Bit32u edi = EDI;
 
-  write_virtual_word(BX_SEG_REG_ES, edi, AX);
+  bx_mem.write_word(BX_SEG_REG_ES, edi, AX);
 
   if (BX_CPU_THIS_PTR get_DF()) {
     edi -= 2;
@@ -1214,7 +1214,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::STOSD16_YdEAX(bxInstruction_c *i)
 {
   Bit16u di = DI;
 
-  write_virtual_dword_32(BX_SEG_REG_ES, di, EAX);
+  bx_mem.write_dword(BX_SEG_REG_ES, di, EAX);
 
   if (BX_CPU_THIS_PTR get_DF()) {
     di -= 4;
@@ -1231,7 +1231,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::STOSD32_YdEAX(bxInstruction_c *i)
 {
   Bit32u edi = EDI;
 
-  write_virtual_dword(BX_SEG_REG_ES, edi, EAX);
+  bx_mem.write_dword(BX_SEG_REG_ES, edi, EAX);
 
   if (BX_CPU_THIS_PTR get_DF()) {
     edi -= 4;
@@ -1298,7 +1298,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::LODSB16_ALXb(bxInstruction_c *i)
 {
   Bit16u si = SI;
 
-  AL = read_virtual_byte_32(i->seg(), si);
+  AL = bx_mem.read_byte(i->seg(), si);
 
   if (BX_CPU_THIS_PTR get_DF()) {
     si--;
@@ -1315,7 +1315,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::LODSB32_ALXb(bxInstruction_c *i)
 {
   Bit32u esi = ESI;
 
-  AL = read_virtual_byte(i->seg(), esi);
+  AL = bx_mem.read_byte(i->seg(), esi);
 
   if (BX_CPU_THIS_PTR get_DF()) {
     esi--;
@@ -1334,7 +1334,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::LODSW16_AXXw(bxInstruction_c *i)
 {
   Bit16u si = SI;
 
-  AX = read_virtual_word_32(i->seg(), si);
+  AX = bx_mem.read_word(i->seg(), si);
 
   if (BX_CPU_THIS_PTR get_DF()) {
     si -= 2;
@@ -1351,7 +1351,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::LODSW32_AXXw(bxInstruction_c *i)
 {
   Bit32u esi = ESI;
 
-  AX = read_virtual_word(i->seg(), esi);
+  AX = bx_mem.read_word(i->seg(), esi);
 
   if (BX_CPU_THIS_PTR get_DF()) {
     esi -= 2;
@@ -1370,7 +1370,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::LODSD16_EAXXd(bxInstruction_c *i)
 {
   Bit16u si = SI;
 
-  RAX = read_virtual_dword_32(i->seg(), si);
+  RAX = bx_mem.read_dword(i->seg(), si);
 
   if (BX_CPU_THIS_PTR get_DF()) {
     si -= 4;
@@ -1387,7 +1387,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::LODSD32_EAXXd(bxInstruction_c *i)
 {
   Bit32u esi = ESI;
 
-  RAX = read_virtual_dword(i->seg(), esi);
+  RAX = bx_mem.read_dword(i->seg(), esi);
 
   if (BX_CPU_THIS_PTR get_DF()) {
     esi -= 4;

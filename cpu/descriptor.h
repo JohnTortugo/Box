@@ -129,9 +129,6 @@ union {
                             */
     bx_bool g;             /* granularity: 0=byte, 1=4K (page) */
     bx_bool d_b;           /* default size: 0=16bit, 1=32bit */
-#if BX_SUPPORT_X86_64
-    bx_bool l;             /* long mode: 0=compat, 1=64 bit */
-#endif
     bx_bool avl;           /* available for use by system */
   } segment;
   struct {

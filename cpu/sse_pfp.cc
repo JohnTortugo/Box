@@ -123,7 +123,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CVTPI2PS_VpsQqM(bxInstruction_c *i
 
   // do not cause transition to MMX state because no MMX register touched
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  MMXUQ(op) = read_virtual_qword(i->seg(), eaddr);
+  MMXUQ(op) = bx_mem.read_qword(i->seg(), eaddr);
 
   float_status_t status;
   mxcsr_to_softfloat_status_word(status, MXCSR);
@@ -171,7 +171,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CVTPI2PD_VpdQqM(bxInstruction_c *i
 
   // do not cause transition to MMX state because no MMX register touched
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  MMXUQ(op) = read_virtual_qword(i->seg(), eaddr);
+  MMXUQ(op) = bx_mem.read_qword(i->seg(), eaddr);
 
   result.xmm64u(0) = int32_to_float64(MMXUD0(op));
   result.xmm64u(1) = int32_to_float64(MMXUD1(op));
@@ -270,7 +270,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CVTTPS2PI_PqWps(bxInstruction_c *i
   else {
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
     /* pointer, segment address pair */
-    MMXUQ(op) = read_virtual_qword(i->seg(), eaddr);
+    MMXUQ(op) = bx_mem.read_qword(i->seg(), eaddr);
   }
 
   float_status_t status;
@@ -433,7 +433,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CVTPS2PI_PqWps(bxInstruction_c *i)
   else {
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
     /* pointer, segment address pair */
-    MMXUQ(op) = read_virtual_qword(i->seg(), eaddr);
+    MMXUQ(op) = bx_mem.read_qword(i->seg(), eaddr);
   }
 
   float_status_t status;

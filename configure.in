@@ -2376,7 +2376,7 @@ AC_PATH_PROG(GZIP, gzip)
 AC_PATH_PROG(TAR, tar)
 
 AC_OUTPUT(Makefile cpu/Makefile \
-          fpu/Makefile elf/Makefile memory/Makefile \
+          fpu/Makefile elf/Makefile memory/Makefile syscall/Makefile \
 	  runtime/Makefile disasm/Makefile bxversion.h)
 # gui/Makefile disasm/Makefile ${INSTRUMENT_DIR}/Makefile misc/Makefile \
 # fpu/Makefile doc/docbook/Makefile build/linux/bochs-dlx \

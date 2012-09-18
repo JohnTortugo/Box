@@ -40,7 +40,6 @@ bx_cpuid_t::bx_cpuid_t(BX_CPU_C *_cpu): cpu(_cpu)
 
 bx_generic_cpuid_t::bx_generic_cpuid_t(BX_CPU_C *cpu): bx_cpuid_t(cpu)
 {
-/*
   init_isa_extensions_bitmask();
   init_cpu_extensions_bitmask();
 #if BX_SUPPORT_VMX
@@ -50,35 +49,27 @@ bx_generic_cpuid_t::bx_generic_cpuid_t(BX_CPU_C *cpu): bx_cpuid_t(cpu)
   init_svm_extensions_bitmask();
 #endif
 
-#if BX_CPU_LEVEL <= 5
-  // 486 and Pentium processors
-  max_std_leaf = 1;
-#else
   // for Pentium Pro, Pentium II, Pentium 4 processors
   max_std_leaf = 2;
 
   // do not report CPUID functions above 0x3 if cpuid_limit_winnt is set
   // to workaround WinNT issue.
-  static bx_bool cpuid_limit_winnt = SIM->get_param_bool(BXPN_CPUID_LIMIT_WINNT)->get();
+  static bx_bool cpuid_limit_winnt = true; //CESAR - SIM->get_param_bool(BXPN_CPUID_LIMIT_WINNT)->get();
   if (! cpuid_limit_winnt) {
     if (BX_CPUID_SUPPORT_ISA_EXTENSION(BX_ISA_MONITOR_MWAIT))
       max_std_leaf = 0x5;
+
     if (BX_CPUID_SUPPORT_CPU_EXTENSION(BX_CPU_X2APIC))
       max_std_leaf = 0xB;
+
     if (BX_CPUID_SUPPORT_ISA_EXTENSION(BX_ISA_XSAVE))
       max_std_leaf = 0xD;
   }
-#endif
 
-#if BX_CPU_LEVEL <= 5
-  max_ext_leaf = 0;
-#else
   max_ext_leaf = 0x80000008;
 
   if (BX_CPUID_SUPPORT_ISA_EXTENSION(BX_ISA_SVM))
     max_ext_leaf = 0x8000000A;
-#endif
-*/
 }
 
 void bx_generic_cpuid_t::get_cpuid_leaf(Bit32u function, Bit32u subfunction, cpuid_function_t *leaf) const
@@ -601,20 +592,17 @@ void bx_generic_cpuid_t::get_ext_cpuid_leaf_A(cpuid_function_t *leaf) const
 
 void bx_generic_cpuid_t::init_isa_extensions_bitmask(void)
 {
-/*
   Bit64u features_bitmask = 0;
 
 #if BX_SUPPORT_FPU
   features_bitmask |= BX_ISA_X87;
 #endif
 
-#if BX_CPU_LEVEL >= 4
   features_bitmask |= BX_ISA_486;
 
-#if BX_CPU_LEVEL >= 5
   features_bitmask |= BX_ISA_PENTIUM;
 
-  static bx_bool mmx_enabled = SIM->get_param_bool(BXPN_CPUID_MMX)->get();
+  static bx_bool mmx_enabled = true; //CESAR: SIM->get_param_bool(BXPN_CPUID_MMX)->get();
   if (mmx_enabled)
     features_bitmask |= BX_ISA_MMX;
 
@@ -627,16 +615,15 @@ void bx_generic_cpuid_t::init_isa_extensions_bitmask(void)
   }
 #endif
 
-#if BX_CPU_LEVEL >= 6
   features_bitmask |= BX_ISA_P6;
 
 #if BX_SUPPORT_MONITOR_MWAIT
-  static bx_bool mwait_enabled = SIM->get_param_bool(BXPN_CPUID_MWAIT)->get();
+  static bx_bool mwait_enabled = false; //CESAR - SIM->get_param_bool(BXPN_CPUID_MWAIT)->get();
   if (mwait_enabled)
     features_bitmask |= BX_ISA_MONITOR_MWAIT;
 #endif
 
-  static unsigned sse_enabled = SIM->get_param_enum(BXPN_CPUID_SSE)->get();
+  static unsigned sse_enabled = BX_CPUID_SUPPORT_SSE4_2; //CESAR - SIM->get_param_enum(BXPN_CPUID_SSE)->get();
   // determine SSE in runtime
   switch (sse_enabled) {
     case BX_CPUID_SUPPORT_SSE4_2:
@@ -671,7 +658,7 @@ void bx_generic_cpuid_t::init_isa_extensions_bitmask(void)
   if (sse_enabled >= BX_CPUID_SUPPORT_SSE4_2)
     features_bitmask |= BX_ISA_POPCNT;
 
-  static bx_bool sse4a_enabled = SIM->get_param_bool(BXPN_CPUID_SSE4A)->get();
+  static bx_bool sse4a_enabled = true; //CESAR SIM->get_param_bool(BXPN_CPUID_SSE4A)->get();
   if (sse4a_enabled) {
     features_bitmask |= BX_ISA_SSE4A;
 
@@ -681,11 +668,11 @@ void bx_generic_cpuid_t::init_isa_extensions_bitmask(void)
     }
   }
 
-  static bx_bool sep_enabled = SIM->get_param_bool(BXPN_CPUID_SEP)->get();
+  static bx_bool sep_enabled = true; //CESAR - SIM->get_param_bool(BXPN_CPUID_SEP)->get();
   if (sep_enabled)
     features_bitmask |= BX_ISA_SYSENTER_SYSEXIT;
 
-  static bx_bool xsave_enabled = SIM->get_param_bool(BXPN_CPUID_XSAVE)->get();
+  static bx_bool xsave_enabled = false; //CESAR - SIM->get_param_bool(BXPN_CPUID_XSAVE)->get();
   if (xsave_enabled) {
     features_bitmask |= BX_ISA_XSAVE;
 
@@ -695,7 +682,7 @@ void bx_generic_cpuid_t::init_isa_extensions_bitmask(void)
     }
   }
 
-  static bx_bool xsaveopt_enabled = SIM->get_param_bool(BXPN_CPUID_XSAVEOPT)->get();
+  static bx_bool xsaveopt_enabled = false; //CESAR - SIM->get_param_bool(BXPN_CPUID_XSAVEOPT)->get();
   if (xsaveopt_enabled) {
     features_bitmask |= BX_ISA_XSAVEOPT;
 
@@ -705,7 +692,7 @@ void bx_generic_cpuid_t::init_isa_extensions_bitmask(void)
     }
   }
 
-  static bx_bool aes_enabled = SIM->get_param_bool(BXPN_CPUID_AES)->get();
+  static bx_bool aes_enabled = false; //CESAR - SIM->get_param_bool(BXPN_CPUID_AES)->get();
   if (aes_enabled) {
     features_bitmask |= BX_ISA_AES_PCLMULQDQ;
 
@@ -716,7 +703,7 @@ void bx_generic_cpuid_t::init_isa_extensions_bitmask(void)
     }
   }
 
-  static bx_bool movbe_enabled = SIM->get_param_bool(BXPN_CPUID_MOVBE)->get();
+  static bx_bool movbe_enabled = true; //CESAR - SIM->get_param_bool(BXPN_CPUID_MOVBE)->get();
   if (movbe_enabled) {
     features_bitmask |= BX_ISA_MOVBE;
 
@@ -727,7 +714,7 @@ void bx_generic_cpuid_t::init_isa_extensions_bitmask(void)
     }
   }
 
-  static bx_bool adx_enabled = SIM->get_param_bool(BXPN_CPUID_ADX)->get();
+  static bx_bool adx_enabled = false; //CESAR - SIM->get_param_bool(BXPN_CPUID_ADX)->get();
   if (adx_enabled) {
     features_bitmask |= BX_ISA_ADX;
 
@@ -738,125 +725,8 @@ void bx_generic_cpuid_t::init_isa_extensions_bitmask(void)
     }
   }
 
-#if BX_SUPPORT_X86_64
-  static bx_bool x86_64_enabled = SIM->get_param_bool(BXPN_CPUID_X86_64)->get();
-  if (x86_64_enabled) {
-    features_bitmask |= BX_ISA_CMPXCHG16B | BX_ISA_RDTSCP | BX_ISA_LM_LAHF_SAHF;
-
-    if (sse_enabled < BX_CPUID_SUPPORT_SSE2) {
-      BX_PANIC(("PANIC: x86-64 emulation requires SSE2 support !"));
-      return;
-    }
-
-    if (! sep_enabled) {
-      BX_PANIC(("PANIC: x86-64 emulation requires SYSENTER/SYSEXIT support !"));
-      return;
-    }
-
-    static bx_bool fsgsbase_enabled = SIM->get_param_bool(BXPN_CPUID_FSGSBASE)->get();
-    if (fsgsbase_enabled)
-      features_bitmask |= BX_ISA_FSGSBASE;
-
-    static unsigned apic_enabled = SIM->get_param_enum(BXPN_CPUID_APIC)->get();
-    if (apic_enabled < BX_CPUID_SUPPORT_XAPIC) {
-      BX_PANIC(("PANIC: x86-64 emulation requires XAPIC support !"));
-      return;
-    }
-  }
-  else {
-    if (BX_SUPPORT_VMX >= 2) {
-      BX_PANIC(("PANIC: VMXx2 emulation requires x86-64 support !"));
-      return;
-    }
-  }
-
-#if BX_SUPPORT_AVX
-  static unsigned avx_enabled = SIM->get_param_num(BXPN_CPUID_AVX)->get();
-  if (avx_enabled) {
-    features_bitmask |= BX_ISA_AVX;
-
-    if (! xsave_enabled) {
-      BX_PANIC(("PANIC: AVX emulation requires XSAVE support !"));
-      return;
-    }
-
-    if (! x86_64_enabled) {
-      BX_PANIC(("PANIC: AVX emulation requires x86-64 support !"));
-      return;
-    }
-
-    if (avx_enabled >= 2)
-      features_bitmask |= BX_ISA_AVX2;
-  }
-
-  static bx_bool avx_f16c_enabled = SIM->get_param_bool(BXPN_CPUID_AVX_F16CVT)->get();
-  if (avx_f16c_enabled) {
-    if (! avx_enabled) {
-      BX_PANIC(("PANIC: Float16 convert emulation requires AVX support !"));
-      return;
-    }
-
-    features_bitmask |= BX_ISA_AVX_F16C;
-  }
-
-  static bx_bool avx_fma_enabled = SIM->get_param_bool(BXPN_CPUID_AVX_FMA)->get();
-  if (avx_fma_enabled) {
-    if (avx_enabled < 2) {
-      BX_PANIC(("PANIC: FMA emulation requires AVX2 support !"));
-      return;
-    }
-
-    features_bitmask |= BX_ISA_AVX_FMA;
-  }
-
-  static unsigned bmi_enabled = SIM->get_param_num(BXPN_CPUID_BMI)->get();
-  if (bmi_enabled) {
-    features_bitmask |= BX_ISA_BMI1 | BX_ISA_LZCNT;
-
-    if (! avx_enabled) {
-      BX_PANIC(("PANIC: Bit Manipulation Instructions (BMI) emulation requires AVX support !"));
-      return;
-    }
-
-    if (bmi_enabled >= 2)
-      features_bitmask |= BX_ISA_BMI2;
-  }
-
-  static bx_bool fma4_enabled = SIM->get_param_bool(BXPN_CPUID_FMA4)->get();
-  if (fma4_enabled) {
-    if (! avx_enabled) {
-      BX_PANIC(("PANIC: FMA4 emulation requires AVX support !"));
-      return;
-    }
-
-    features_bitmask |= BX_ISA_FMA4;
-  }
-
-  static bx_bool xop_enabled = SIM->get_param_bool(BXPN_CPUID_XOP)->get();
-  if (xop_enabled) {
-    if (! avx_enabled) {
-      BX_PANIC(("PANIC: XOP emulation requires AVX support !"));
-      return;
-    }
-
-    features_bitmask |= BX_ISA_XOP;
-  }
-
-  static bx_bool tbm_enabled = SIM->get_param_bool(BXPN_CPUID_TBM)->get();
-  if (tbm_enabled) {
-    if (! avx_enabled || ! xop_enabled) {
-      BX_PANIC(("PANIC: TBM emulation requires AVX and XOP support !"));
-      return;
-    }
-
-    features_bitmask |= BX_ISA_TBM;
-  }
-#endif // BX_SUPPORT_AVX
-
-#endif // BX_SUPPORT_X86_64
-
 #if BX_SUPPORT_VMX
-  static unsigned vmx_enabled = SIM->get_param_num(BXPN_CPUID_VMX)->get();
+  static unsigned vmx_enabled = true; //CESAR - SIM->get_param_num(BXPN_CPUID_VMX)->get();
   if (vmx_enabled) {
     features_bitmask |= BX_ISA_VMX;
 
@@ -868,7 +738,7 @@ void bx_generic_cpuid_t::init_isa_extensions_bitmask(void)
 #endif
 
 #if BX_SUPPORT_SVM
-  static unsigned svm_enabled = SIM->get_param_num(BXPN_CPUID_SVM)->get();
+  static unsigned svm_enabled = true; //CESAR - SIM->get_param_num(BXPN_CPUID_SVM)->get();
   if (svm_enabled) {
     features_bitmask |= BX_ISA_SVM;
 
@@ -886,27 +756,17 @@ void bx_generic_cpuid_t::init_isa_extensions_bitmask(void)
   }
 #endif
 
-#endif // CPU_LEVEL >= 6
-
-#endif // CPU_LEVEL >= 5
-
-#endif // CPU_LEVEL >= 4
-
   this->isa_extensions_bitmask = features_bitmask;
-*/
 }
 
 void bx_generic_cpuid_t::init_cpu_extensions_bitmask(void)
 {
-/*
   Bit32u features_bitmask = 0;
 
-#if BX_CPU_LEVEL >= 5
   features_bitmask |= BX_CPU_VME;
   features_bitmask |= BX_CPU_DEBUG_EXTENSIONS;
   features_bitmask |= BX_CPU_PSE;
 
-#if BX_CPU_LEVEL >= 6
   features_bitmask |= BX_CPU_PAE;
   features_bitmask |= BX_CPU_PGE;
 #if BX_PHY_ADDRESS_LONG
@@ -919,39 +779,11 @@ void bx_generic_cpuid_t::init_cpu_extensions_bitmask(void)
   features_bitmask |= BX_CPU_MISALIGNED_SSE;
 #endif
 
-  static bx_bool smep_enabled = SIM->get_param_bool(BXPN_CPUID_SMEP)->get();
+  static bx_bool smep_enabled = true; //CESAR - SIM->get_param_bool(BXPN_CPUID_SMEP)->get();
   if (smep_enabled)
     features_bitmask |= BX_CPU_SMEP;
 
-#if BX_SUPPORT_X86_64
-  static bx_bool x86_64_enabled = SIM->get_param_bool(BXPN_CPUID_X86_64)->get();
-  if (x86_64_enabled) {
-    features_bitmask |= BX_CPU_LONG_MODE | BX_CPU_FFXSR | BX_CPU_NX;
-
-    static bx_bool pcid_enabled = SIM->get_param_bool(BXPN_CPUID_PCID)->get();
-    if (pcid_enabled)
-      features_bitmask |= BX_CPU_PCID;
-
-    static bx_bool xlarge_pages = SIM->get_param_bool(BXPN_CPUID_1G_PAGES)->get();
-    if (xlarge_pages)
-      features_bitmask |= BX_CPU_1G_PAGES;
-  }
-
-#if BX_SUPPORT_SVM
-  static unsigned svm_enabled = SIM->get_param_num(BXPN_CPUID_SVM)->get();
-  if (svm_enabled) {
-    features_bitmask |= BX_CPU_ALT_MOV_CR8 | BX_CPU_XAPIC_EXT; // auto-enable together with SVM
-  }
-#endif
-
-#endif // BX_SUPPORT_X86_64
-
-#endif // CPU_LEVEL >= 6
-
-#endif // CPU_LEVEL >= 5
-
   this->cpu_extensions_bitmask = features_bitmask;
-*/
 }
 
 #if BX_SUPPORT_VMX

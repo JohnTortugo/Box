@@ -212,7 +212,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::VMOVLPD_VpdHpdMq(bxInstruction_c *
 
   BxPackedXmmRegister op;
 
-  op.xmm64u(0) = read_virtual_qword(i->seg(), eaddr);
+  op.xmm64u(0) = bx_mem.read_qword(i->seg(), eaddr);
   op.xmm64u(1) = BX_READ_XMM_REG_HI_QWORD(i->src1());
 
   BX_WRITE_XMM_REG_CLEAR_HIGH(i->dst(), op);
@@ -241,7 +241,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::VMOVHPD_VpdHpdMq(bxInstruction_c *
   BxPackedXmmRegister op;
 
   op.xmm64u(0) = BX_READ_XMM_REG_LO_QWORD(i->src1());
-  op.xmm64u(1) = read_virtual_qword(i->seg(), eaddr);
+  op.xmm64u(1) = bx_mem.read_qword(i->seg(), eaddr);
 
   BX_WRITE_XMM_REG_CLEAR_HIGH(i->dst(), op);
 
@@ -578,7 +578,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::VMASKMOVPS_VpsHpsMps(bxInstruction
 
   for (int n=4*len-1; n >= 0; n--) {
     if (mask.avx32u(n) & 0x80000000)
-       result.avx32u(n) = read_virtual_dword(i->seg(), (eaddr + 4*n) & i->asize_mask());
+       result.avx32u(n) = bx_mem.read_dword(i->seg(), (eaddr + 4*n) & i->asize_mask());
     else
        result.avx32u(n) = 0;
   }
@@ -598,7 +598,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::VMASKMOVPD_VpdHpdMpd(bxInstruction
 
   for (int n=2*len-1; n >= 0; n--) {
     if (mask.avx32u(n*2+1) & 0x80000000)
-       result.avx64u(n) = read_virtual_qword(i->seg(), (eaddr + 8*n) & i->asize_mask());
+       result.avx64u(n) = bx_mem.read_qword(i->seg(), (eaddr + 8*n) & i->asize_mask());
     else
        result.avx64u(n) = 0;
   }

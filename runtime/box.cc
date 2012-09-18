@@ -24,6 +24,7 @@
 #include "bxversion.h"
 #include "cpu/cpu.h"
 #include "memory/memory.h"
+#include "syscall/syscall.h"
 
 extern "C" {
 #include <signal.h>
@@ -38,6 +39,7 @@ typedef BX_CPU_C *BX_CPU_C_PTR;
 
 BX_CPU_C bx_cpu;
 BX_MEM_C bx_mem;
+BX_SYSCALL bx_sys;
 
 void bx_print_header() {
 }
@@ -52,6 +54,7 @@ const char *cpu_modes[] = {
 
 int bxmain(void) {
     char instr[] =  {
+            			0x55,                   	            // push   %ebp
                         0xb8,0x01,0x00,0x00,0x00,      	        // mov    $0x1,%eax
                         0xbb,0x02,0x00,0x00,0x00,      	        // mov    $0x2,%ebx
                         0x89,0xc6,               	            // mov    %eax,%esi
@@ -98,14 +101,20 @@ int bxmain(void) {
 
     CacheSize = sizeof(instr);
 
-    bx_cpu.sregs[BX_SEG_REG_CS].cache.u.segment.d_b = 1;
-    bx_cpu.sregs[BX_SEG_REG_CS].cache.u.segment.g = 1;
+    bx_cpu.sregs[BX_SEG_REG_CS].cache.u.segment.d_b 			= 1;
+    bx_cpu.sregs[BX_SEG_REG_CS].cache.u.segment.g 				= 1;
+    bx_cpu.sregs[BX_SEG_REG_CS].cache.u.segment.base 			= 0;
+    bx_cpu.sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled 	= (intptr_t) instr + sizeof(instr);;
 
-    bx_cpu.sregs[BX_SEG_REG_SS].cache.u.segment.d_b = 1;
-    bx_cpu.sregs[BX_SEG_REG_SS].cache.u.segment.g = 1;
+    bx_cpu.sregs[BX_SEG_REG_SS].cache.u.segment.d_b 			= 1;
+    bx_cpu.sregs[BX_SEG_REG_SS].cache.u.segment.g 				= 1;
 
-    bx_cpu.sregs[BX_SEG_REG_DS].cache.u.segment.d_b = 1;
-    bx_cpu.sregs[BX_SEG_REG_DS].cache.u.segment.g = 1;
+    bx_cpu.sregs[BX_SEG_REG_DS].cache.u.segment.d_b 			= 1;
+    bx_cpu.sregs[BX_SEG_REG_DS].cache.u.segment.g 				= 1;
+
+    bx_cpu.sregs[BX_SEG_REG_ES].cache.u.segment.d_b 			= 1;
+    bx_cpu.sregs[BX_SEG_REG_ES].cache.u.segment.g 				= 1;
+
 
 	//bx_cpu.init_FetchDecodeTables();
     //bx_cpu.initialize();

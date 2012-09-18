@@ -28,6 +28,16 @@
 
 #include "cpu/cpuid.h"
 
+enum {
+  BX_CPUID_SUPPORT_NOSSE,
+  BX_CPUID_SUPPORT_SSE,
+  BX_CPUID_SUPPORT_SSE2,
+  BX_CPUID_SUPPORT_SSE3,
+  BX_CPUID_SUPPORT_SSSE3,
+  BX_CPUID_SUPPORT_SSE4_1,
+  BX_CPUID_SUPPORT_SSE4_2
+};
+
 class bx_generic_cpuid_t : public bx_cpuid_t {
 public:
   bx_generic_cpuid_t(BX_CPU_C *cpu);
