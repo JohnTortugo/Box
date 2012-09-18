@@ -9,6 +9,7 @@ int CacheSize;
 void BX_CPU_C::cpu_loop(void) {
     bxInstruction_c *i = new bxInstruction_c();
     int ret;
+    char disbuf[50];
 
     disassembler d;
     d.set_syntax_att();
@@ -25,7 +26,6 @@ void BX_CPU_C::cpu_loop(void) {
         // doesn't mean that i was decoded right
         // but means that the input that was correct
         // we can use this for tracing program interpretation
-        char disbuf[50];
         d.disasm32((bx_address)RIP, (bx_address)RIP, (const Bit8u *)RIP, disbuf);
         printf("%s\n", disbuf);
 
