@@ -58,7 +58,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PI2FW_PqQq(bxInstruction_c *i)
   else {
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
     /* pointer, segment address pair */
-    MMXUQ(op) = read_virtual_qword(i->seg(), eaddr);
+    MMXUQ(op) = bx_mem.read_qword(i->seg(), eaddr);
   }
 
   BX_CPU_THIS_PTR prepareFPU2MMX(); /* FPU2MMX transition */
@@ -93,7 +93,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PI2FD_PqQq(bxInstruction_c *i)
   else {
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
     /* pointer, segment address pair */
-    MMXUQ(op) = read_virtual_qword(i->seg(), eaddr);
+    MMXUQ(op) = bx_mem.read_qword(i->seg(), eaddr);
   }
 
   BX_CPU_THIS_PTR prepareFPU2MMX(); /* FPU2MMX transition */
@@ -135,7 +135,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PF2ID_PqQq(bxInstruction_c *i)
   else {
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
     /* pointer, segment address pair */
-    MMXUQ(op) = read_virtual_qword(i->seg(), eaddr);
+    MMXUQ(op) = bx_mem.read_qword(i->seg(), eaddr);
   }
 
   BX_CPU_THIS_PTR prepareFPU2MMX(); /* FPU2MMX transition */
@@ -282,7 +282,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PMULHRW_PqQq(bxInstruction_c *i)
   else {
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
     /* pointer, segment address pair */
-    MMXUQ(op2) = read_virtual_qword(i->seg(), eaddr);
+    MMXUQ(op2) = bx_mem.read_qword(i->seg(), eaddr);
   }
 
   BX_CPU_THIS_PTR prepareFPU2MMX(); /* FPU2MMX transition */
@@ -319,7 +319,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PSWAPD_PqQq(bxInstruction_c *i)
   else {
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
     /* pointer, segment address pair */
-    MMXUQ(op) = read_virtual_qword(i->seg(), eaddr);
+    MMXUQ(op) = bx_mem.read_qword(i->seg(), eaddr);
   }
 
   BX_CPU_THIS_PTR prepareFPU2MMX(); /* FPU2MMX transition */

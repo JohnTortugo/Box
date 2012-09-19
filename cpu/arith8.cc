@@ -57,7 +57,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::ADD_GbEbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit32u op1 = BX_READ_8BIT_REGx(i->dst(), i->extend8bitL());
-  Bit32u op2 = read_virtual_byte(i->seg(), eaddr);
+  Bit32u op2 = bx_mem.read_byte(i->seg(), eaddr);
   Bit32u sum = op1 + op2;
 
   BX_WRITE_8BIT_REGx(i->dst(), i->extend8bitL(), sum);
@@ -100,7 +100,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::ADC_GbEbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit32u op1 = BX_READ_8BIT_REGx(i->dst(), i->extend8bitL());
-  Bit32u op2 = read_virtual_byte(i->seg(), eaddr);
+  Bit32u op2 = bx_mem.read_byte(i->seg(), eaddr);
   Bit32u sum = op1 + op2 + getB_CF();
 
   BX_WRITE_8BIT_REGx(i->dst(), i->extend8bitL(), sum);
@@ -143,7 +143,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SBB_GbEbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit32u op1_8 = BX_READ_8BIT_REGx(i->dst(), i->extend8bitL());
-  Bit32u op2_8 = read_virtual_byte(i->seg(), eaddr);
+  Bit32u op2_8 = bx_mem.read_byte(i->seg(), eaddr);
   Bit32u diff_8 = op1_8 - (op2_8 + getB_CF());
 
   BX_WRITE_8BIT_REGx(i->dst(), i->extend8bitL(), diff_8);
@@ -212,7 +212,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SUB_GbEbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit32u op1_8 = BX_READ_8BIT_REGx(i->dst(), i->extend8bitL());
-  Bit32u op2_8 = read_virtual_byte(i->seg(), eaddr);
+  Bit32u op2_8 = bx_mem.read_byte(i->seg(), eaddr);
   Bit32u diff_8 = op1_8 - op2_8;
 
   BX_WRITE_8BIT_REGx(i->dst(), i->extend8bitL(), diff_8);
@@ -226,7 +226,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CMP_EbGbM(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit32u op1_8 = read_virtual_byte(i->seg(), eaddr);
+  Bit32u op1_8 = bx_mem.read_byte(i->seg(), eaddr);
   Bit32u op2_8 = BX_READ_8BIT_REGx(i->src(), i->extend8bitL());
   Bit32u diff_8 = op1_8 - op2_8;
 
@@ -251,7 +251,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CMP_GbEbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit32u op1_8 = BX_READ_8BIT_REGx(i->dst(), i->extend8bitL());
-  Bit32u op2_8 = read_virtual_byte(i->seg(), eaddr);
+  Bit32u op2_8 = bx_mem.read_byte(i->seg(), eaddr);
   Bit32u diff_8 = op1_8 - op2_8;
 
   SET_FLAGS_OSZAPC_SUB_8(op1_8, op2_8, diff_8);
@@ -395,7 +395,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CMP_EbIbM(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit32u op1_8 = read_virtual_byte(i->seg(), eaddr);
+  Bit32u op1_8 = bx_mem.read_byte(i->seg(), eaddr);
   Bit32u op2_8 = i->Ib();
   Bit32u diff_8 = op1_8 - op2_8;
 

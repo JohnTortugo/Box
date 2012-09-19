@@ -422,7 +422,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LMSW_Ew(bxInstruction_c *i)
     /* use RMAddr(i) to save address for VMexit */
     RMAddr(i) = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
     /* pointer, segment address pair */
-    msw = read_virtual_word(i->seg(), RMAddr(i));
+    msw = bx_mem.read_word(i->seg(), RMAddr(i));
   }
 
   // LMSW does not affect PG,CD,NW,AM,WP,NE,ET bits, and cannot clear PE
@@ -463,7 +463,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SMSW_EwM(bxInstruction_c *i)
 {
   Bit16u msw = read_CR0() & 0xffff;   // handle CR0 shadow in VMX
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  write_virtual_word(i->seg(), eaddr, msw);
+  bx_mem.write_word(i->seg(), eaddr, msw);
 
   BX_NEXT_INSTR(i);
 }

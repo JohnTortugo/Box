@@ -96,7 +96,7 @@ BX_INSF_TYPE BX_CPU_C::PUSH_EwM(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit16u op1_16 = read_virtual_word(i->seg(), eaddr);
+  Bit16u op1_16 = bx_mem.read_word(i->seg(), eaddr);
 
   push_16(op1_16);
 

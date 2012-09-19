@@ -1878,7 +1878,7 @@ void BX_CPU_C::VMexitSaveGuestState(void)
 
 #if BX_SUPPORT_VMX >= 2
   if (VMX_MSR_MISC & VMX_MISC_STORE_LMA_TO_X86_64_GUEST_VMENTRY_CONTROL) {
-    // VMEXITs store the value of EFER.LMA into the “x86-64 guest" VMENTRY control
+    // VMEXITs store the value of EFER.LMA into the ï¿½x86-64 guest" VMENTRY control
     // must be set if unrestricted guest is supported
     if (long_mode())
        vm->vmentry_ctrls |=  VMX_VMENTRY_CTRL1_X86_64_GUEST;
@@ -2193,7 +2193,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::VMXON(bxInstruction_c *i)
     }
 
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-    Bit64u pAddr = read_virtual_qword(i->seg(), eaddr); // keep 64-bit
+    Bit64u pAddr = bx_mem.read_qword(i->seg(), eaddr); // keep 64-bit
     if ((pAddr & 0xfff) != 0 || ! IsValidPhyAddr(pAddr)) {
       printf("VMXON: invalid or not page aligned physical address !");
       VMfailInvalid();
@@ -2548,7 +2548,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::VMPTRLD(bxInstruction_c *i)
   }
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  Bit64u pAddr = read_virtual_qword(i->seg(), eaddr); // keep 64-bit
+  Bit64u pAddr = bx_mem.read_qword(i->seg(), eaddr); // keep 64-bit
   if ((pAddr & 0xfff) != 0 || ! IsValidPhyAddr(pAddr)) {
     printf("VMFAIL: invalid or not page aligned physical address !");
     VMfail(VMXERR_VMPTRLD_INVALID_PHYSICAL_ADDRESS);
@@ -2752,7 +2752,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::VMWRITE_GdEd(bxInstruction_c *i)
     }
     else {
        Bit32u eaddr = (Bit32u) BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-       val_32 = read_virtual_dword_32(i->seg(), eaddr);
+       val_32 = bx_mem.read_dword(i->seg(), eaddr);
     }
 
     val_64 = (Bit64u) val_32;
@@ -2818,7 +2818,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::VMCLEAR(bxInstruction_c *i)
   }
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  Bit64u pAddr = read_virtual_qword(i->seg(), eaddr); // keep 64-bit
+  Bit64u pAddr = bx_mem.read_qword(i->seg(), eaddr); // keep 64-bit
   if ((pAddr & 0xfff) != 0 || ! IsValidPhyAddr(pAddr)) {
     printf("VMFAIL: VMCLEAR with invalid physical address!");
     VMfail(VMXERR_VMCLEAR_WITH_INVALID_ADDR);

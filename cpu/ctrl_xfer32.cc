@@ -25,20 +25,16 @@
 #include "debug.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
-#if BX_CPU_LEVEL >= 3
+BX_CPP_INLINE void BX_CPU_C::branch_near32(Bit32u new_EIP) {
+	BX_ASSERT(BX_CPU_THIS_PTR cpu_mode != BX_MODE_LONG_64);
 
-BX_CPP_INLINE void BX_CPP_AttrRegparmN(1) BX_CPU_C::branch_near32(Bit32u new_EIP)
-{
-  BX_ASSERT(BX_CPU_THIS_PTR cpu_mode != BX_MODE_LONG_64);
+	// check always, not only in protected mode
+	if (new_EIP > bx_cpu.sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled) {
+		BX_ERROR(("branch_near32: offset outside of CS limits"));
+		exception(BX_GP_EXCEPTION, 0);
+	}
 
-  // check always, not only in protected mode
-  if (new_EIP > BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled)
-  {
-    printf("branch_near32: offset outside of CS limits");
-    exception(BX_GP_EXCEPTION, 0);
-  }
-
-  EIP = new_EIP;
+	EIP = new_EIP;
 
 #if BX_SUPPORT_HANDLERS_CHAINING_SPEEDUPS == 0
   // assert magic async_event to stop trace execution
@@ -46,13 +42,9 @@ BX_CPP_INLINE void BX_CPP_AttrRegparmN(1) BX_CPU_C::branch_near32(Bit32u new_EIP
 #endif
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::RETnear32_Iw(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::RETnear32_Iw(bxInstruction_c *i)
 {
   BX_ASSERT(BX_CPU_THIS_PTR cpu_mode != BX_MODE_LONG_64);
-
-#if BX_DEBUGGER
-  BX_CPU_THIS_PTR show_flag |= Flag_ret;
-#endif
 
   RSP_SPECULATIVE;
 
@@ -60,7 +52,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::RETnear32_Iw(bxInstruction_c *i)
   Bit32u return_EIP = pop_32();
   if (return_EIP > BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled)
   {
-    printf("RETnear32_Iw: offset outside of CS limits");
+	  BX_ERROR(("RETnear32_Iw: offset outside of CS limits"));
     exception(BX_GP_EXCEPTION, 0);
   }
   EIP = return_EIP;
@@ -77,38 +69,28 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::RETnear32_Iw(bxInstruction_c *i)
   BX_NEXT_TRACE(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::RETnear32(bxInstruction_c *i)
-{
-  BX_ASSERT(BX_CPU_THIS_PTR cpu_mode != BX_MODE_LONG_64);
+BX_INSF_TYPE BX_CPU_C::RETnear32(bxInstruction_c *i) {
+	BX_ASSERT(BX_CPU_THIS_PTR cpu_mode != BX_MODE_LONG_64);
 
-#if BX_DEBUGGER
-  BX_CPU_THIS_PTR show_flag |= Flag_ret;
-#endif
+	RSP_SPECULATIVE;
 
-  RSP_SPECULATIVE;
+	Bit32u return_EIP = pop_32();
+	if (return_EIP > BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled) {
+		BX_ERROR(("RETnear32: offset outside of CS limits"));
+		exception(BX_GP_EXCEPTION, 0);
+	}
+	EIP = return_EIP;
 
-  Bit32u return_EIP = pop_32();
-  if (return_EIP > BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled)
-  {
-    printf("RETnear32: offset outside of CS limits");
-    exception(BX_GP_EXCEPTION, 0);
-  }
-  EIP = return_EIP;
+	RSP_COMMIT;
 
-  RSP_COMMIT;
+	BX_INSTR_UCNEAR_BRANCH(BX_CPU_ID, BX_INSTR_IS_RET, PREV_RIP, EIP);
 
-  BX_INSTR_UCNEAR_BRANCH(BX_CPU_ID, BX_INSTR_IS_RET, PREV_RIP, EIP);
-
-  BX_NEXT_TRACE(i);
+	BX_NEXT_TRACE(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::RETfar32_Iw(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::RETfar32_Iw(bxInstruction_c *i)
 {
   invalidate_prefetch_q();
-
-#if BX_DEBUGGER
-  BX_CPU_THIS_PTR show_flag |= Flag_ret;
-#endif
 
   Bit16u imm16 = i->Iw();
   Bit16u cs_raw;
@@ -126,7 +108,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::RETfar32_Iw(bxInstruction_c *i)
 
   // CS.LIMIT can't change when in real/v8086 mode
   if (eip > BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled) {
-    printf("RETfar32_Iw: instruction pointer not within code segment limits");
+	  BX_ERROR(("RETfar32_Iw: instruction pointer not within code segment limits"));
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -148,12 +130,8 @@ done:
   BX_NEXT_TRACE(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CALL_Jd(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::CALL_Jd(bxInstruction_c *i)
 {
-#if BX_DEBUGGER
-  BX_CPU_THIS_PTR show_flag |= Flag_call;
-#endif
-
   Bit32u new_EIP = EIP + i->Id();
 
   RSP_SPECULATIVE;
@@ -170,7 +148,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CALL_Jd(bxInstruction_c *i)
   BX_NEXT_TRACE(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CALL32_Ap(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::CALL32_Ap(bxInstruction_c *i)
 {
   BX_ASSERT(BX_CPU_THIS_PTR cpu_mode != BX_MODE_LONG_64);
 
@@ -178,10 +156,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CALL32_Ap(bxInstruction_c *i)
   Bit32u disp32;
 
   invalidate_prefetch_q();
-
-#if BX_DEBUGGER
-  BX_CPU_THIS_PTR show_flag |= Flag_call;
-#endif
 
   disp32 = i->Id();
   cs_raw = i->Iw2();
@@ -195,7 +169,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CALL32_Ap(bxInstruction_c *i)
 
   // CS.LIMIT can't change when in real/v8086 mode
   if (disp32 > BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled) {
-    printf("CALL32_Ap: instruction pointer not within code segment limits");
+	  BX_ERROR(("CALL32_Ap: instruction pointer not within code segment limits"));
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -214,12 +188,8 @@ done:
   BX_NEXT_TRACE(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CALL_EdR(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::CALL_EdR(bxInstruction_c *i)
 {
-#if BX_DEBUGGER
-  BX_CPU_THIS_PTR show_flag |= Flag_call;
-#endif
-
   Bit32u new_EIP = BX_READ_32BIT_REG(i->dst());
 
   RSP_SPECULATIVE;
@@ -236,22 +206,18 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CALL_EdR(bxInstruction_c *i)
   BX_NEXT_TRACE(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CALL32_Ep(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::CALL32_Ep(bxInstruction_c *i)
 {
   Bit16u cs_raw;
   Bit32u op1_32;
 
   invalidate_prefetch_q();
 
-#if BX_DEBUGGER
-  BX_CPU_THIS_PTR show_flag |= Flag_call;
-#endif
-
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   /* pointer, segment address pair */
-  op1_32 = read_virtual_dword(i->seg(), eaddr);
-  cs_raw = read_virtual_word (i->seg(), (eaddr+4) & i->asize_mask());
+  op1_32 = bx_mem.read_dword(i->seg(), eaddr);
+  cs_raw = bx_mem.read_word (i->seg(), (eaddr+4) & i->asize_mask());
 
   RSP_SPECULATIVE;
 
@@ -262,7 +228,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CALL32_Ep(bxInstruction_c *i)
 
   // CS.LIMIT can't change when in real/v8086 mode
   if (op1_32 > BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled) {
-    printf("CALL32_Ep: instruction pointer not within code segment limits");
+	  BX_ERROR(("CALL32_Ep: instruction pointer not within code segment limits"));
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -281,7 +247,7 @@ done:
   BX_NEXT_TRACE(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JMP_Jd(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JMP_Jd(bxInstruction_c *i)
 {
   Bit32u new_EIP = EIP + (Bit32s) i->Id();
   branch_near32(new_EIP);
@@ -290,7 +256,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JMP_Jd(bxInstruction_c *i)
   BX_LINK_TRACE(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JO_Jd(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JO_Jd(bxInstruction_c *i)
 {
   if (get_OF()) {
     Bit32u new_EIP = EIP + (Bit32s) i->Id();
@@ -303,7 +269,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JO_Jd(bxInstruction_c *i)
   BX_NEXT_INSTR(i); // trace can continue over non-taken branch
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JNO_Jd(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JNO_Jd(bxInstruction_c *i)
 {
   if (! get_OF()) {
     Bit32u new_EIP = EIP + (Bit32s) i->Id();
@@ -316,7 +282,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JNO_Jd(bxInstruction_c *i)
   BX_NEXT_INSTR(i); // trace can continue over non-taken branch
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JB_Jd(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JB_Jd(bxInstruction_c *i)
 {
   if (get_CF()) {
     Bit32u new_EIP = EIP + (Bit32s) i->Id();
@@ -329,7 +295,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JB_Jd(bxInstruction_c *i)
   BX_NEXT_INSTR(i); // trace can continue over non-taken branch
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JNB_Jd(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JNB_Jd(bxInstruction_c *i)
 {
   if (! get_CF()) {
     Bit32u new_EIP = EIP + (Bit32s) i->Id();
@@ -342,20 +308,19 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JNB_Jd(bxInstruction_c *i)
   BX_NEXT_INSTR(i); // trace can continue over non-taken branch
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JZ_Jd(bxInstruction_c *i)
-{
-  if (get_ZF()) {
-    Bit32u new_EIP = EIP + (Bit32s) i->Id();
-    branch_near32(new_EIP);
-    BX_INSTR_CNEAR_BRANCH_TAKEN(BX_CPU_ID, PREV_RIP, new_EIP);
-    BX_LINK_TRACE(i);
-  }
+BX_INSF_TYPE BX_CPU_C::JZ_Jd(bxInstruction_c *i) {
+	if (get_ZF()) {
+		Bit32u new_EIP = EIP + (Bit32s) i->Id();
+		branch_near32(new_EIP);
+		BX_INSTR_CNEAR_BRANCH_TAKEN(BX_CPU_ID, PREV_RIP, new_EIP);
+		BX_LINK_TRACE(i);
+	}
 
-  BX_INSTR_CNEAR_BRANCH_NOT_TAKEN(BX_CPU_ID, PREV_RIP);
-  BX_NEXT_INSTR(i); // trace can continue over non-taken branch
+	BX_INSTR_CNEAR_BRANCH_NOT_TAKEN(BX_CPU_ID, PREV_RIP);
+	BX_NEXT_INSTR(i); // trace can continue over non-taken branch
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JNZ_Jd(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JNZ_Jd(bxInstruction_c *i)
 {
   if (! get_ZF()) {
     Bit32u new_EIP = EIP + (Bit32s) i->Id();
@@ -368,7 +333,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JNZ_Jd(bxInstruction_c *i)
   BX_NEXT_INSTR(i); // trace can continue over non-taken branch
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JBE_Jd(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JBE_Jd(bxInstruction_c *i)
 {
   if (get_CF() || get_ZF()) {
     Bit32u new_EIP = EIP + (Bit32s) i->Id();
@@ -381,7 +346,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JBE_Jd(bxInstruction_c *i)
   BX_NEXT_INSTR(i); // trace can continue over non-taken branch
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JNBE_Jd(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JNBE_Jd(bxInstruction_c *i)
 {
   if (! (get_CF() || get_ZF())) {
     Bit32u new_EIP = EIP + (Bit32s) i->Id();
@@ -394,7 +359,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JNBE_Jd(bxInstruction_c *i)
   BX_NEXT_INSTR(i); // trace can continue over non-taken branch
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JS_Jd(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JS_Jd(bxInstruction_c *i)
 {
   if (get_SF()) {
     Bit32u new_EIP = EIP + (Bit32s) i->Id();
@@ -407,7 +372,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JS_Jd(bxInstruction_c *i)
   BX_NEXT_INSTR(i); // trace can continue over non-taken branch
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JNS_Jd(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JNS_Jd(bxInstruction_c *i)
 {
   if (! get_SF()) {
     Bit32u new_EIP = EIP + (Bit32s) i->Id();
@@ -420,7 +385,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JNS_Jd(bxInstruction_c *i)
   BX_NEXT_INSTR(i); // trace can continue over non-taken branch
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JP_Jd(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JP_Jd(bxInstruction_c *i)
 {
   if (get_PF()) {
     Bit32u new_EIP = EIP + (Bit32s) i->Id();
@@ -433,7 +398,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JP_Jd(bxInstruction_c *i)
   BX_NEXT_INSTR(i); // trace can continue over non-taken branch
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JNP_Jd(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JNP_Jd(bxInstruction_c *i)
 {
   if (! get_PF()) {
     Bit32u new_EIP = EIP + (Bit32s) i->Id();
@@ -446,7 +411,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JNP_Jd(bxInstruction_c *i)
   BX_NEXT_INSTR(i); // trace can continue over non-taken branch
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JL_Jd(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JL_Jd(bxInstruction_c *i)
 {
   if (getB_SF() != getB_OF()) {
     Bit32u new_EIP = EIP + (Bit32s) i->Id();
@@ -459,7 +424,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JL_Jd(bxInstruction_c *i)
   BX_NEXT_INSTR(i); // trace can continue over non-taken branch
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JNL_Jd(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JNL_Jd(bxInstruction_c *i)
 {
   if (getB_SF() == getB_OF()) {
     Bit32u new_EIP = EIP + (Bit32s) i->Id();
@@ -472,7 +437,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JNL_Jd(bxInstruction_c *i)
   BX_NEXT_INSTR(i); // trace can continue over non-taken branch
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JLE_Jd(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JLE_Jd(bxInstruction_c *i)
 {
   if (get_ZF() || (getB_SF() != getB_OF())) {
     Bit32u new_EIP = EIP + (Bit32s) i->Id();
@@ -485,7 +450,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JLE_Jd(bxInstruction_c *i)
   BX_NEXT_INSTR(i); // trace can continue over non-taken branch
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JNLE_Jd(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JNLE_Jd(bxInstruction_c *i)
 {
   if (! get_ZF() && (getB_SF() == getB_OF())) {
     Bit32u new_EIP = EIP + (Bit32s) i->Id();
@@ -498,7 +463,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JNLE_Jd(bxInstruction_c *i)
   BX_NEXT_INSTR(i); // trace can continue over non-taken branch
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JMP_Ap(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JMP_Ap(bxInstruction_c *i)
 {
   BX_ASSERT(BX_CPU_THIS_PTR cpu_mode != BX_MODE_LONG_64);
 
@@ -523,7 +488,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JMP_Ap(bxInstruction_c *i)
 
   // CS.LIMIT can't change when in real/v8086 mode
   if (disp32 > BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled) {
-    printf("JMP_Ap: instruction pointer not within code segment limits");
+	  BX_ERROR(("JMP_Ap: instruction pointer not within code segment limits"));
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -537,7 +502,7 @@ done:
   BX_NEXT_TRACE(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JMP_EdR(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JMP_EdR(bxInstruction_c *i)
 {
   Bit32u new_EIP = BX_READ_32BIT_REG(i->dst());
   branch_near32(new_EIP);
@@ -547,7 +512,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JMP_EdR(bxInstruction_c *i)
 }
 
 /* Far indirect jump */
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JMP32_Ep(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JMP32_Ep(bxInstruction_c *i)
 {
   Bit16u cs_raw;
   Bit32u op1_32;
@@ -557,8 +522,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JMP32_Ep(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   /* pointer, segment address pair */
-  op1_32 = read_virtual_dword(i->seg(), eaddr);
-  cs_raw = read_virtual_word (i->seg(), (eaddr+4) & i->asize_mask());
+  op1_32 = bx_mem.read_dword(i->seg(), eaddr);
+  cs_raw = bx_mem.read_word (i->seg(), (eaddr+4) & i->asize_mask());
 
   // jump_protected doesn't affect RSP so it is RSP safe
   if (protected_mode()) {
@@ -568,7 +533,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JMP32_Ep(bxInstruction_c *i)
 
   // CS.LIMIT can't change when in real/v8086 mode
   if (op1_32 > BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled) {
-    printf("JMP32_Ep: instruction pointer not within code segment limits");
+	  BX_ERROR(("JMP32_Ep: instruction pointer not within code segment limits"));
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -582,7 +547,7 @@ done:
   BX_NEXT_TRACE(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::IRET32(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::IRET32(bxInstruction_c *i)
 {
   BX_ASSERT(BX_CPU_THIS_PTR cpu_mode != BX_MODE_LONG_64);
 
@@ -592,10 +557,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::IRET32(bxInstruction_c *i)
   if (!BX_CPU_THIS_PTR in_vmx_guest || !VMEXIT(VMX_VM_EXEC_CTRL1_NMI_VMEXIT))
 #endif
     BX_CPU_THIS_PTR disable_NMI = 0;
-
-#if BX_DEBUGGER
-  BX_CPU_THIS_PTR show_flag |= Flag_iret;
-#endif
 
   if (protected_mode()) {
     iret_protected(i);
@@ -615,7 +576,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::IRET32(bxInstruction_c *i)
 
     // CS.LIMIT can't change when in real/v8086 mode
     if (eip > BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled) {
-      printf("IRET32: instruction pointer not within code segment limits");
+    	BX_ERROR(("IRET32: instruction pointer not within code segment limits"));
       exception(BX_GP_EXCEPTION, 0);
     }
 
@@ -634,7 +595,7 @@ done:
   BX_NEXT_TRACE(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JECXZ_Jb(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::JECXZ_Jb(bxInstruction_c *i)
 {
   // it is impossible to get this instruction in long mode
   BX_ASSERT(i->as64L() == 0);
@@ -667,7 +628,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JECXZ_Jb(bxInstruction_c *i)
 // it is known that no exceptions can happen.
 //
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LOOPNE32_Jb(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::LOOPNE32_Jb(bxInstruction_c *i)
 {
   // it is impossible to get this instruction in long mode
   BX_ASSERT(i->as64L() == 0);
@@ -681,11 +642,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LOOPNE32_Jb(bxInstruction_c *i)
       branch_near32(new_EIP);
       BX_INSTR_CNEAR_BRANCH_TAKEN(BX_CPU_ID, PREV_RIP, new_EIP);
     }
-#if BX_INSTRUMENTATION
-    else {
-      BX_INSTR_CNEAR_BRANCH_NOT_TAKEN(BX_CPU_ID, PREV_RIP);
-    }
-#endif
 
     ECX = count;
   }
@@ -698,11 +654,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LOOPNE32_Jb(bxInstruction_c *i)
       branch_near32(new_EIP);
       BX_INSTR_CNEAR_BRANCH_TAKEN(BX_CPU_ID, PREV_RIP, new_EIP);
     }
-#if BX_INSTRUMENTATION
-    else {
-      BX_INSTR_CNEAR_BRANCH_NOT_TAKEN(BX_CPU_ID, PREV_RIP);
-    }
-#endif
 
     CX = count;
   }
@@ -710,7 +661,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LOOPNE32_Jb(bxInstruction_c *i)
   BX_NEXT_TRACE(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LOOPE32_Jb(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::LOOPE32_Jb(bxInstruction_c *i)
 {
   // it is impossible to get this instruction in long mode
   BX_ASSERT(i->as64L() == 0);
@@ -724,11 +675,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LOOPE32_Jb(bxInstruction_c *i)
       branch_near32(new_EIP);
       BX_INSTR_CNEAR_BRANCH_TAKEN(BX_CPU_ID, PREV_RIP, new_EIP);
     }
-#if BX_INSTRUMENTATION
-    else {
-      BX_INSTR_CNEAR_BRANCH_NOT_TAKEN(BX_CPU_ID, PREV_RIP);
-    }
-#endif
 
     ECX = count;
   }
@@ -741,11 +687,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LOOPE32_Jb(bxInstruction_c *i)
       branch_near32(new_EIP);
       BX_INSTR_CNEAR_BRANCH_TAKEN(BX_CPU_ID, PREV_RIP, new_EIP);
     }
-#if BX_INSTRUMENTATION
-    else {
-      BX_INSTR_CNEAR_BRANCH_NOT_TAKEN(BX_CPU_ID, PREV_RIP);
-    }
-#endif
 
     CX = count;
   }
@@ -753,7 +694,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LOOPE32_Jb(bxInstruction_c *i)
   BX_NEXT_TRACE(i);
 }
 
-BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LOOP32_Jb(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPU_C::LOOP32_Jb(bxInstruction_c *i)
 {
   // it is impossible to get this instruction in long mode
   BX_ASSERT(i->as64L() == 0);
@@ -767,11 +708,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LOOP32_Jb(bxInstruction_c *i)
       branch_near32(new_EIP);
       BX_INSTR_CNEAR_BRANCH_TAKEN(BX_CPU_ID, PREV_RIP, new_EIP);
     }
-#if BX_INSTRUMENTATION
-    else {
-      BX_INSTR_CNEAR_BRANCH_NOT_TAKEN(BX_CPU_ID, PREV_RIP);
-    }
-#endif
 
     ECX = count;
   }
@@ -784,16 +720,9 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LOOP32_Jb(bxInstruction_c *i)
       branch_near32(new_EIP);
       BX_INSTR_CNEAR_BRANCH_TAKEN(BX_CPU_ID, PREV_RIP, new_EIP);
     }
-#if BX_INSTRUMENTATION
-    else {
-      BX_INSTR_CNEAR_BRANCH_NOT_TAKEN(BX_CPU_ID, PREV_RIP);
-    }
-#endif
 
     CX = count;
   }
 
   BX_NEXT_TRACE(i);
 }
-
-#endif

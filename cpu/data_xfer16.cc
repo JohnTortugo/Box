@@ -45,7 +45,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_EwGwM(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  write_virtual_word(i->seg(), eaddr, BX_READ_16BIT_REG(i->src()));
+  bx_mem.write_word(i->seg(), eaddr, BX_READ_16BIT_REG(i->src()));
 
   BX_NEXT_INSTR(i);
 }
@@ -60,7 +60,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_GwEwR(bxInstruction_c *i)
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_GwEwM(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  Bit16u val16 = read_virtual_word(i->seg(), eaddr);
+  Bit16u val16 = bx_mem.read_word(i->seg(), eaddr);
   BX_WRITE_16BIT_REG(i->dst(), val16);
 
   BX_NEXT_INSTR(i);
@@ -97,7 +97,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_EwSwM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   Bit16u seg_reg = BX_CPU_THIS_PTR sregs[i->src()].selector.value;
-  write_virtual_word(i->seg(), eaddr, seg_reg);
+  bx_mem.write_word(i->seg(), eaddr, seg_reg);
 
   BX_NEXT_INSTR(i);
 }
@@ -118,7 +118,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_SwEw(bxInstruction_c *i)
   else {
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
     /* pointer, segment address pair */
-    op2_16 = read_virtual_word(i->seg(), eaddr);
+    op2_16 = bx_mem.read_word(i->seg(), eaddr);
   }
 
   load_seg_reg(&BX_CPU_THIS_PTR sregs[i->dst()], op2_16);
@@ -146,14 +146,14 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LEA_GwM(bxInstruction_c *i)
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_AXOd(bxInstruction_c *i)
 {
-  AX = read_virtual_word_32(i->seg(), i->Id());
+  AX = bx_mem.read_word(i->seg(), i->Id());
 
   BX_NEXT_INSTR(i);
 }
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_OdAX(bxInstruction_c *i)
 {
-  write_virtual_word_32(i->seg(), i->Id(), AX);
+	bx_mem.write_word(i->seg(), i->Id(), AX);
 
   BX_NEXT_INSTR(i);
 }
@@ -162,7 +162,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_EwIwM(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  write_virtual_word(i->seg(), eaddr, i->Iw());
+  bx_mem.write_word(i->seg(), eaddr, i->Iw());
 
   BX_NEXT_INSTR(i);
 }
@@ -171,7 +171,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVZX_GwEbM(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit8u op2_8 = read_virtual_byte(i->seg(), eaddr);
+  Bit8u op2_8 = bx_mem.read_byte(i->seg(), eaddr);
 
   /* zero extend byte op2 into word op1 */
   BX_WRITE_16BIT_REG(i->dst(), (Bit16u) op2_8);
@@ -193,7 +193,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVSX_GwEbM(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit8u op2_8 = read_virtual_byte(i->seg(), eaddr);
+  Bit8u op2_8 = bx_mem.read_byte(i->seg(), eaddr);
 
   /* sign extend byte op2 into word op1 */
   BX_WRITE_16BIT_REG(i->dst(), (Bit8s) op2_8);

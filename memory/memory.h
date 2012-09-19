@@ -25,6 +25,8 @@
 #ifndef BX_MEM_H
 #  define BX_MEM_H 1
 
+#include "config.h"
+
 class BX_MEM_C {
 private:
 	Bit8u		*memory;

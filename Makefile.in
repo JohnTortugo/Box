@@ -120,7 +120,7 @@ BX_INCLUDES = bochs.h config.h
 .c.o:
 	$(CC) @DASH@c $(BX_INCDIRS) $(CFLAGS) $(FPU_FLAGS) $< @OFP@$@
 
-SUBDIRS = cpu fpu runtime elf disasm memory
+SUBDIRS = cpu fpu runtime elf disasm memory syscall
 
 BX_OBJS = $(wildcard $(addsuffix /*.o, $(SUBDIRS)))
 

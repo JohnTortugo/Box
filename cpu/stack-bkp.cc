@@ -227,7 +227,7 @@ Bit8u BX_CPU_C::stack_read_byte(bx_address offset)
     return data;
   }
   else {
-    return read_virtual_byte(BX_SEG_REG_SS, offset);
+    return bx_mem.read_byte(BX_SEG_REG_SS, offset);
   }
 }
 
@@ -257,7 +257,7 @@ Bit16u BX_CPU_C::stack_read_word(bx_address offset)
     return data;
   }
   else {
-    return read_virtual_word(BX_SEG_REG_SS, offset);
+    return bx_mem.read_word(BX_SEG_REG_SS, offset);
   }
 }
 
@@ -287,7 +287,7 @@ Bit32u BX_CPU_C::stack_read_dword(bx_address offset)
     return data;
   }
   else {
-    return read_virtual_dword(BX_SEG_REG_SS, offset);
+    return bx_mem.read_dword(BX_SEG_REG_SS, offset);
   }
 }
 
@@ -317,6 +317,6 @@ Bit64u BX_CPU_C::stack_read_qword(bx_address offset)
     return data;
   }
   else {
-    return read_virtual_qword(BX_SEG_REG_SS, offset);
+    return bx_mem.read_qword(BX_SEG_REG_SS, offset);
   }
 }

@@ -71,7 +71,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FLD_SINGLE_REAL(bxInstruction_c *i
   BX_CPU_THIS_PTR prepareFPU(i);
 
   RMAddr(i) = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  float32 load_reg = read_virtual_dword(i->seg(), RMAddr(i));
+  float32 load_reg = bx_mem.read_dword(i->seg(), RMAddr(i));
 
   FPU_update_last_instruction(i);
 
@@ -102,7 +102,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FLD_DOUBLE_REAL(bxInstruction_c *i
   BX_CPU_THIS_PTR prepareFPU(i);
 
   RMAddr(i) = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  float64 load_reg = read_virtual_qword(i->seg(), RMAddr(i));
+  float64 load_reg = bx_mem.read_qword(i->seg(), RMAddr(i));
 
   FPU_update_last_instruction(i);
 
@@ -135,8 +135,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FLD_EXTENDED_REAL(bxInstruction_c 
   floatx80 result;
 
   RMAddr(i) = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  result.fraction = read_virtual_qword(i->seg(), RMAddr(i));
-  result.exp      = read_virtual_word(i->seg(), (RMAddr(i)+8) & i->asize_mask());
+  result.fraction = bx_mem.read_qword(i->seg(), RMAddr(i));
+  result.exp      = bx_mem.read_word(i->seg(), (RMAddr(i)+8) & i->asize_mask());
 
   FPU_update_last_instruction(i);
 
@@ -159,7 +159,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FILD_WORD_INTEGER(bxInstruction_c 
   BX_CPU_THIS_PTR prepareFPU(i);
 
   RMAddr(i) = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  Bit16s load_reg = (Bit16s) read_virtual_word(i->seg(), RMAddr(i));
+  Bit16s load_reg = (Bit16s) bx_mem.read_word(i->seg(), RMAddr(i));
 
   FPU_update_last_instruction(i);
 
@@ -183,7 +183,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FILD_DWORD_INTEGER(bxInstruction_c
   BX_CPU_THIS_PTR prepareFPU(i);
 
   RMAddr(i) = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  Bit32s load_reg = (Bit32s) read_virtual_dword(i->seg(), RMAddr(i));
+  Bit32s load_reg = (Bit32s) bx_mem.read_dword(i->seg(), RMAddr(i));
 
   FPU_update_last_instruction(i);
 
@@ -207,7 +207,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FILD_QWORD_INTEGER(bxInstruction_c
   BX_CPU_THIS_PTR prepareFPU(i);
 
   RMAddr(i) = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  Bit64s load_reg = (Bit64s) read_virtual_qword(i->seg(), RMAddr(i));
+  Bit64s load_reg = (Bit64s) bx_mem.read_qword(i->seg(), RMAddr(i));
 
   FPU_update_last_instruction(i);
 
@@ -231,8 +231,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FBLD_PACKED_BCD(bxInstruction_c *i
   BX_CPU_THIS_PTR prepareFPU(i);
 
   RMAddr(i) = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  Bit16u hi2 = read_virtual_word(i->seg(), (RMAddr(i) + 8) & i->asize_mask());
-  Bit64u lo8 = read_virtual_qword(i->seg(), RMAddr(i));
+  Bit16u hi2 = bx_mem.read_word(i->seg(), (RMAddr(i) + 8) & i->asize_mask());
+  Bit64u lo8 = bx_mem.read_qword(i->seg(), RMAddr(i));
 
   FPU_update_last_instruction(i);
 
@@ -332,7 +332,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FST_SINGLE_REAL(bxInstruction_c *i
   // store to the memory might generate an exception, in this case origial FPU_SW must be kept
   swap_values16u(x87_sw, FPU_PARTIAL_STATUS);
 
-  write_virtual_dword(i->seg(), RMAddr(i), save_reg);
+  bx_mem.write_dword(i->seg(), RMAddr(i), save_reg);
 
   FPU_PARTIAL_STATUS = x87_sw;
   if (pop_stack)
@@ -380,7 +380,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FST_DOUBLE_REAL(bxInstruction_c *i
   // store to the memory might generate an exception, in this case origial FPU_SW must be kept
   swap_values16u(x87_sw, FPU_PARTIAL_STATUS);
 
-  write_virtual_qword(i->seg(), RMAddr(i), save_reg);
+  bx_mem.write_qword(i->seg(), RMAddr(i), save_reg);
 
   FPU_PARTIAL_STATUS = x87_sw;
   if (pop_stack)
@@ -414,8 +414,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FSTP_EXTENDED_REAL(bxInstruction_c
      save_reg = BX_READ_FPU_REG(0);
   }
 
-  write_virtual_qword(i->seg(), RMAddr(i), save_reg.fraction);
-  write_virtual_word(i->seg(), (RMAddr(i) + 8) & i->asize_mask(), save_reg.exp);
+  bx_mem.write_qword(i->seg(), RMAddr(i), save_reg.fraction);
+  bx_mem.write_word(i->seg(), (RMAddr(i) + 8) & i->asize_mask(), save_reg.exp);
 
   BX_CPU_THIS_PTR the_i387.FPU_pop();
 
@@ -461,7 +461,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FIST_WORD_INTEGER(bxInstruction_c 
   // store to the memory might generate an exception, in this case origial FPU_SW must be kept
   swap_values16u(x87_sw, FPU_PARTIAL_STATUS);
 
-  write_virtual_word(i->seg(), RMAddr(i), (Bit16u)(save_reg));
+  bx_mem.write_word(i->seg(), RMAddr(i), (Bit16u)(save_reg));
 
   FPU_PARTIAL_STATUS = x87_sw;
   if (pop_stack)
@@ -509,7 +509,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FIST_DWORD_INTEGER(bxInstruction_c
   // store to the memory might generate an exception, in this case origial FPU_SW must be kept
   swap_values16u(x87_sw, FPU_PARTIAL_STATUS);
 
-  write_virtual_dword(i->seg(), RMAddr(i), (Bit32u)(save_reg));
+  bx_mem.write_dword(i->seg(), RMAddr(i), (Bit32u)(save_reg));
 
   FPU_PARTIAL_STATUS = x87_sw;
   if (pop_stack)
@@ -553,7 +553,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FISTP_QWORD_INTEGER(bxInstruction_
   // store to the memory might generate an exception, in this case origial FPU_SW must be kept
   swap_values16u(x87_sw, FPU_PARTIAL_STATUS);
 
-  write_virtual_qword(i->seg(), RMAddr(i), (Bit64u)(save_reg));
+  bx_mem.write_qword(i->seg(), RMAddr(i), (Bit64u)(save_reg));
 
   FPU_PARTIAL_STATUS = x87_sw;
 
@@ -630,8 +630,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FBSTP_PACKED_BCD(bxInstruction_c *
   swap_values16u(x87_sw, FPU_PARTIAL_STATUS);
 
   // write packed bcd to memory
-  write_virtual_qword(i->seg(), RMAddr(i), save_reg_lo);
-  write_virtual_word(i->seg(), (RMAddr(i) + 8) & i->asize_mask(), save_reg_hi);
+  bx_mem.write_qword(i->seg(), RMAddr(i), save_reg_lo);
+  bx_mem.write_word(i->seg(), (RMAddr(i) + 8) & i->asize_mask(), save_reg_hi);
 
   FPU_PARTIAL_STATUS = x87_sw;
 
@@ -676,7 +676,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FISTTP16(bxInstruction_c *i)
   // store to the memory might generate an exception, in this case origial FPU_SW must be kept
   swap_values16u(x87_sw, FPU_PARTIAL_STATUS);
 
-  write_virtual_word(i->seg(), RMAddr(i), (Bit16u)(save_reg));
+  bx_mem.write_word(i->seg(), RMAddr(i), (Bit16u)(save_reg));
 
   FPU_PARTIAL_STATUS = x87_sw;
 
@@ -721,7 +721,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FISTTP32(bxInstruction_c *i)
   // store to the memory might generate an exception, in this case origial FPU_SW must be kept
   swap_values16u(x87_sw, FPU_PARTIAL_STATUS);
 
-  write_virtual_dword(i->seg(), RMAddr(i), (Bit32u)(save_reg));
+  bx_mem.write_dword(i->seg(), RMAddr(i), (Bit32u)(save_reg));
 
   FPU_PARTIAL_STATUS = x87_sw;
 
@@ -766,7 +766,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FISTTP64(bxInstruction_c *i)
   // store to the memory might generate an exception, in this case origial FPU_SW must be kept
   swap_values16u(x87_sw, FPU_PARTIAL_STATUS);
 
-  write_virtual_qword(i->seg(), RMAddr(i), (Bit64u)(save_reg));
+  bx_mem.write_qword(i->seg(), RMAddr(i), (Bit64u)(save_reg));
 
   FPU_PARTIAL_STATUS = x87_sw;
 

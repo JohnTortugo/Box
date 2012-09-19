@@ -39,8 +39,6 @@
 // IRET to VM does affect IOPL, IF, VM, and RF
 //
 
-#if BX_CPU_LEVEL >= 3
-
 void BX_CPU_C::stack_return_to_v86(Bit32u new_eip, Bit32u raw_cs_selector, Bit32u flags32)
 {
   Bit32u temp_ESP, new_esp;
@@ -262,5 +260,3 @@ void BX_CPU_C::init_v8086_mode(void)
 
   invalidate_stack_cache();
 }
-
-#endif /* BX_CPU_LEVEL >= 3 */

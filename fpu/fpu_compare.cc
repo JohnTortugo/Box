@@ -231,7 +231,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FCOM_SINGLE_REAL(bxInstruction_c *
       pop_stack = 1;
 
   RMAddr(i) = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  float32 load_reg = read_virtual_dword(i->seg(), RMAddr(i));
+  float32 load_reg = bx_mem.read_dword(i->seg(), RMAddr(i));
 
   BX_CPU_THIS_PTR FPU_update_last_instruction(i);
 
@@ -281,7 +281,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FCOM_DOUBLE_REAL(bxInstruction_c *
       pop_stack = 1;
 
   RMAddr(i) = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  float64 load_reg = read_virtual_qword(i->seg(), RMAddr(i));
+  float64 load_reg = bx_mem.read_qword(i->seg(), RMAddr(i));
 
   BX_CPU_THIS_PTR FPU_update_last_instruction(i);
 
@@ -331,7 +331,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FICOM_WORD_INTEGER(bxInstruction_c
       pop_stack = 1;
 
   RMAddr(i) = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  Bit16s load_reg = (Bit16s) read_virtual_word(i->seg(), RMAddr(i));
+  Bit16s load_reg = (Bit16s) bx_mem.read_word(i->seg(), RMAddr(i));
 
   BX_CPU_THIS_PTR FPU_update_last_instruction(i);
 
@@ -374,7 +374,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FICOM_DWORD_INTEGER(bxInstruction_
       pop_stack = 1;
 
   RMAddr(i) = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  Bit32s load_reg = (Bit32s) read_virtual_dword(i->seg(), RMAddr(i));
+  Bit32s load_reg = (Bit32s) bx_mem.read_dword(i->seg(), RMAddr(i));
 
   BX_CPU_THIS_PTR FPU_update_last_instruction(i);
 

@@ -23,10 +23,10 @@
 #define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
 #include "cpu.h"
+#include "../debug.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
 #include "param_names.h"
-//#include "iodev/iodev.h"
 
 #if BX_SUPPORT_X86_64==0
 // Make life easier merging cpu64 & cpu code.
@@ -824,7 +824,6 @@ struct BxExceptionInfo exceptions_info[BX_CPU_HANDLED_EXCEPTIONS] = {
 // trap:       override exception class to TRAP
 void BX_CPU_C::exception(unsigned vector, Bit16u error_code)
 {
-/*
   BX_INSTR_EXCEPTION(BX_CPU_ID, vector, error_code);
 
 #if printfGER
@@ -851,14 +850,6 @@ void BX_CPU_C::exception(unsigned vector, Bit16u error_code)
     error_code = (error_code & 0xfffe) | BX_CPU_THIS_PTR EXT;
   }
 
-#if BX_SUPPORT_VMX
-  VMexit_Event(BX_HARDWARE_EXCEPTION, vector, error_code, push_error);
-#endif
-
-#if BX_SUPPORT_SVM
-  SvmInterceptException(BX_HARDWARE_EXCEPTION, vector, error_code, push_error);
-#endif
-
   if (BX_CPU_THIS_PTR errorno > 0) {
     if (BX_CPU_THIS_PTR errorno > 2 || BX_CPU_THIS_PTR curr_exception == BX_ET_DOUBLE_FAULT) {
       // restore RIP/RSP to value before error occurred
@@ -867,22 +858,11 @@ void BX_CPU_C::exception(unsigned vector, Bit16u error_code)
         RSP = BX_CPU_THIS_PTR prev_rsp;
 
       debug(BX_CPU_THIS_PTR prev_rip); // print debug information to the log
-#if BX_SUPPORT_VMX
-      VMexit_TripleFault();
-#endif
 #if printfGER
       // trap into debugger (similar as done when PANIC occured)
       bx_debug_break();
 #endif
-      if (SIM->get_param_bool(BXPN_RESET_ON_TRIPLE_FAULT)->get()) {
-        printf("exception(): 3rd (%d) exception with no resolution, shutdown status is %02xh, resetting", vector, DEV_cmos_get_reg(0x0f));
-        bx_pc_system.Reset(BX_RESET_HARDWARE);
-      }
-      else {
-        printf("exception(): 3rd (%d) exception with no resolution", vector);
-        printf("WARNING: Any simulation after this point is completely bogus !");
-        shutdown();
-      }
+      BX_PANIC(("exception(): 3rd (%d) exception with no resolution \n WARNING: Any simulation after this point is completely bogus !", vector));
       longjmp(BX_CPU_THIS_PTR jmp_buf_env, 1); // go back to main decode loop
     }
   }
@@ -930,5 +910,4 @@ void BX_CPU_C::exception(unsigned vector, Bit16u error_code)
   interrupt(vector, BX_HARDWARE_EXCEPTION, push_error, error_code);
   BX_CPU_THIS_PTR errorno = 0; // error resolved
   longjmp(BX_CPU_THIS_PTR jmp_buf_env, 1); // go back to main decode loop
-*/
 }
