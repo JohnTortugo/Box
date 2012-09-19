@@ -1,0 +1,110 @@
+% Exemplo de relatório técnico do IC
+% Criado por P.J.de Rezende antes do Alvorecer da História.
+% Modificado em 97-06-15 e 01-02-26 por J.Stolfi.
+% Last edited on 2003-06-07 21:12:18 by stolfi
+
+% modificado em 1o. de outubro de 2008
+
+\documentclass[11pt,twoside]{article}
+\usepackage{techrep-ic}
+
+%%% SE USAR INGLÊS, TROQUE AS ATIVAÇÕES DOS DOIS COMANDOS A SEGUIR:
+\usepackage[brazil]{babel}
+%% \usepackage[english]{babel}
+
+%%% SE USAR CODIFICAÇÃO LATIN1, TROQUE AS ATIVAÇÕES DOS DOIS COMANDOS A
+%%% SEGUIR:
+%% \usepackage[latin1]{inputenc}
+\usepackage[utf8]{inputenc}
+
+\begin{document}
+
+%%% PÁGINA DE CAPA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% Número do relatório
+\TRNumber{45}
+
+% DATA DE PUBLICAÇÃO (PARA A CAPA)
+%
+\TRYear{12}  % Dois dígitos apenas
+\TRMonth{09} % Numérico, 01-12
+
+% LISTA DE AUTORES PARA CAPA (sem afiliações).
+\TRAuthor{R. Barboza Jr \and A. S. Ferreira \and D. C. S. Lucas}
+
+% TÍTULO PARA A CAPA (use \\ para forçar quebras de linha).
+\TRTitle{Box \\A IA32 Process Emulator}
+
+\TRMakeCover
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% O que segue é apenas uma sugestão - sinta-se à vontade para
+% usar seu formato predileto, desde que as margens tenham pelo
+% menos 25mm nos quatro lados, e o tamanho do fonte seja pelo menos
+% 11pt. Certifique-se também de que o título e lista de autores
+% estão reproduzidos na íntegra na página 1, a primeira depois da
+% página de capa.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Nomes de autores ABREVIADOS e titulo ABREVIADO,
+% para cabeçalhos em cada página.
+%
+\markboth{Barboza, Ferreira e Lucas}{Box}
+\pagestyle{myheadings}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TÍTULO e NOMES DOS AUTORES, completos, para a página 1.
+% Use "\\" para quebrar linhas, "\and" para separar autores.
+%
+\title{Comparação de Cervejas Brasileiras}
+
+\author{Roberto Barboza Jr\thanks{Beernautics, Inc.} \and
+Anderson Soares Ferreira\thanks{Institute for Advanced Salaries, 
+St. Anford University, 95307 Las Cervezas, CA} \and
+Divino C. S. Lucas\thanks{Instituto  de Computação, Universidade
+Estadual  de Campinas, 13081-970  Campinas,  SP.  Pesquisa desenvolvida com
+suporte financeiro parcial do CNPq, processo 123456/90-x}}
+
+\date{}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{abstract} 
+  Este trabalho se trata da comparação de desempenho entre uma nova máquina 
+  virtual de processos (chamda em{Box}) em relação ao em{Bochs} uma máquina
+  virtual de sistema de código aberto.
+
+  Para tal, .......
+  
+\end{abstract}
+
+\section{Introdução}
+
+  As propriedades lúdicas, mnemolíticas e catalógicas de 
+  soluções fraca- e medianamente concentradas de 1-metil-metanol
+  em hidróxido de hidrônio aquoso ($\rm H_3O^{+} HO^{-}\cdot {\mathit n}H_2O$)
+  tem sido objeto de intensos estudos experimentais por
+  cientistas no mundo todo~\cite{AHU,KNU}.
+  
+  Durante os últimos 20 anos, os autores coordenaram uma equipe
+  multidiplinar de pesquisadores, na UNICAMP e em outras instituições,
+  cujo objetivo derradeiro é elucidar e quantificar a relação entre...
+
+\begin{thebibliography}{99}
+
+\bibitem{AHU} A. V. Aho, J. E. Hopcroft and J.  D.  Ullman, {\it The
+Design and Analysis of Computer Algorithms,} Addison-Wesley (1901).
+
+\bibitem{KNU} D. E. Knuth and L. Lamport, {\it A structural analysis
+of the role of gnus and gnats in the post-modernistic, crypto-existential 
+Weltanschauung of neo-liberal Tibeto-Vietnamese leaf blower operators 
+as manifest in the sexual symbology of the Los Angeles Phone Directory}.
+Journal of Gnu Technology, {\bf 23} (6), 12--87
+(March 1996).
+
+\end{thebibliography}
+
+\end{document}
