@@ -8,6 +8,7 @@ int CacheSize;
 
 void BX_CPU_C::cpu_loop(void) {
     bxInstruction_c *i = new bxInstruction_c();
+    Bit8u *ptr;
     int ret;
     char disbuf[50];
 
@@ -19,14 +20,16 @@ void BX_CPU_C::cpu_loop(void) {
         // objdump -dC box | grep exec1 
         // and it indeed is pointing to the right function =DDD
         // hurray
-        printf("RIP: 0x%016lx \t CacheSize: %02d \t", RIP,CacheSize);
-        ret = fetchDecode32((Bit8u *) RIP, i, CacheSize);
+        ptr = (Bit8u *) bx_mem.VirtualToRealAddress(RIP);
+
+        printf("RIP: 0x%016lx \t CacheSize: %02d \t", ptr,CacheSize);
+        ret = fetchDecode32((Bit8u *) ptr, i, CacheSize);
         printf("iLen: %02d \t Exec1: %0x \t\t", i->ilen(), i->execute);
 
         // doesn't mean that i was decoded right
         // but means that the input that was correct
         // we can use this for tracing program interpretation
-        d.disasm32((bx_address)RIP, (bx_address)RIP, (const Bit8u *)RIP, disbuf);
+        d.disasm32((bx_address)ptr, (bx_address)ptr, (const Bit8u *)ptr, disbuf);
         printf("%s\n", disbuf);
 
         // call the interpretation routine

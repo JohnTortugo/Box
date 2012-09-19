@@ -33,29 +33,23 @@ private:
 	Bit64u		size;
 
 public:
-	BX_MEM_C(Bit64u size) {
-		memory = (Bit8u *) malloc(size); 
-		this->size = size;
-	}
+	BX_MEM_C(Bit64u size);
+	~BX_MEM_C();
 
 	Bit8u read_byte(unsigned s, Bit32u offset);
 	Bit16u read_word(unsigned s, Bit32u offset);
 	Bit32u read_dword(unsigned s, Bit32u offset);
 	Bit64u read_qword(unsigned s, Bit32u offset);
-/*
-	void write_byte(Bit8u val8);
-	void write_word(Bit16u val16);
-	void write_dword(Bit32u val32);
-	void write_qword(Bit64u val64);
-*/
+
 	void write_byte(unsigned seg, Bit32u offset, Bit8u data);
 	void write_word(unsigned seg, Bit32u offset, Bit16u data);
 	void write_dword(unsigned seg, Bit32u offset, Bit32u data);
 	void write_qword(unsigned seg, Bit32u offset, Bit64u data);
 
-	~BX_MEM_C() {
-		free(memory);
-	}
+	Bit32u VirtualToRealAddress(Bit32u address);
+	Bit32u RealToVirtualAddress(Bit32u address);
+	int loadFile(char * fname, Bit32u addr);
+	int loadData(void * ptr, Bit32u size, Bit32u addr);
 };
 
 #endif

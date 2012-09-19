@@ -47,15 +47,8 @@ void bx_print_header() {
 
 extern const char* cpu_mode_string(unsigned cpu_mode);
 
-int bxmain(void) {
+int bxmain(int argc, char **argv) {
     char instr[] =  {
-			0xb9,0x01,0x00,0x00,0x00,		// mov    $0x1,%ecx
-			0x89,0xc8,				// mov    %ecx,%eax
-			0xc7,0x00,0x0a,0x00,0x00,0x00,		// movl   $0xa,(%eax)
-			0x89,0xc8,				// mov    %ecx,%eax
-			0x8b,0x00				// mov    (%eax),%eax
-};
-/*
                         0xb8,0x01,0x00,0x00,0x00,      	        // mov    $0x1,%eax
                         0xbb,0x02,0x00,0x00,0x00,      	        // mov    $0x2,%ebx
                         0x89,0xc6,				// mov    %eax,%esi
@@ -86,11 +79,13 @@ int bxmain(void) {
                         0xc9,					// leave  
                         0xc3					// ret    
                     };
-*/
-    //Bit64u memSize = 64 * BX_CONST64(1024*1024);
-    //Bit64u hostMemSize = 512 * BX_CONST64(1024*1024);
 
-    //bx_mem.init_memory(memSize, hostMemSize);
+    if (argc == 2)
+       CacheSize = bx_mem.loadFile(argv[1],0);
+    else{
+       CacheSize = sizeof(instr);
+       bx_mem.loadData( (void *) instr, CacheSize,0);
+    } 
 
     bx_cpu.initialize();
     bx_cpu.sanity_checks();
@@ -104,10 +99,7 @@ int bxmain(void) {
 
     BX_DEBUG(("CPU mode: %s", cpu_mode_string(bx_cpu.get_cpu_mode())));
 
-    //RIP = (intptr_t) instr;
-    bx_cpu.gen_reg[BX_32BIT_REG_EIP].dword.erx = (intptr_t) instr;
-
-    CacheSize = sizeof(instr);
+    bx_cpu.gen_reg[BX_32BIT_REG_EIP].dword.erx = (intptr_t) 0;
 
 /*
  *  Os seguimentos foram inicializados pela funcao bx_load_null_kernel_hack(), no final deste arquivo
