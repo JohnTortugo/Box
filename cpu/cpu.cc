@@ -31,9 +31,7 @@ void BX_CPU_C::cpu_loop(void) {
 
         // call the interpretation routine
         // memory isn't working yet
-        printf("calling interpretation: ");
         (bx_cpu.*i->execute)(i);
-        printf("\n");
 
         CacheSize -= i->ilen();
         RIP += i->ilen();

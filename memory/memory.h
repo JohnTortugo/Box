@@ -30,22 +30,24 @@
 class BX_MEM_C {
 private:
 	Bit8u		*memory;
+	Bit64u		size;
 
 public:
-	BX_MEM_C() {
-		memory = (Bit8u *) malloc(sizeof(Bit8u) * 1024 * 1024); // 1MB
+	BX_MEM_C(Bit64u size) {
+		memory = (Bit8u *) malloc(size); 
+		this->size = size;
 	}
 
 	Bit8u read_byte(unsigned s, Bit32u offset);
 	Bit16u read_word(unsigned s, Bit32u offset);
 	Bit32u read_dword(unsigned s, Bit32u offset);
 	Bit64u read_qword(unsigned s, Bit32u offset);
-
+/*
 	void write_byte(Bit8u val8);
 	void write_word(Bit16u val16);
 	void write_dword(Bit32u val32);
 	void write_qword(Bit64u val64);
-
+*/
 	void write_byte(unsigned seg, Bit32u offset, Bit8u data);
 	void write_word(unsigned seg, Bit32u offset, Bit16u data);
 	void write_dword(unsigned seg, Bit32u offset, Bit32u data);

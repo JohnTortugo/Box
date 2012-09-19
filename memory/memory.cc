@@ -26,54 +26,57 @@
 
 
 Bit8u BX_MEM_C::read_byte(unsigned s, Bit32u offset) {
-	printf("Reading from seg: %x (%s), base %x, offset %x, laddr: %x\n", s, bx_cpu.strseg(&bx_cpu.sregs[s]), bx_cpu.get_segment_base(s), offset, bx_cpu.get_laddr(s, offset));
-
-	return 0;
+	Bit32u addr = bx_cpu.get_laddr(s, offset);
+	if ( addr > this->size )
+        BX_PANIC(("Atempt to read beyond memory size limit. Address: %lx\n",addr));
+	return *(memory+addr);
 }
 
 Bit16u BX_MEM_C::read_word(unsigned s, Bit32u offset) {
-	printf("Reading from seg: %x (%s), base %x, offset %x, laddr: %x\n", s, bx_cpu.strseg(&bx_cpu.sregs[s]), bx_cpu.get_segment_base(s), offset, bx_cpu.get_laddr(s, offset));
-	return 0;
+	Bit32u addr = bx_cpu.get_laddr(s, offset);
+	if ( addr > this->size )
+        BX_PANIC(("Atempt to read beyond memory size limit. Address: %lx\n",addr));
+	return *((Bit16u *)(memory+addr));
 }
 
 Bit32u BX_MEM_C::read_dword(unsigned s, Bit32u offset) {
-	printf("Reading from seg: %x (%s), base %x, offset %x, laddr: %x\n", s, bx_cpu.strseg(&bx_cpu.sregs[s]), bx_cpu.get_segment_base(s), offset, bx_cpu.get_laddr(s, offset));
-	return 0;
+	Bit32u addr = bx_cpu.get_laddr(s, offset);
+	if ( addr > this->size )
+        BX_PANIC(("Atempt to read beyond memory size limit. Address: %lx\n",addr));
+	return *((Bit32u *)(memory+addr));
 }
 
 Bit64u BX_MEM_C::read_qword(unsigned s, Bit32u offset) {
-	printf("Reading from seg: %x (%s), base %x, offset %x, laddr: %x\n", s, bx_cpu.strseg(&bx_cpu.sregs[s]), bx_cpu.get_segment_base(s), offset, bx_cpu.get_laddr(s, offset));
-	return 0;
-}
-
-void BX_MEM_C::write_byte(Bit8u val8) {
-	printf("writing to %x\n", val8);
-}
-
-void BX_MEM_C::write_word(Bit16u val16) {
-	printf("writing to %x\n", val16);
-}
-
-void BX_MEM_C::write_dword(Bit32u val32) {
-	printf("writing to %x\n", val32);
-}
-
-void BX_MEM_C::write_qword(Bit64u val64) {
-	printf("writing to %x\n", val64);
+	Bit32u addr = bx_cpu.get_laddr(s, offset);
+	if ( addr > this->size )
+        BX_PANIC(("Atempt to read beyond memory size limit. Address: %lx\n",addr));
+	return *((Bit64u *)(memory+addr));
 }
 
 void BX_MEM_C::write_byte(unsigned s, Bit32u offset, Bit8u data) {
-	printf("Writing from seg: %x (%s), base %x, offset %x, laddr: %x\n", s, bx_cpu.strseg(&bx_cpu.sregs[s]), bx_cpu.get_segment_base(s), offset, bx_cpu.get_laddr(s, offset));
+	Bit32u addr = bx_cpu.get_laddr(s, offset);
+	if ( addr > this->size )
+        BX_PANIC(("Atempt to write beyond memory size limit. Address: %lx\n",addr));
+	*(memory+addr) = data;
 }
 
 void BX_MEM_C::write_word(unsigned s, Bit32u offset, Bit16u data) {
-	printf("Writing from seg: %x (%s), base %x, offset %x, laddr: %x\n", s, bx_cpu.strseg(&bx_cpu.sregs[s]), bx_cpu.get_segment_base(s), offset, bx_cpu.get_laddr(s, offset));
+	Bit32u addr = bx_cpu.get_laddr(s, offset);
+	if ( addr > this->size )
+        BX_PANIC(("Atempt to write beyond memory size limit. Address: %lx\n",addr));
+	*((Bit16u *) (memory+addr)) = data;
 }
 
 void BX_MEM_C::write_dword(unsigned s, Bit32u offset, Bit32u data) {
-	printf("Writing from seg: %x (%s), base %x, offset %x, laddr: %x\n", s, bx_cpu.strseg(&bx_cpu.sregs[s]), bx_cpu.get_segment_base(s), offset, bx_cpu.get_laddr(s, offset));
+	Bit32u addr = bx_cpu.get_laddr(s, offset);
+	if ( addr > this->size )
+        BX_PANIC(("Atempt to write beyond memory size limit. Address: %lx\n",addr));
+	*((Bit32u *) (memory+addr)) = data;
 }
 
 void BX_MEM_C::write_qword(unsigned s, Bit32u offset, Bit64u data) {
-	printf("Writing from seg: %x (%s), base %x, offset %x, laddr: %x\n", s, bx_cpu.strseg(&bx_cpu.sregs[s]), bx_cpu.get_segment_base(s), offset, bx_cpu.get_laddr(s, offset));
+	Bit32u addr = bx_cpu.get_laddr(s, offset);
+	if ( addr > this->size )
+        BX_PANIC(("Atempt to write beyond memory size limit. Address: %lx\n",addr));
+	*((Bit64u *) (memory+addr)) = data;
 }
