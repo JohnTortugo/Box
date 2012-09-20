@@ -1,18 +1,20 @@
 #define NEED_CPU_REG_SHORTCUTS 1
+#include <stdio.h>
+#include <unistd.h>
 #include "bochs.h"
 #include "cpu/cpu.h"
-#include "syscall/syscall.h"
+#include "syscall.h"
 #include "debug.h"
 
-#include <stdio.h>
 
-void BX_SYSCALL::handle() {
+void BX_SYSCALL::handle()
+{
 	switch (EAX) {
 		case __NR_restart_syscall:
 			printf("restart_syscall.\n");
 			break;
 		case __NR_exit:
-			exit(EBX);
+			_exit(EBX);
 			break;
 		case __NR_fork:
 			printf("fork.\n");
@@ -21,6 +23,7 @@ void BX_SYSCALL::handle() {
 			printf("read.\n");
 			break;
 		case __NR_write:
+			EAX = write(EBX, (const void *) ECX , EDX);
 			printf("write.\n");
 			break;
 		case __NR_open:
@@ -30,6 +33,6 @@ void BX_SYSCALL::handle() {
 			printf("close.\n");
 			break;
 		default:
-	                BX_PANIC(("Unknow system call: EAX: %d",EAX));
+	        BX_PANIC(("Unknow system call: EAX: %x	",EAX));
 	}
 }
