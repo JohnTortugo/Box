@@ -34,8 +34,6 @@ void bx_init_hardware(void);
 void bx_init_options(void);
 void bx_load_null_kernel_hack(void);
 
-extern int CacheSize;
-
 typedef BX_CPU_C *BX_CPU_C_PTR;
 
 BX_CPU_C bx_cpu;
@@ -64,6 +62,9 @@ int bxmain(int argc, char **argv) {
                         0x29,0xd7,				// sub    %edx,%edi
                         0x89,0xfa,				// mov    %edi,%edx
                         0x89,0xd3,				// mov    %edx,%ebx
+			0xf4					// hlt
+};
+/*
                         0x55,					// push   %ebp
                         0x89, 0xe5,				// mov    %esp,%ebp
                         0x53,					// push   %ebx
@@ -79,13 +80,13 @@ int bxmain(int argc, char **argv) {
                         0xc9,					// leave  
                         0xc3					// ret    
                     };
+*/
 
     if (argc == 2)
-       CacheSize = bx_mem.loadFile(argv[1],0);
-    else{
-       CacheSize = sizeof(instr);
-       bx_mem.loadData( (void *) instr, CacheSize,0);
-    } 
+       bx_mem.loadFile(argv[1],0);
+    else
+       bx_mem.loadData( (void *) instr, sizeof(instr) ,0);
+     
 
     bx_cpu.initialize();
     bx_cpu.sanity_checks();
