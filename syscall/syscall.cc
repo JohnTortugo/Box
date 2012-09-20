@@ -7,14 +7,12 @@
 #include <stdio.h>
 
 void BX_SYSCALL::handle() {
-	BX_DEBUG(("System Call: \n"));
-
 	switch (EAX) {
 		case __NR_restart_syscall:
 			printf("restart_syscall.\n");
 			break;
 		case __NR_exit:
-			printf("exit.\n");
+			exit(EBX);
 			break;
 		case __NR_fork:
 			printf("fork.\n");
@@ -32,6 +30,6 @@ void BX_SYSCALL::handle() {
 			printf("close.\n");
 			break;
 		default:
-			break;
+	                BX_PANIC(("Unknow system call: EAX: %d",EAX));
 	}
 }

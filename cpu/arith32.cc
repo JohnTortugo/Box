@@ -60,8 +60,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::ADD_EdGdM(bxInstruction_c *i)
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::ADD_GdEdR(bxInstruction_c *i)
 {
-    printf("I'm alive\n");
-
   Bit32u op1_32, op2_32, sum_32;
 
   op1_32 = BX_READ_32BIT_REG(i->dst());
@@ -246,8 +244,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SUB_EdGdM(bxInstruction_c *i)
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SUB_GdEdR(bxInstruction_c *i)
 {
-    printf("I'm alive\n");
-
   Bit32u op1_32, op2_32, diff_32;
 
   op1_32 = BX_READ_32BIT_REG(i->dst());
