@@ -34,207 +34,6 @@
 #define RSP ESP
 #endif
 
-#if BX_SUPPORT_X86_64
-void BX_CPU_C::long_mode_int(Bit8u vector, unsigned soft_int, bx_bool push_error, Bit16u error_code)
-{
-  bx_descriptor_t gate_descriptor, cs_descriptor;
-  bx_selector_t cs_selector;
-
-  // interrupt vector must be within IDT table limits,
-  // else #GP(vector*8 + 2 + EXT)
-  if ((vector*16 + 15) > BX_CPU_THIS_PTR idtr.limit) {
-    printf("interrupt(long mode): vector must be within IDT table limits, IDT.limit = 0x%x", BX_CPU_THIS_PTR idtr.limit);
-    exception(BX_GP_EXCEPTION, vector*8 + 2);
-  }
-
-  Bit64u desctmp1 = system_read_qword(BX_CPU_THIS_PTR idtr.base + vector*16);
-  Bit64u desctmp2 = system_read_qword(BX_CPU_THIS_PTR idtr.base + vector*16 + 8);
-
-  if (desctmp2 & BX_CONST64(0x00001F0000000000)) {
-    printf("interrupt(long mode): IDT entry extended attributes DWORD4 TYPE != 0");
-    exception(BX_GP_EXCEPTION, vector*8 + 2);
-  }
-
-  Bit32u dword1 = GET32L(desctmp1);
-  Bit32u dword2 = GET32H(desctmp1);
-  Bit32u dword3 = GET32L(desctmp2);
-
-  parse_descriptor(dword1, dword2, &gate_descriptor);
-
-  if ((gate_descriptor.valid==0) || gate_descriptor.segment)
-  {
-    printf("interrupt(long mode): gate descriptor is not valid sys seg");
-    exception(BX_GP_EXCEPTION, vector*8 + 2);
-  }
-
-  // descriptor AR byte must indicate interrupt gate, trap gate,
-  // or task gate, else #GP(vector*8 + 2 + EXT)
-  if (gate_descriptor.type != BX_386_INTERRUPT_GATE &&
-      gate_descriptor.type != BX_386_TRAP_GATE)
-  {
-    printf("interrupt(long mode): unsupported gate type %u",
-        (unsigned) gate_descriptor.type);
-    exception(BX_GP_EXCEPTION, vector*8 + 2);
-  }
-
-  // if software interrupt, then gate descripor DPL must be >= CPL,
-  // else #GP(vector * 8 + 2 + EXT)
-  if (soft_int && gate_descriptor.dpl < CPL)
-  {
-    printf("interrupt(long mode): soft_int && gate.dpl < CPL");
-    exception(BX_GP_EXCEPTION, vector*8 + 2);
-  }
-
-  // Gate must be present, else #NP(vector * 8 + 2 + EXT)
-  if (! IS_PRESENT(gate_descriptor)) {
-    printf("interrupt(long mode): gate.p == 0");
-    exception(BX_NP_EXCEPTION, vector*8 + 2);
-  }
-
-  Bit16u gate_dest_selector = gate_descriptor.u.gate.dest_selector;
-  Bit64u gate_dest_offset   = ((Bit64u)dword3 << 32) |
-                       gate_descriptor.u.gate.dest_offset;
-
-  unsigned ist = gate_descriptor.u.gate.param_count & 0x7;
-
-  // examine CS selector and descriptor given in gate descriptor
-  // selector must be non-null else #GP(EXT)
-  if ((gate_dest_selector & 0xfffc) == 0) {
-    printf("int_trap_gate(long mode): selector null");
-    exception(BX_GP_EXCEPTION, 0);
-  }
-
-  parse_selector(gate_dest_selector, &cs_selector);
-
-  // selector must be within its descriptor table limits
-  // else #GP(selector+EXT)
-  fetch_raw_descriptor(&cs_selector, &dword1, &dword2, BX_GP_EXCEPTION);
-  parse_descriptor(dword1, dword2, &cs_descriptor);
-
-  // descriptor AR byte must indicate code seg
-  // and code segment descriptor DPL<=CPL, else #GP(selector+EXT)
-  if (cs_descriptor.valid==0 || cs_descriptor.segment==0 ||
-      IS_DATA_SEGMENT(cs_descriptor.type) ||
-      cs_descriptor.dpl > CPL)
-  {
-    printf("interrupt(long mode): not accessible or not code segment");
-    exception(BX_GP_EXCEPTION, cs_selector.value & 0xfffc);
-  }
-
-  // check that it's a 64 bit segment
-  if (! IS_LONG64_SEGMENT(cs_descriptor) || cs_descriptor.u.segment.d_b)
-  {
-    printf("interrupt(long mode): must be 64 bit segment");
-    exception(BX_GP_EXCEPTION, cs_selector.value & 0xfffc);
-  }
-
-  // segment must be present, else #NP(selector + EXT)
-  if (! IS_PRESENT(cs_descriptor)) {
-    printf("interrupt(long mode): segment not present");
-    exception(BX_NP_EXCEPTION, cs_selector.value & 0xfffc);
-  }
- 
-  Bit64u RSP_for_cpl_x;
-
-  Bit64u old_CS  = BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].selector.value;
-  Bit64u old_RIP = RIP;
-  Bit64u old_SS  = BX_CPU_THIS_PTR sregs[BX_SEG_REG_SS].selector.value;
-  Bit64u old_RSP = RSP;
-
-  // if code segment is non-conforming and DPL < CPL then
-  // INTERRUPT TO INNER PRIVILEGE:
-  if (IS_CODE_SEGMENT_NON_CONFORMING(cs_descriptor.type) && cs_descriptor.dpl < CPL)
-  {
-    printf("interrupt(long mode): INTERRUPT TO INNER PRIVILEGE");
-
-    // check selector and descriptor for new stack in current TSS
-    if (ist > 0) {
-      printf("interrupt(long mode): trap to IST, vector = %d", ist);
-      RSP_for_cpl_x = get_RSP_from_TSS(ist+3);
-    }
-    else {
-      RSP_for_cpl_x = get_RSP_from_TSS(cs_descriptor.dpl);
-    }
-
-    // align stack
-    RSP_for_cpl_x &= BX_CONST64(0xfffffffffffffff0);
-
-    // push old stack long pointer onto new stack
-    write_new_stack_qword_64(RSP_for_cpl_x -  8, cs_descriptor.dpl, old_SS);
-    write_new_stack_qword_64(RSP_for_cpl_x - 16, cs_descriptor.dpl, old_RSP);
-    write_new_stack_qword_64(RSP_for_cpl_x - 24, cs_descriptor.dpl, read_eflags();
-    // push long pointer to return address onto new stack
-    write_new_stack_qword_64(RSP_for_cpl_x - 32, cs_descriptor.dpl, old_CS);
-    write_new_stack_qword_64(RSP_for_cpl_x - 40, cs_descriptor.dpl, old_RIP);
-    RSP_for_cpl_x -= 40;
-
-    if (push_error) {
-      RSP_for_cpl_x -= 8;
-      write_new_stack_qword_64(RSP_for_cpl_x, cs_descriptor.dpl, error_code);
-    }
-
-    // load CS:RIP (guaranteed to be in 64 bit mode)
-    branch_far64(&cs_selector, &cs_descriptor, gate_dest_offset, cs_descriptor.dpl);
-
-    // set up null SS descriptor
-    load_null_selector(&BX_CPU_THIS_PTR sregs[BX_SEG_REG_SS], cs_descriptor.dpl);
-  }
-  else if(IS_CODE_SEGMENT_CONFORMING(cs_descriptor.type) || cs_descriptor.dpl==CPL) 
-  {
-    // if code segment is conforming OR code segment DPL = CPL then
-    // INTERRUPT TO SAME PRIVILEGE LEVEL:
-
-    printf("interrupt(long mode): INTERRUPT TO SAME PRIVILEGE");
-
-    // check selector and descriptor for new stack in current TSS
-    if (ist > 0) {
-      printf("interrupt(long mode): trap to IST, vector = %d", ist);
-      RSP_for_cpl_x = get_RSP_from_TSS(ist+3);
-    }
-    else {
-      RSP_for_cpl_x = RSP;
-    }
-
-    // align stack
-    RSP_for_cpl_x &= BX_CONST64(0xfffffffffffffff0);
-
-    // push flags onto stack
-    // push current CS selector onto stack
-    // push return offset onto stack
-    write_new_stack_qword_64(RSP_for_cpl_x - 8,  cs_descriptor.dpl, old_SS);
-    write_new_stack_qword_64(RSP_for_cpl_x - 16, cs_descriptor.dpl, old_RSP);
-    write_new_stack_qword_64(RSP_for_cpl_x - 24, cs_descriptor.dpl, read_eflags();
-    // push long pointer to return address onto new stack
-    write_new_stack_qword_64(RSP_for_cpl_x - 32, cs_descriptor.dpl, old_CS);
-    write_new_stack_qword_64(RSP_for_cpl_x - 40, cs_descriptor.dpl, old_RIP);
-    RSP_for_cpl_x -= 40;
-
-    if (push_error) {
-      RSP_for_cpl_x -= 8;
-      write_new_stack_qword_64(RSP_for_cpl_x, cs_descriptor.dpl, error_code);
-    }
-
-    // set the RPL field of CS to CPL
-    branch_far64(&cs_selector, &cs_descriptor, gate_dest_offset, CPL);
-  }
-  else {
-    printf("interrupt(long mode): bad descriptor type %u (CS.DPL=%u CPL=%u)",
-      (unsigned) cs_descriptor.type, (unsigned) cs_descriptor.dpl, (unsigned) CPL);
-    exception(BX_GP_EXCEPTION, cs_selector.value & 0xfffc);
-  }
-
-  RSP = RSP_for_cpl_x;
-
-  // if interrupt gate then set IF to 0
-  if (!(gate_descriptor.type & 1)) // even is int-gate
-    BX_CPU_THIS_PTR clear_IF();
-  BX_CPU_THIS_PTR clear_TF();
-//BX_CPU_THIS_PTR clear_VM(); // VM is clear in long mode
-  BX_CPU_THIS_PTR clear_RF();
-  BX_CPU_THIS_PTR clear_NT();
-}
-#endif
-
 void BX_CPU_C::protected_mode_int(Bit8u vector, unsigned soft_int, bx_bool push_error, Bit16u error_code)
 {
   bx_descriptor_t gate_descriptor, cs_descriptor;
@@ -247,10 +46,13 @@ void BX_CPU_C::protected_mode_int(Bit8u vector, unsigned soft_int, bx_bool push_
   Bit16u gate_dest_selector;
   Bit32u gate_dest_offset;
 
+  BX_INFO(("protected_mode_int"));
+
   // interrupt vector must be within IDT table limits,
   // else #GP(vector*8 + 2 + EXT)
   if ((vector*8 + 7) > BX_CPU_THIS_PTR idtr.limit) {
-    printf("interrupt(): vector must be within IDT table limits, IDT.limit = 0x%x", BX_CPU_THIS_PTR idtr.limit);
+    BX_ERROR(("interrupt(): vector must be within IDT table limits, IDT.limit = 0x%x",
+    		           BX_CPU_THIS_PTR idtr.limit));
     exception(BX_GP_EXCEPTION, vector*8 + 2);
   }
 
@@ -262,7 +64,7 @@ void BX_CPU_C::protected_mode_int(Bit8u vector, unsigned soft_int, bx_bool push_
   parse_descriptor(dword1, dword2, &gate_descriptor);
 
   if ((gate_descriptor.valid==0) || gate_descriptor.segment) {
-    printf("interrupt(): gate descriptor is not valid sys seg (vector=0x%02x)", vector);
+    BX_ERROR(("interrupt(): gate descriptor is not valid sys seg (vector=0x%02x)", vector)s);
     exception(BX_GP_EXCEPTION, vector*8 + 2);
   }
 
@@ -659,8 +461,11 @@ void BX_CPU_C::protected_mode_int(Bit8u vector, unsigned soft_int, bx_bool push_
 
 void BX_CPU_C::real_mode_int(Bit8u vector, bx_bool push_error, Bit16u error_code)
 {
+
+  BX_INFO(("real_mode_int"));
+
   if ((vector*4+3) > BX_CPU_THIS_PTR idtr.limit) {
-    printf("interrupt(real mode) vector > idtr.limit");
+    BX_INFO(("interrupt(real mode) vector > idtr.limit"));
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -671,7 +476,7 @@ void BX_CPU_C::real_mode_int(Bit8u vector, bx_bool push_error, Bit16u error_code
   Bit16u new_ip = system_read_word(BX_CPU_THIS_PTR idtr.base + 4 * vector);
   // CS.LIMIT can't change when in real/v8086 mode
   if (new_ip > BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled) {
-    printf("interrupt(real mode): instruction pointer not within code segment limits");
+    BX_ERROR(("interrupt(real mode): instruction pointer not within code segment limits"));
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -690,6 +495,9 @@ void BX_CPU_C::real_mode_int(Bit8u vector, bx_bool push_error, Bit16u error_code
 
 void BX_CPU_C::interrupt(Bit8u vector, unsigned type, bx_bool push_error, Bit16u error_code)
 {
+
+BX_INFO(("interrupt (%x)",vector));
+
 #if printfGER
   BX_CPU_THIS_PTR show_flag |= Flag_intsig;
 #if printf_LINUX
@@ -715,45 +523,32 @@ void BX_CPU_C::interrupt(Bit8u vector, unsigned type, bx_bool push_error, Bit16u
     case BX_NMI:
     case BX_HARDWARE_EXCEPTION:
       break;
-
     default:
-      printf("interrupt(): unknown exception type %d", type);
+      BX_INFO(("interrupt(): unknown exception type %d", type));
   }
 
-  printf("interrupt(): vector = %02x, TYPE = %u, EXT = %u",
-      vector, type, (unsigned) BX_CPU_THIS_PTR EXT);
+  BX_INFO(("interrupt(): vector = %02x, TYPE = %u, EXT = %u",
+      vector, type, (unsigned) BX_CPU_THIS_PTR EXT));
 
   // Discard any traps and inhibits for new context; traps will
   // resume upon return.
   BX_CPU_THIS_PTR debug_trap = 0;
   BX_CPU_THIS_PTR inhibit_mask = 0;
 
-#if BX_SUPPORT_VMX || BX_SUPPORT_SVM
-  BX_CPU_THIS_PTR in_event = 1;
-#endif
+  RSP_SPECULATIVE;
 
-#if BX_SUPPORT_X86_64
-  if (long_mode()) {
-    long_mode_int(vector, soft_int, push_error, error_code);
-  }
-  else
-#endif
-  {
-    RSP_SPECULATIVE;
+   // software interrupt can be redirefcted in v8086 mode
+   if (type != BX_SOFTWARE_INTERRUPT || !v8086_mode() || !v86_redirect_interrupt(vector))
+   {
+     if(real_mode()) {
+       real_mode_int(vector, push_error, error_code);
+     }
+     else {
+       protected_mode_int(vector, soft_int, push_error, error_code);
+     }
+   }
 
-    // software interrupt can be redirefcted in v8086 mode
-    if (type != BX_SOFTWARE_INTERRUPT || !v8086_mode() || !v86_redirect_interrupt(vector))
-    {
-      if(real_mode()) {
-        real_mode_int(vector, push_error, error_code);
-      }
-      else {
-        protected_mode_int(vector, soft_int, push_error, error_code);
-      }
-    }
-
-    RSP_COMMIT;
-  }
+   RSP_COMMIT;
 
 #if BX_X86_DEBUGGER
   BX_CPU_THIS_PTR in_repeat = 0;
@@ -830,7 +625,7 @@ void BX_CPU_C::exception(unsigned vector, Bit16u error_code)
   bx_dbg_exception(BX_CPU_ID, vector, error_code);
 #endif
 
-  printf("exception(0x%02x): error_code=%04x", vector, error_code);
+  BX_INFO(("exception(0x%02x): error_code=%04x", vector, error_code));
 
   unsigned exception_type = 0;
   unsigned exception_class = BX_EXCEPTION_CLASS_FAULT;
@@ -842,7 +637,7 @@ void BX_CPU_C::exception(unsigned vector, Bit16u error_code)
      exception_type = exceptions_info[vector].exception_type;
   }
   else {
-     printf("exception(%u): bad vector", vector);
+     BX_ERROR(("exception(%u): bad vector", vector));
   }
 
   if (vector != BX_PF_EXCEPTION && vector != BX_DF_EXCEPTION) {
