@@ -22,7 +22,7 @@
 %%% PÁGINA DE CAPA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
 % Número do relatório
-\TRNumber{45}
+\TRNumber{007}
 
 % DATA DE PUBLICAÇÃO (PARA A CAPA)
 %
@@ -33,7 +33,7 @@
 \TRAuthor{R. Barboza Jr \and A. S. Ferreira \and D. C. S. Lucas}
 
 % TÍTULO PARA A CAPA (use \\ para forçar quebras de linha).
-\TRTitle{Box \\A IA32 Process Emulator}
+\TRTitle{Box \\An IA-32 Process Emulator}
 
 \TRMakeCover
 
@@ -57,14 +57,11 @@
 % TÍTULO e NOMES DOS AUTORES, completos, para a página 1.
 % Use "\\" para quebrar linhas, "\and" para separar autores.
 %
-\title{Comparação de Cervejas Brasileiras}
+\title{Box: An IA-32 Process Emulator}
 
-\author{Roberto Barboza Jr\thanks{Beernautics, Inc.} \and
-Anderson Soares Ferreira\thanks{Institute for Advanced Salaries, 
-St. Anford University, 95307 Las Cervezas, CA} \and
-Divino C. S. Lucas\thanks{Instituto  de Computação, Universidade
-Estadual  de Campinas, 13081-970  Campinas,  SP.  Pesquisa desenvolvida com
-suporte financeiro parcial do CNPq, processo 123456/90-x}}
+\author{Roberto Barboza Jr\thanks{RA: 035712, rbarboza@gmail.com} \and
+Anderson Soares Ferreira\thanks{RA: 974530, asferreira.ferreira@gmail.com} \and
+Divino C. S. Lucas\thanks{RA: 115121, divcesar@gmail.com}}
 
 \date{}
 
@@ -82,16 +79,121 @@ suporte financeiro parcial do CNPq, processo 123456/90-x}}
 \end{abstract}
 
 \section{Introdução}
+% aqui vamos dar introdução ao assunto de máquinas virtuais
+% falar sobre os modos de emulação 
+% falar que máquinas virtuais podem ser usadas para pesquisa
+% pois permitem fazer analise do código, etc.
+% comentar brevemente qual ẽ o nosso objetivo no projeto.
 
-  As propriedades lúdicas, mnemolíticas e catalógicas de 
-  soluções fraca- e medianamente concentradas de 1-metil-metanol
-  em hidróxido de hidrônio aquoso ($\rm H_3O^{+} HO^{-}\cdot {\mathit n}H_2O$)
-  tem sido objeto de intensos estudos experimentais por
-  cientistas no mundo todo~\cite{AHU,KNU}.
-  
-  Durante os últimos 20 anos, os autores coordenaram uma equipe
-  multidiplinar de pesquisadores, na UNICAMP e em outras instituições,
-  cujo objetivo derradeiro é elucidar e quantificar a relação entre...
+Uma Máquina Virtual (MV) é uma plataforma versátil que pode ser empregada 
+para resolver diversos problemas na área de computação. Uma MV pode ser 
+visualizada como uma camada de software utilizada para prover a integração
+entre duas interfaces distintas. Essas interfaces podem representar tanto
+Application Binary Interface (ABI) quanto Instruction Set Architecture (ISA) 
+diferentes, o que denominamos MV de Processo ou de Sistema, respectivamente. 
+Nesse sentido uma MV ocupa uma posição estratégica que pode ser explorada de 
+diversas formas. Por exemplo, uma MV pode efetuar a otimização dinâmica de 
+binarios.
+
+Duas abordagens são frequentemente empregadas para implementar a emulação
+em uma máquina virtual: interpretação e tradução. Uma MV que emprega 
+interpretação utiliza funções para simular o comportamento de cada instrução
+da aplicação sendo emulada. O processo de tradução porém, emprega técnicas
+da área de compiladores para produzir um código binário nativo (possívelmente
+otimizado) equivalente aquele da aplicação sendo emulada. É comum encontrarmos 
+MV que, visando maximizar o desempenho, empregam estas abordagens em conjunto.
+
+Nesse texto descrevemos uma proposta de implementação de uma máquina virtual
+de processo que emprega interpretação como forma de emulação. O objetivo desta
+MA não é otimizar a execução da aplicação sendo emulada mas sim, criar uma
+infraestrutura que permita a realização de experimentos voltados para a área
+de máquinas virtuais.
+
+
+
+   
+\section{Objetivos}
+% Aqui vamos apresentar nosso objetivo principal que é desenvolver
+% uma máquina virtual de processo que emprega interpretação para
+% fazer a emulação do sistema.
+% 
+% precisamos também adicionar como objetivo a análise do desempenho
+% da nossa implementação em relação ao Bochs.
+
+Como comentamos na seção anterior, o objetivo deste texto é apresentar
+uma proposta de desenvolvimento de uma máquina virtual de processo que
+usa interpretação como técnica de emulação. No que segue apresentamos
+nosso objetivos gerais (chamaremos de étapa) e específicos (chamaremos
+de passo):
+
+\paragraph{Objetivo 1} Nesta étapa implementaremos a versão básica da 
+máquina virtual. Ao final desta étapa teremos uma máquina virtual de
+processo capaz de interpretar um executável compilado com linkagem
+dinamica para execução em uma máquina Linux de 32 bits.
+	\begin{itemize}
+		\item \textbf{Carregador} Neste passo implementaremos o código responsável
+		por ler e decodificar o executável principal e suas dependencias
+		e montar o espaço de endereçamento onde a interpretação ocorrerá.
+		\item \textbf{Decodificador} Neste passo implementaremos as rotinas de 
+		decodificação das instruções x86 32 bits.
+		\item \textbf{Interpretador} Neste passo implementaremos as rotinas 
+		resposáveis por interpretar as instruções do x86 32 bits.
+		\item \textbf{Syscalls} Neste passo implementaremos as rotinas que simularam
+		as syscalls da ABI guest.
+	\end{itemize}
+
+\paragraph{Objetivo 2} Nesta étapa implementaremos os passos que adicionaram
+ao sistema inicial recursos de instrumentação e otimização da interpretação.
+	\begin{itemize}
+		\item \textbf{Implementações Adicionais} Neste passo implementaremos uma das
+		das seguintes técnicas: DICache, Threaded-Interpretation ou Pre-decoding.
+		\item \textbf{Instrumentação} Neste passo implementaremos suporte para 
+		instrumentação dinâmica das aplicações emuladas.
+	\end{itemize}
+ 
+\paragraph{Objetivo 3} Nesta étapa conduziremos uma análise de desempenho do sistema
+em relação ao emulador Bochs e quantificaremos o impacto das técnicas implementadas
+na étapa 2 no sistema.
+	\begin{itemize}
+		\item \textbf{Desempenho 1} Neste passo avaliaremos o desempenho do sistema
+		em relação ao emulador de sistema Bochs.
+		\item \textbf{Desempenho 2} Neste passo iremos avaliar o efeito das técnicas 
+		implementadas na étapa 2 no desempenho do sistema.
+	\end{itemize}
+
+Na próxima seção apresentamos os trabalhos relacionados a este projeto.
+
+
+\section{Levantamento Bibliográfico}
+% Aqui devemos comentar sobre os trabalhos relacionados ao nosso
+% podemos comentar sobre o Bochs, o PIN e o HDTrans por exemplo.
+% comentar no que nosso sistema é diferente do deles.
+
+
+\section{Infraestrutura}
+% Aqui explicamos que estamos reaproveitando as rotinas de interpretação
+% utilizadas no Bochs.
+% talvez seja interessante comentar brevemente que usamos o GitHub
+% para sincronizar o desenvolvimento do projeto.
+%
+
+
+\section{Metodologia e Cronograma}
+% Aqui explicamos como vamos fazer para desenvolver o projeto,
+% quais são as principais etapas do projeto e como elas estão
+% distribuidas no intervalo de tempo que temos.
+% precisamos incluir no cronograma a redação do relatório final
+% e do relatório atual.
+%
+
+
+\section{Resultados e Impacto Esperado}
+% Aqui falamos do que esperamos obter com o desenvolvimento do 
+% projeto. Um dos resultados que pretendemos obter é análise da
+% sobrecarga da emulação do sistema operacional na emulação do
+% programa. 
+%
+
 
 \begin{thebibliography}{99}
 
