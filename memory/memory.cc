@@ -42,7 +42,7 @@ Bit8u BX_MEM_C::read_byte(unsigned s, Bit32u offset)
 {
    Bit32u addr = bx_cpu.get_laddr(s, offset);
    if ( addr > this->size )
-      BX_PANIC(("Atempt to read beyond memory size limit. Address: %lx\n",addr));
+      BX_PANIC(("Attempt to read beyond memory size limit. Address: %lx\n",addr));
    return *(memory+addr);
 }
 
@@ -50,7 +50,7 @@ Bit16u BX_MEM_C::read_word(unsigned s, Bit32u offset)
 {
    Bit32u addr = bx_cpu.get_laddr(s, offset);
    if ( addr > this->size )
-      BX_PANIC(("Atempt to read beyond memory size limit. Address: %lx\n",addr));
+      BX_PANIC(("Attempt to read beyond memory size limit. Address: %lx\n",addr));
    return *((Bit16u *)(memory+addr));
 }
 
@@ -58,7 +58,7 @@ Bit32u BX_MEM_C::read_dword(unsigned s, Bit32u offset)
 {
    Bit32u addr = bx_cpu.get_laddr(s, offset);
    if ( addr > this->size )
-      BX_PANIC(("Atempt to read beyond memory size limit. Address: %lx\n",addr));
+      BX_PANIC(("Attempt to read beyond memory size limit. Address: %lx\n",addr));
    return *((Bit32u *)(memory+addr));
 }
 
@@ -66,7 +66,7 @@ Bit64u BX_MEM_C::read_qword(unsigned s, Bit32u offset)
 {
    Bit32u addr = bx_cpu.get_laddr(s, offset);
    if ( addr > this->size )
-      BX_PANIC(("Atempt to read beyond memory size limit. Address: %lx\n",addr));
+      BX_PANIC(("Attempt to read beyond memory size limit. Address: %lx\n",addr));
    return *((Bit64u *)(memory+addr));
 }
 
@@ -74,7 +74,7 @@ void BX_MEM_C::write_byte(unsigned s, Bit32u offset, Bit8u data)
 {
    Bit32u addr = bx_cpu.get_laddr(s, offset);
    if ( addr > this->size )
-      BX_PANIC(("Atempt to write beyond memory size limit. Address: %lx\n",addr));
+      BX_PANIC(("Attempt to write beyond memory size limit. Address: %lx\n",addr));
    *(memory+addr) = data;
 }
 
@@ -82,7 +82,7 @@ void BX_MEM_C::write_word(unsigned s, Bit32u offset, Bit16u data)
 {
    Bit32u addr = bx_cpu.get_laddr(s, offset);
    if ( addr > this->size )
-      BX_PANIC(("Atempt to write beyond memory size limit. Address: %lx\n",addr));
+      BX_PANIC(("Attempt to write beyond memory size limit. Address: %lx\n",addr));
    *((Bit16u *) (memory+addr)) = data;
 }
 
@@ -90,7 +90,7 @@ void BX_MEM_C::write_dword(unsigned s, Bit32u offset, Bit32u data)
 {
    Bit32u addr = bx_cpu.get_laddr(s, offset);
    if ( addr > this->size )
-      BX_PANIC(("Atempt to write beyond memory size limit. Address: %lx\n",addr));
+      BX_PANIC(("Attempt to write beyond memory size limit. Address: %lx\n",addr));
    *((Bit32u *) (memory+addr)) = data;
 }
 
@@ -98,7 +98,7 @@ void BX_MEM_C::write_qword(unsigned s, Bit32u offset, Bit64u data)
 {
    Bit32u addr = bx_cpu.get_laddr(s, offset);
    if ( addr > this->size )
-      BX_PANIC(("Atempt to write beyond memory size limit. Address: %lx\n",addr));
+      BX_PANIC(("Attempt to write beyond memory size limit. Address: %lx\n",addr));
    *((Bit64u *) (memory+addr)) = data;
 }
 
@@ -119,7 +119,7 @@ int BX_MEM_C::loadFile(char * fname, Bit32u addr)
   unsigned long size, offset;
 
   if ( addr > this->size )
-     BX_PANIC(("Atempt to write beyond memory size limit. Address: %lx\n",addr));
+     BX_PANIC(("Attempt to write beyond memory size limit. Address: %lx\n",addr));
 
   // read file
   fd = open(fname, O_RDONLY);
