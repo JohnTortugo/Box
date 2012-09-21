@@ -4,135 +4,72 @@
 #include <queue>
 #include <set>
 #include <string>
+#include <vector>
 
+#include "config.h"
+#include "debug.h"
 #include "ElfParser.h"
 
 using namespace std;
+
+class LoadedSegment {
+	public:
+		string fileName;
+		Bit8u segmentIndex;
+		Elf32_Phdr hdr;
+		Bit32u loadedPos;
+};
 
 class ElfLoader {
 	private:
 		string executablePath;
 		char *ldLibraryPath;
 
+		// Pointer to simulated guest memory
+		Bit8u *memory;
+
+		// index of next free byte in "memory"
+		Bit32u memory_indx;
+
+		// size of allocated memory for guest data
+		Bit32u memory_size;
+
+		int argc;
+		char **argv;
+
+		// main executable object
 		ElfParser mainExecutable;
 
+		// shared library objects
 		vector<ElfParser> sharedLibs;
 
-		/* uma lista com todos os elfs que possuem libs compartilhadas a serem carregadas */
+		// ELFObjects that have dependency
 		queue<ElfParser> hasDependencies;
+
+		// Name of shared libraries that have already been loaded
 		set<string> alreadyLoadedLibs;
 
+		// description list of loaded segments
+		vector<LoadedSegment> loadedSegments;
+
 	public:
-		ElfLoader(string execPath, char *ldLibPath) : mainExecutable(execPath) {
-			this->executablePath = execPath;
-			this->ldLibraryPath = ldLibPath;
+		ElfLoader(int p_argc, char **p_argv, char *ldLibPath, Bit8u *p_memory, Bit32u mem_size);
 
-			printf("Main executable loaded.\n");
+		~ElfLoader() {
+			mainExecutable.elfClose();
 
-			/* inicia carregamento das bibliotecas compartilhadas */
-			hasDependencies.push(mainExecutable);
-			loadSharedLibs();
-			printf("Shared libraries loaded. %d dependencies.\n", sharedLibs.size());
+			for (int i=0; i<sharedLibs.size(); i++) sharedLibs[i].elfClose();
 		}
 
-		/* Carrega todas as bibliotecas necessarias a execucao de mainExecutable */
-		void loadSharedLibs() {
+		void loadSharedLibs();
 
-			while ( !hasDependencies.empty() ) {
-				ElfParser elf = hasDependencies.front(); hasDependencies.pop();
+		string findLibrary(string libName, string Rpath);
 
-				// lista de bibliotecas compartilhadas necessarias para o exec principal
-				vector<string> libs = elf.getNeededLibraries();
+		vector<string> parseLibPath(string str);
 
-				// percorre todas as libs necessarias
-				for (int i=0; i<libs.size(); i++) {
-					string libName = libs[i];
+		vector<string> parseLibPath(char *str);
 
-					/* 
-					 * verifica se essa biblioteca já nao foi carregada
-					 */
-					if (alreadyLoadedLibs.find(libName) != alreadyLoadedLibs.end()) {
-						continue;
-					}
+		void createAddressSpace();
 
-					/* 
-					 * procura a biblioteca e se encontrar retorna o caminho de onde encontrou.
-					 */
-					string libPath = findLibrary(libName, elf.getRpath());
-
-					if (libPath != "") {
-						ElfParser lib(libPath + "/" + libName);
-						sharedLibs.push_back(lib);
-						hasDependencies.push(lib);
-						alreadyLoadedLibs.insert(libName);
-					} 
-					else {
-						printf("Library not found: %s\n", libName.c_str());
-					}
-				}
-			}
-
-		}
-
-		/* procura a biblioteca libName nos diretorios padroes */
-		string findLibrary(string libName, string Rpath) {
-			/* verifica se esta onde a lib disse que estaria */
-			if (Rpath != "") {
-				//printf("Searching %s in Rpath %s\n", libName.c_str(), Rpath.c_str());
-				vector<string> paths = parseLibPath(Rpath);
-
-				// find the needed library
-				for (int i=0; i<paths.size(); i++) {
-					FILE *fp = fopen((paths[i] + "/" + libName).c_str(), "r");
-					if (fp) {
-						printf("Lib %s found at %s\n", libName.c_str(), paths[i].c_str());
-						fclose(fp);
-						return paths[i];
-					}
-				}
-			}
-
-			/* verifica os diretorios padroes do ambiente */
-			if (ldLibraryPath != NULL) {
-				//printf("Starting search of %s in ld_library_path %s\n", libName.c_str(), ldLibraryPath);
-				vector<string> paths = parseLibPath(ldLibraryPath);
-
-				// find the needed library
-				for (int i=0; i<paths.size(); i++) {
-					FILE *fp = fopen((paths[i] + "/" + libName).c_str(), "r");
-					if (fp) {
-						printf("Lib %s found at %s\n", libName.c_str(), paths[i].c_str());
-						fclose(fp);
-						return paths[i];
-					}
-				}
-			}
-
-			/* por fim, verifica em /usr/lib */
-			FILE *fp = fopen(("/usr/lib/" + libName).c_str(), "r");
-			if (fp) {
-				printf("Lib %s found at %s\n", libName.c_str(), "/usr/lib/");
-				fclose(fp);
-				return "/usr/lib/";
-			}
-
-			return "";
-		}
-
-		vector<string> parseLibPath(string str) {
-			return parseLibPath(str.c_str());
-		}
-
-		vector<string> parseLibPath(char *str) {
-			vector<string> paths;
-			char *aux = strdup(str);
-			char *p = strtok(aux, ":");
-
-			while (p != NULL) {
-				paths.push_back(p);
-				p = strtok(NULL, ":");
-			}
-
-			return paths;
-		}
+		void dumpAddressSpaceInfo();
 };

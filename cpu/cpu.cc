@@ -4,7 +4,7 @@
 #include "debug.h"
 #include "disasm/disasm.h"
 
-int CacheSize;
+extern int CacheSize;
 
 void BX_CPU_C::cpu_loop(void) {
     bxInstruction_c *i = new bxInstruction_c();
