@@ -11,7 +11,7 @@
 BX_CPU_C bx_cpu;
 BX_MEM_C bx_mem;
 BX_SYSCALL bx_sys;
-int CacheSize;
+
 
 void verifyParams(int argc, char **argv);
 void printBanner();
@@ -19,7 +19,7 @@ int run();
 void bx_load_null_kernel_hack();
 
 int main(int argc, char **argv) {
-	// verifica parametros
+    // verifica parametros
 	verifyParams(argc, argv);
 
 	// print banner
@@ -45,7 +45,9 @@ int main(int argc, char **argv) {
 }
 
 int run() {
-    char instr[] =  {
+	int CacheSize;
+
+	char instr[] =  {
                         0xb8,0x01,0x00,0x00,0x00,      	        // mov    $0x1,%eax
                         0xbb,0x02,0x00,0x00,0x00,      	        // mov    $0x2,%ebx
                         0x89,0xc6,				// mov    %eax,%esi
@@ -161,6 +163,6 @@ void verifyParams(int argc, char **argv) {
 }
 
 void printBanner() {
-	printf("Box 0.1\n");
+	printf("%s\n",VER_STRING);
 	printf("--------------------------------\n");
 }
