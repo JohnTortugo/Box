@@ -4,8 +4,6 @@
 #include "debug.h"
 #include "disasm/disasm.h"
 
-extern int CacheSize;
-
 void BX_CPU_C::cpu_loop(void) {
     bxInstruction_c *i = new bxInstruction_c();
     Bit8u *ptr;
@@ -15,15 +13,15 @@ void BX_CPU_C::cpu_loop(void) {
     disassembler d;
     d.set_syntax_att();
 
-    while (CacheSize >= 1) {
+    while (1) {
         // I inspected the exec1 pointer using 
         // objdump -dC box | grep exec1 
         // and it indeed is pointing to the right function =DDD
         // hurray
         ptr = (Bit8u *) bx_mem.VirtualToRealAddress(RIP);
 
-        printf("RIP: 0x%016lx \t CacheSize: %02d \t", ptr,CacheSize);
-        ret = fetchDecode32((Bit8u *) ptr, i, CacheSize);
+        printf("RIP: 0x%016lx \t", ptr);
+        ret = fetchDecode32((Bit8u *) ptr, i, 15);
         printf("iLen: %02d \t Exec1: %0x \t\t", i->ilen(), i->execute);
 
         // doesn't mean that i was decoded right
@@ -35,8 +33,7 @@ void BX_CPU_C::cpu_loop(void) {
         // call the interpretation routine
         // memory isn't working yet
         (bx_cpu.*i->execute)(i);
-
-        CacheSize -= i->ilen();
+	
         RIP += i->ilen();
     }
 }

@@ -33,90 +33,10 @@ extern "C" {
 void bx_init_hardware(void);
 void bx_init_options(void);
 
-
 typedef BX_CPU_C *BX_CPU_C_PTR;
 
 extern const char* cpu_mode_string(unsigned cpu_mode);
 
-//int bxmain(int argc, char **argv) {
-//    char instr[] =  {
-//                        0xb8,0x01,0x00,0x00,0x00,      	        // mov    $0x1,%eax
-//                        0xbb,0x02,0x00,0x00,0x00,      	        // mov    $0x2,%ebx
-//                        0x89,0xc6,				// mov    %eax,%esi
-//                        0x89,0xda,				// mov    %ebx,%edx
-//                        0x01,0xf2,				// add    %esi,%edx
-//                        0x89,0xd1,				// mov    %edx,%ecx
-//                        0x89,0xc6,				// mov    %eax,%esi
-//                        0x89,0xca,				// mov    %ecx,%edx
-//                        0xb9,0x00,0x01,0x00,0x00,	      	// mov    $0x100,%ecx
-//                        0x89,0xc8,	                	// mov    %ecx,%eax
-//                        0xc7,0x00,0x0a,0x00,0x00,0x00,   	// movl   $0xa,(%eax)
-//                        0x89,0xf7,				// mov    %esi,%edi
-//                        0x29,0xd7,				// sub    %edx,%edi
-//                        0x89,0xfa,				// mov    %edi,%edx
-//                        0x89,0xd3,				// mov    %edx,%ebx
-//                        0x55,					// push   %ebp
-//                        0x89, 0xe5,				// mov    %esp,%ebp
-//                        0x53,					// push   %ebx
-//                        0x83, 0xec, 0x04,			// sub    $0x4,%esp
-//                        0x5b,					// pop    %ebx
-//                        0x81, 0xc3, 0xfc, 0x6c, 0x0a, 0x00,	// add    $0xa6cfc,%ebx
-//                        0x8b, 0x93, 0xfc, 0xff, 0xff, 0xff,     // mov    -0x4(%ebx),%edx
-//                        0x85, 0xd2,				// test   %edx,%edx
-//                        0x74, 0x05,				// je     806743a
-//                        0xe8, 0xd1, 0x03, 0x00, 0x00,		// call   8067810
-//                        0x58,					// pop    %eax
-//                        0x5b,					// pop    %ebx
-//                        0xc9,					// leave
-//                        0xc3					// ret
-//                    };
-//
-//    if (argc == 2)
-//       CacheSize = bx_mem.loadFile(argv[1],0);
-//    else{
-//       CacheSize = sizeof(instr);
-//       bx_mem.loadData( (void *) instr, CacheSize,0);
-//    }
-//
-//    bx_cpu.initialize();
-//    bx_cpu.sanity_checks();
-//    bx_cpu.register_state();
-//
-//    BX_INSTR_INITIALIZE(0);
-//
-//    BX_DEBUG(("CPU mode: %s", cpu_mode_string(bx_cpu.get_cpu_mode())));
-//
-//    bx_load_null_kernel_hack();
-//
-//    BX_DEBUG(("CPU mode: %s", cpu_mode_string(bx_cpu.get_cpu_mode())));
-//
-//    bx_cpu.gen_reg[BX_32BIT_REG_EIP].dword.erx = (intptr_t) 0;
-//
-///*
-// *  Os seguimentos foram inicializados pela funcao bx_load_null_kernel_hack(), no final deste arquivo
-// *
-//    bx_cpu.sregs[BX_SEG_REG_CS].cache.u.segment.d_b 			= 1;
-//    bx_cpu.sregs[BX_SEG_REG_CS].cache.u.segment.g 				= 1;
-//    bx_cpu.sregs[BX_SEG_REG_CS].cache.u.segment.base 			= 0;
-//    bx_cpu.sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled 	= (intptr_t) instr + sizeof(instr);;
-//
-//    bx_cpu.sregs[BX_SEG_REG_SS].cache.u.segment.d_b 			= 1;
-//    bx_cpu.sregs[BX_SEG_REG_SS].cache.u.segment.g 				= 1;
-//
-//    bx_cpu.sregs[BX_SEG_REG_DS].cache.u.segment.d_b 			= 1;
-//    bx_cpu.sregs[BX_SEG_REG_DS].cache.u.segment.g 				= 1;
-//
-//    bx_cpu.sregs[BX_SEG_REG_ES].cache.u.segment.d_b 			= 1;
-//    bx_cpu.sregs[BX_SEG_REG_ES].cache.u.segment.g 				= 1;
-//
-// */
-//    //bx_cpu.init_FetchDecodeTables();
-//    //bx_cpu.initialize();
-//
-//    bx_cpu.cpu_loop();
-//
-//	return 0;
-//}
 
 void bx_init_hardware()
 {
