@@ -20,20 +20,22 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-#include <stdlib.h>
 #include "bochs.h"
 #include "cpu/cpu.h"
 #include "debug.h"
 
-BX_MEM_C::BX_MEM_C(Bit64u size) 
+BX_MEM_C::BX_MEM_C() : size(0), memory(NULL)
 {
-   memory = (Bit8u *) malloc(size); 
-   this->size = size;
 }
 
-BX_MEM_C::~BX_MEM_C() 
+BX_MEM_C::~BX_MEM_C()
 {
    free(memory);
+}
+
+void BX_MEM_C::allocate(Bit64u size) {
+  memory = (Bit8u *) malloc(size);
+  this->size = size;
 }
 
 Bit8u BX_MEM_C::read_byte(unsigned s, Bit32u offset) 

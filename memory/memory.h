@@ -28,13 +28,14 @@
 #include "config.h"
 
 class BX_MEM_C {
-private:
-	Bit8u		*memory;
-	Bit64u		size;
-
 public:
-	BX_MEM_C(Bit64u size);
+	Bit64u		 size;
+	Bit8u		*memory;
+
+	BX_MEM_C();
 	~BX_MEM_C();
+
+	void allocate(Bit64u size);
 
 	Bit8u read_byte(unsigned s, Bit32u offset);
 	Bit16u read_word(unsigned s, Bit32u offset);
