@@ -41,7 +41,6 @@ BX_INCDIRS = -I.. -I$(srcdir)/.. -I../elfparser -I$(srcdir)/../elfparser \
 
 BX_OBJS = \
 	main.o \
-	box.o \
 	config.o \
 	logio.o
 

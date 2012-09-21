@@ -64,7 +64,7 @@ void BX_CPU_C::protected_mode_int(Bit8u vector, unsigned soft_int, bx_bool push_
   parse_descriptor(dword1, dword2, &gate_descriptor);
 
   if ((gate_descriptor.valid==0) || gate_descriptor.segment) {
-    BX_ERROR(("interrupt(): gate descriptor is not valid sys seg (vector=0x%02x)", vector)s);
+    BX_ERROR(("interrupt(): gate descriptor is not valid sys seg (vector=0x%02x)", vector));
     exception(BX_GP_EXCEPTION, vector*8 + 2);
   }
 
