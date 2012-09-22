@@ -142,10 +142,10 @@ dinamica para execução em uma máquina Linux de 32 bits.
 		as syscalls da ABI guest.
 	\end{itemize}
 
-\paragraph{Segunda Etapa} Nesta etapa implementaremos os passos que adicionaram
+\paragraph{Segunda Etapa} Nesta etapa implementaremos os passos que adicionam
 ao sistema inicial recursos de instrumentação e otimização da interpretação.
 	\begin{itemize}
-		\item \textbf{Implementações Adicionais} Neste passo implementaremos uma das
+		\item \textbf{Otimização} Neste passo implementaremos uma das
 		das seguintes técnicas: DICache, Threaded-Interpretation ou Pre-decoding.
 		\item \textbf{Instrumentação} Neste passo implementaremos suporte para 
 		instrumentação dinâmica das aplicações emuladas.
@@ -170,39 +170,39 @@ Na próxima seção apresentamos os trabalhos relacionados a este projeto.
 % comentar no que nosso sistema é diferente do deles.
 
 \subsection{Máquinas Virtuais}
-Bochs \cite{bochs} é uma máquina virtual de sistema com suporte a emulação
-de diversos processadores da família x86 32 e 64 bits. O Bochs preza
-por portabilidade e nesse sentido utiliza interpretação como técnica
-de emulação. Para reduzir o overhead de interpretação o Bochs utiliza
+O Bochs \cite{bochs} é uma máquina virtual de sistema com suporte a emulação
+de diversos processadores da família x86 32 e 64 bits. Ele preza
+por portabilidade, e nesse sentido utiliza interpretação como técnica
+de emulação. Para reduzir o overhead de interpretação, o Bochs utiliza
 as técnicas de pre-decoding \cite{smith} e threaded-interpretation \cite{smith}.
 O sistema que estamos propondo se diferencia do Bochs por ser voltado
-a emulação de processos e não de sistemas.
+à emulação de processos e não de sistemas.
 
-O Pin \cite{pin} é uma máquina virtual de processo que emula o ISA IA-32
-e x86-64. O PIN é uma ferramenta de código fechado e possui versões tanto
-para Windows como para Linux. O PIN é reconhecido por prover uma rica
+O Pin \cite{pin} é uma máquina virtual de processo que emula os ISAs IA-32
+e x86-64. Ele é uma ferramenta de código fechado e possui versões tanto
+para Windows como para Linux, sendo reconhecido por prover uma rica
 API para criação de ferramentas (Pintools) para análise do comportamento 
 dinâmico de aplicações. O Box diferencia-se do PIN por ser uma máquina
 virtual de código aberto e utilizar interpretação como técnica de emulação.
-Em contrapartida os sistemas se assemelham no aspecto de proverem uma
+Em contrapartida, os sistemas se assemelham no aspecto de proverem uma
 interface para instrumentação de binários e serem emuladores same-isa~\footnote{As duas interfaces da máquina virtual são iguais.}.
 
-O sistema HDTrans \cite{hdtrans} é uma máquina virtual de processo para
-a arquitetura IA-32. O HDTrans difere do Bochs e PIN por empregar tradução
-de binários como técnica de emulação. No entanto, apesar de utilizar 
-tradução, o HDTrans abre mão de empregar otimizações no código traduzido
-(o que geralmente é feito para amortizar o overhead de tradução) em favor 
-da implementação de uma tradução simples e rápida. O Box diferencia-se do
-HDTrans por empregar interpretação de binários.
+O HDTrans \cite{hdtrans} é uma máquina virtual de processo para
+a arquitetura IA-32. O HDTrans difere do Bochs e do PIN por empregar tradução
+de binários como técnica de emulação. No entanto, o HDTrans abre mão de 
+empregar otimizações no código traduzido (o que geralmente é feito para 
+amortizar o overhead de tradução) em favor da implementação de uma tradução
+simples e rápida. O Box diferencia-se do HDTrans por empregar interpretação 
+de binários.
 
-Dynamo \cite{dynamo} é uma máquina virtual de processo para a arquitetura
-do HP PA-800. Diferentemente do PIN, Bochs e HDTrans o Dynamo é uma máquina
+O Dynamo \cite{dynamo} é uma máquina virtual de processo para a arquitetura
+do HP PA-800. Diferentemente do PIN, Bochs e HDTrans, o Dynamo é uma máquina
 virtual cujo objetivo é otimizar a execução do programa sendo emulado.
 Para tanto o Dynamo emprega uma combinação das técnicas de interpretação
 e emulação. O sistema inicialmente interpreta o código da aplicação sendo 
-emulada, uma vez que uma região é declarada como quente o Dynamo aplica 
+emulada. Uma vez que uma região é declarada como quente, o Dynamo aplica 
 otimizações nesta região e salva o código otimizado em uma cache de traduções. 
-Subsequente invocações do trecho de código original serão emuladas utilizando 
+Subsequentes invocações do trecho de código original serão emuladas utilizando 
 o código traduzido. O Box diferencia-se do Dynamo por não ter o foco na otimização 
 de binários mas sim em ser um sistema que prove uma interface simples para 
 instrumentação de binários.
@@ -212,21 +212,22 @@ suportar a execução de aplicações IA-32 em processadores da família IA-64.
 De forma similar ao Dynamo, o IA-32 EL emprega uma abordagem de emulação em
 duas etapas, porém as duas etapas realizam tradução de código. Inicialmente
 o IA-32 EL efetua a tradução de código em uma granularidade de bloco básico.
-Durante essa tradução código de instrumentação é inserido para detectar blocos
+Durante essa tradução, código de instrumentação é inserido para detectar blocos
 básicos que são frequentemente executados. Quando um número mínimo de blocos básicos
-é identificado o sistema forma uma região de código envolvendo esses blocos
+é identificado, o sistema forma uma região de código envolvendo esses blocos
 básicos, os otimiza e posteriormente salva em uma cache de traduções. Execuções
-subsequentes desses blocos básicos usam a tradução otimizada. Da mesma forma que
-para o Dynamo, o Box diferencia-se do IA-32 EL por não fazer tradução de binários.
+subsequentes desses blocos básicos usam a tradução otimizada. O Box diferencia-se 
+do IA-32 EL por não fazer tradução de binários.
 
 StarDBT \cite{stardbt} é uma máquina virtual de pesquisa capaz de fazer traduções de
 aplicações compiladas para x86 32/64 bits para execução em hardware x86 32 bits.
-De forma similar ao IA-32 EL o StarDBT é um tradutor em duas fases. Regiões de
+De forma similar ao IA-32 EL, o StarDBT é um tradutor em duas fases. Regiões de
 código que são infrequentemente executadas são traduzidas utilizando um tradutor
-simples e rápido, regiões de código que são frequentemente executadas são traduzidas
-empregando otimizações de código e posteriormente persistidas em uma cache de
-traduções. O Box diferencia-se do StarDBT por ser capaz de traduzir apenas binários
-de 32 bits, compilados para Linux e não empregar tradução de binários.
+simples e rápido, enquanto regiões de código que são frequentemente executadas
+são traduzidas empregando otimizações de código e posteriormente persistidas
+em uma cache de traduções. O Box diferencia-se do StarDBT por ser capaz de traduzir
+apenas binários de 32 bits, compilados para Linux e não empregar tradução
+de binários.
 
 % acho que esse nome não está bom...
 \section{Técnicas de Interpretação}
@@ -260,6 +261,22 @@ cache de instruções, placa de vídeo, placa de rede, etc. Como o sistema
 que estamos projetando é uma máquina virtual de processo não precisamos
 emular tais dispositivos. 
 
-\bibliography{bibliography}
+\begin{thebibliography}{99}
+
+\bibitem{pin}Chi-Keung Luk, Robert Cohn, Robert Muth, Harish Patil, Artur
+Klauser, Geoff Lowney, Steven Wallace, Vijay Janapa Reddi, Kim Hazelwood, 
+Pin: building customized program analysis tools with dynamic instrumentation, 
+Proceedings of the 2005 ACM SIGPLAN conference on Programming language design
+and implementation, June 12-15, 2005, Chicago, IL, USA 
+
+\bibitem{hdtrans}Swaroop Sridhar, Jonathan S. Shapiro, Prashanth P. Bungale, 
+HDTrans: a low-overhead dynamic translator, ACM SIGARCH Computer Architecture
+News, v.35 n.1, p.135-140, March 2007 
+
+\bibitem{dynamo}Bala, V., Duesterwald, E., and Banerjia, S. 1999. Transparent
+dynamic optimization: The design and implementation of Dynamo. Hewlett Packard
+Laboratories Technical Report HPL-1999-78. June 1999. 
+
+\end{thebibliography}
 
 \end{document}
