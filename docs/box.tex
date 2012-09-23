@@ -30,7 +30,7 @@
 \TRMonth{09} % Numérico, 01-12
 
 % LISTA DE AUTORES PARA CAPA (sem afiliações).
-\TRAuthor{R. Barboza Jr \and A. S. Ferreira \and D. C. S. Lucas}
+\TRAuthor{R. Barboza Jr \and D. C. S. Lucas \and A. S. Ferreira}
 
 % TÍTULO PARA A CAPA (use \\ para forçar quebras de linha).
 \TRTitle{Box \\An IA-32 Process Emulator}
@@ -50,7 +50,7 @@
 % Nomes de autores ABREVIADOS e titulo ABREVIADO,
 % para cabeçalhos em cada página.
 %
-\markboth{Barboza, Ferreira e Lucas}{Box}
+\markboth{Barboza, Lucas e Ferreira}{Box}
 \pagestyle{myheadings}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -60,8 +60,8 @@
 \title{Box: An IA-32 Process Emulator}
 
 \author{Roberto Barboza Jr\thanks{RA: 035712, rbarboza@gmail.com} \and
-Anderson Soares Ferreira\thanks{RA: 974530, asferreira.ferreira@gmail.com} \and
-Divino C. S. Lucas\thanks{RA: 115121, divcesar@gmail.com}}
+Divino C. S. Lucas\thanks{RA: 115121, divcesar@gmail.com} \and
+Anderson Soares Ferreira\thanks{RA: 974530, asferreira.ferreira@gmail.com}}
 
 \date{}
 
@@ -70,12 +70,9 @@ Divino C. S. Lucas\thanks{RA: 115121, divcesar@gmail.com}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{abstract} 
-  Este trabalho se trata da comparação de desempenho entre uma nova máquina 
-  virtual de processos (chamda em{Box}) em relação ao em{Bochs} uma máquina
-  virtual de sistema de código aberto.
-
-  Para tal, .......
-  
+ As máquinas virtuais são ferramentas amplamente utilizadas para resuloção de diversas problemas computacionais e podem ser classificadas de diversas formas, de acordo com sua implementação.
+ Como forma de ampliar a compreensão das implicações resultantes das diferentes características de implementação dos diversos tipos de máquinas virtuais, este trabalho apresenta uma comparação de desempenho entre máquinas virtuais interpretadas de sistema e de processo.
+ Para tanto, o presente estudo faz a comparação das ferramentas \emph{Bochs}, um gerenciador de máquinas virtuais de sistema, e um gerenciador para máquinas virtuais de processo chamodo \emph{Box}, desenvolvido a partir da ferramenta anterior especificamente para esse estudo.
 \end{abstract}
 
 \section{Introdução}
@@ -85,15 +82,11 @@ Divino C. S. Lucas\thanks{RA: 115121, divcesar@gmail.com}}
 % pois permitem fazer analise do código, etc.
 % comentar brevemente qual ẽ o nosso objetivo no projeto.
 
-Uma Máquina Virtual (MV) é uma plataforma versátil que pode ser empregada 
-para resolver diversos problemas na área de computação. Uma MV pode ser 
-visualizada como uma camada de software utilizada para prover a integração
-entre duas interfaces distintas. Essas interfaces podem representar tanto
-Application Binary Interface (ABI) quanto Instruction Set Architecture (ISA) 
-diferentes, o que denominamos MV de Processo ou de Sistema, respectivamente. 
-Nesse sentido uma MV ocupa uma posição estratégica que pode ser explorada de 
-diversas formas. Por exemplo, uma MV pode efetuar a otimização dinâmica de 
-binarios.
+Uma Máquina Virtual (MV) é uma plataforma versátil que pode ser empregada para resolver diversos problemas na área de computação. 
+Uma MV pode ser vista como uma camada de software utilizada para prover a integração entre duas interfaces distintas.
+As interfaces descritas podem ser tanto \emph{Application Binary Interface} (ABI) em máquinas virtuais de processo, quanto \emph{Instruction Set Architecture} (ISA) em MV de sistema.
+Nesse sentido, tais tecnologias ocupam uma posição estratégica que pode ser explorada de diversas formas:
+Na emulação de arquiteturas diferentes, permitindo que aplicações escritas para um plataforma específica possa ser executada em outra; para simulação e instrumentação de sistemas ou aplicações; ou otimização dinâmica de binários.
 
 Duas abordagens são frequentemente empregadas para implementar a emulação
 em uma máquina virtual: interpretação e tradução. Uma MV que emprega 
@@ -108,9 +101,6 @@ de processo que emprega interpretação como forma de emulação. O objetivo des
 MA não é otimizar a execução da aplicação sendo emulada mas sim, criar uma
 infraestrutura que permita a realização de experimentos voltados para a área
 de máquinas virtuais.
-
-
-
    
 \section{Objetivos}
 % Aqui vamos apresentar nosso objetivo principal que é desenvolver
