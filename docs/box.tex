@@ -88,19 +88,13 @@ As interfaces descritas podem ser tanto \emph{Application Binary Interface} (ABI
 Nesse sentido, tais tecnologias ocupam uma posição estratégica que pode ser explorada de diversas formas:
 Na emulação de arquiteturas diferentes, permitindo que aplicações escritas para um plataforma específica possa ser executada em outra; para simulação e instrumentação de sistemas ou aplicações; ou otimização dinâmica de binários.
 
-Duas abordagens são frequentemente empregadas para implementar a emulação
-em uma máquina virtual: interpretação e tradução. Uma MV que emprega 
-interpretação utiliza funções para simular o comportamento de cada instrução
-da aplicação sendo emulada. O processo de tradução porém, emprega técnicas
-da área de compiladores para produzir um código binário nativo (possívelmente
-otimizado) equivalente aquele da aplicação sendo emulada. É comum encontrarmos 
-MV que, visando maximizar o desempenho, empregam estas abordagens em conjunto.
+Duas abordagens são frequentemente empregadas para implementar a emulação em uma máquina virtual: interpretação e tradução.
+Uma MV que emprega interpretação utiliza funções para simular o comportamento de cada instrução da aplicação sendo emulada. 
+O processo de tradução porém, emprega técnicas da área de compiladores para produzir um código binário nativo (possívelmente otimizado) equivalente aquele da aplicação sendo emulada.
+É comum encontrarmos MV que, visando maximizar o desempenho, empregam estas abordagens em conjunto.
 
-Nesse texto descrevemos uma proposta de implementação de uma máquina virtual
-de processo que emprega interpretação como forma de emulação. O objetivo desta
-MA não é otimizar a execução da aplicação sendo emulada mas sim, criar uma
-infraestrutura que permita a realização de experimentos voltados para a área
-de máquinas virtuais.
+Nesse texto descrevemos uma proposta de implementação de uma máquina virtual de processo que emprega interpretação como forma de emulação. 
+O objetivo desta MA não é otimizar a execução da aplicação sendo emulada mas sim, criar uma infraestrutura que permita a realização de experimentos voltados para a área de máquinas virtuais.
    
 \section{Objetivos}
 % Aqui vamos apresentar nosso objetivo principal que é desenvolver
@@ -126,7 +120,13 @@ Como forma de atingir o objetivo descrito, os seguintes objetivos específicos s
 \end{itemize} 
 
 Na próxima seção apresentamos os trabalhos relacionados a este projeto.
+\section{Fundamentação Teórica}
+ % acho que esse nome não está bom...
+ \subsection{Técnicas de Interpretação}
 
+ % acham que precisamos incluir esta subsecao?
+ % penso em colocar aqui um comentário sobre o ELF e sobre as syscalls do linux
+ \subsection{Application Binary Interface}
 
 \section{Levantamento Bibliográfico}
 % Aqui devemos comentar sobre os trabalhos relacionados ao nosso
@@ -142,64 +142,38 @@ as técnicas de pre-decoding \cite{smith} e threaded-interpretation \cite{smith}
 O sistema que estamos propondo se diferencia do Bochs por ser voltado
 à emulação de processos e não de sistemas.
 
-O Pin \cite{pin} é uma máquina virtual de processo que emula os ISAs IA-32
-e x86-64. Ele é uma ferramenta de código fechado e possui versões tanto
-para Windows como para Linux, sendo reconhecido por prover uma rica
-API para criação de ferramentas (Pintools) para análise do comportamento 
-dinâmico de aplicações. O Box diferencia-se do PIN por ser uma máquina
-virtual de código aberto e utilizar interpretação como técnica de emulação.
-Em contrapartida, os sistemas se assemelham no aspecto de proverem uma
-interface para instrumentação de binários e serem emuladores same-isa~\footnote{As duas interfaces da máquina virtual são iguais.}.
+O Pin \cite{pin} é uma máquina virtual de processo que emula os ISAs IA-32 e x86-64. 
+Ele é uma ferramenta de código fechado e possui versões tanto para Windows como para Linux, sendo reconhecido por prover uma rica
+API para criação de ferramentas (Pintools) para análise do comportamento dinâmico de aplicações. 
+O Box diferencia-se do PIN por ser uma máquina virtual de código aberto e utilizar interpretação como técnica de emulação.
+Em contrapartida, os sistemas se assemelham no aspecto de proverem uma interface para instrumentação de binários e serem emuladores \emph{same-ISA}~\footnote{As duas interfaces da máquina virtual são iguais.}.
 
-O HDTrans \cite{hdtrans} é uma máquina virtual de processo para
-a arquitetura IA-32. O HDTrans difere do Bochs e do PIN por empregar tradução
-de binários como técnica de emulação. No entanto, o HDTrans abre mão de 
-empregar otimizações no código traduzido (o que geralmente é feito para 
-amortizar o overhead de tradução) em favor da implementação de uma tradução
-simples e rápida. O Box diferencia-se do HDTrans por empregar interpretação 
-de binários.
+O HDTrans \cite{hdtrans} é uma máquina virtual de processo para a arquitetura IA-32.
+O HDTrans difere do Bochs e do PIN por empregar tradução de binários como técnica de emulação.
+No entanto, o HDTrans abre mão de empregar otimizações no código traduzido (o que geralmente é feito para amortizar o overhead de tradução) em favor da implementação de uma tradução simples e rápida.
+O Box diferencia-se do HDTrans por empregar interpretação de binários.
 
-O Dynamo \cite{dynamo} é uma máquina virtual de processo para a arquitetura
-do HP PA-800. Diferentemente do PIN, Bochs e HDTrans, o Dynamo é uma máquina
-virtual cujo objetivo é otimizar a execução do programa sendo emulado.
-Para tanto o Dynamo emprega uma combinação das técnicas de interpretação
-e emulação. O sistema inicialmente interpreta o código da aplicação sendo 
-emulada. Uma vez que uma região é declarada como quente, o Dynamo aplica 
-otimizações nesta região e salva o código otimizado em uma cache de traduções. 
-Subsequentes invocações do trecho de código original serão emuladas utilizando 
-o código traduzido. O Box diferencia-se do Dynamo por não ter o foco na otimização 
-de binários mas sim em ser um sistema que prove uma interface simples para 
+O Dynamo \cite{dynamo} é uma máquina virtual de processo para a arquitetura do HP PA-800. 
+Diferentemente do PIN, Bochs e HDTrans, o Dynamo é uma máquina virtual cujo objetivo é otimizar a execução do programa sendo emulado.
+Para tanto o Dynamo emprega uma combinação das técnicas de interpretação e emulação. 
+O sistema inicialmente interpreta o código da aplicação sendo emulada. 
+Uma vez que uma região é declarada como quente, o Dynamo aplica otimizações nesta região e salva o código otimizado em uma cache de traduções. 
+Subsequentes invocações do trecho de código original serão emuladas utilizando o código traduzido. 
+O Box diferencia-se do Dynamo por não ter o foco na otimização de binários mas sim em ser um sistema que prove uma interface simples para 
 instrumentação de binários.
 
-O IA-32 EL \cite{ia32el} é uma máquina virtual de processos com o objetivo de
-suportar a execução de aplicações IA-32 em processadores da família IA-64.
-De forma similar ao Dynamo, o IA-32 EL emprega uma abordagem de emulação em
-duas etapas, porém as duas etapas realizam tradução de código. Inicialmente
-o IA-32 EL efetua a tradução de código em uma granularidade de bloco básico.
-Durante essa tradução, código de instrumentação é inserido para detectar blocos
-básicos que são frequentemente executados. Quando um número mínimo de blocos básicos
-é identificado, o sistema forma uma região de código envolvendo esses blocos
-básicos, os otimiza e posteriormente salva em uma cache de traduções. Execuções
-subsequentes desses blocos básicos usam a tradução otimizada. O Box diferencia-se 
-do IA-32 EL por não fazer tradução de binários.
+O IA-32 EL \cite{ia32el} é uma máquina virtual de processos com o objetivo de suportar a execução de aplicações IA-32 em processadores da família IA-64.
+De forma similar ao Dynamo, o IA-32 EL emprega uma abordagem de emulação em duas etapas, porém as duas etapas realizam tradução de código. 
+Inicialmente o IA-32 EL efetua a tradução de código em uma granularidade de bloco básico.
+Durante essa tradução, código de instrumentação é inserido para detectar blocos básicos que são frequentemente executados. 
+Quando um número mínimo de blocos básicos é identificado, o sistema forma uma região de código envolvendo esses blocos básicos, os otimiza e posteriormente salva em uma cache de traduções. 
+Execuções subsequentes desses blocos básicos usam a tradução otimizada. 
+O Box diferencia-se do IA-32 EL por não fazer tradução de binários.
 
-StarDBT \cite{stardbt} é uma máquina virtual de pesquisa capaz de fazer traduções de
-aplicações compiladas para x86 32/64 bits para execução em hardware x86 32 bits.
-De forma similar ao IA-32 EL, o StarDBT é um tradutor em duas fases. Regiões de
-código que são infrequentemente executadas são traduzidas utilizando um tradutor
-simples e rápido, enquanto regiões de código que são frequentemente executadas
-são traduzidas empregando otimizações de código e posteriormente persistidas
-em uma cache de traduções. O Box diferencia-se do StarDBT por ser capaz de traduzir
-apenas binários de 32 bits, compilados para Linux e não empregar tradução
-de binários.
-
-% acho que esse nome não está bom...
-\section{Técnicas de Interpretação}
-
-
-% acham que precisamos incluir esta subsecao?
-% penso em colocar aqui um comentário sobre o ELF e sobre as syscalls do linux
-\section{Application Binary Interface}
+StarDBT \cite{stardbt} é uma máquina virtual de pesquisa capaz de fazer traduções de aplicações compiladas para x86 32/64 bits para execução em hardware x86 32 bits.
+De forma similar ao IA-32 EL, o StarDBT é um tradutor em duas fases. 
+Regiões de código que são infrequentemente executadas são traduzidas utilizando um tradutor simples e rápido, enquanto regiões de código que são frequentemente executadas são traduzidas empregando otimizações de código e posteriormente persistidas em uma cache de traduções. 
+O Box diferencia-se do StarDBT por ser capaz de traduzir apenas binários de 32 bits, compilados para Linux e não empregar tradução de binários.
 
 
 \section{Infraestrutura de Pesquisa}
@@ -210,7 +184,7 @@ de binários.
 %
 
 
-\section{Metodologia e Cronograma}
+\section{Metodologia}
 % Aqui explicamos como vamos fazer para desenvolver o projeto,
 % quais são as principais etapas do projeto e como elas estão
 % distribuidas no intervalo de tempo que temos.
@@ -218,53 +192,52 @@ de binários.
 % e do relatório atual.
 %
 
-O sistema que estamos propondo utilizará o Bochs como ponto de partida
-para desenvolvimento. Uma vez que o Bochs é uma máquina virtual de sistema,
-ele emula o comportamento de diversos dispositivos de hardware, como
-cache de instruções, placa de vídeo, placa de rede, etc. Como o sistema
-que estamos projetando é uma máquina virtual de processo não precisamos
-emular tais dispositivos. 
+Como comentamos na seção anterior, o objetivo deste texto é apresentar uma proposta de desenvolvimento de uma máquina virtual de processo que
+usa interpretação como técnica de emulação.
+No que segue apresentamos nosso objetivos gerais (chamaremos de etapa) e específicos (chamaremos de passo):
 
-Como comentamos na seção anterior, o objetivo deste texto é apresentar
-uma proposta de desenvolvimento de uma máquina virtual de processo que
-usa interpretação como técnica de emulação. No que segue apresentamos
-nosso objetivos gerais (chamaremos de etapa) e específicos (chamaremos
-de passo):
+\paragraph{Primeira Etapa} Implementação da máquina virtual de processos.
 
-\paragraph{Primeira Etapa} Nesta etapa implementaremos a versão básica da 
-máquina virtual. Ao final desta etapa teremos uma máquina virtual de
-processo capaz de interpretar um executável compilado com linkagem
+Nesta etapa implementaremos a versão básica da máquina virtual.
+Ao final desta etapa teremos uma máquina virtual de processo capaz de interpretar um executável compilado com linkagem
 dinamica para execução em uma máquina Linux de 32 bits.
-	\begin{itemize}
-		\item \textbf{Carregador} Neste passo implementaremos o código responsável
-		por ler e decodificar o executável principal e suas dependencias
-		e montar o espaço de endereçamento onde a interpretação ocorrerá.
-		\item \textbf{Decodificador} Neste passo implementaremos as rotinas de 
-		decodificação das instruções x86 32 bits.
-		\item \textbf{Interpretador} Neste passo implementaremos as rotinas 
-		resposáveis por interpretar as instruções do x86 32 bits.
-		\item \textbf{Syscalls} Neste passo implementaremos as rotinas que simularam
-		as syscalls da ABI guest.
-	\end{itemize}
 
-\paragraph{Segunda Etapa} Nesta etapa implementaremos os passos que adicionam
-ao sistema inicial recursos de instrumentação e otimização da interpretação.
-	\begin{itemize}
-		\item \textbf{Otimização} Neste passo implementaremos uma das
-		das seguintes técnicas: DICache, Threaded-Interpretation ou Pre-decoding.
-		\item \textbf{Instrumentação} Neste passo implementaremos suporte para 
-		instrumentação dinâmica das aplicações emuladas.
-	\end{itemize}
+\begin{itemize}
+ \item \textbf{Carregador} Neste passo implementaremos o código responsável por ler e decodificar o executável principal e suas dependencias e montar o espaço de endereçamento onde a interpretação ocorrerá.
+ \item \textbf{Decodificador} Neste passo implementaremos as rotinas de decodificação das instruções x86 32 bits.
+ \item \textbf{Interpretador} Neste passo implementaremos as rotinas resposáveis por interpretar as instruções do x86 32 bits.
+ \item \textbf{Syscalls} Neste passo implementaremos as rotinas que simularam as syscalls da ABI guest.
+\end{itemize}
+
+O sistema que estamos propondo utilizará o Bochs como ponto de partida para desenvolvimento.
+Uma vez que o Bochs é uma máquina virtual de sistema, ele emula o comportamento de diversos dispositivos de hardware, como
+cache de instruções, placa de vídeo, placa de rede, etc.
+Como o sistema que estamos projetando é uma máquina virtual de processo não precisamos emular tais dispositivos. 
+
+\paragraph{Segunda Etapa} Otimização da máquina virtual.
+
+Nesta etapa implementaremos os passos que adicionam ao sistema inicial recursos de instrumentação e otimização da interpretação.
+
+\begin{itemize}
+ \item \textbf{Otimização} Neste passo implementaremos uma das seguintes técnicas: DICache, Threaded-Interpretation ou Pre-decoding.
+ \item \textbf{Instrumentação} Neste passo implementaremos suporte para instrumentação dinâmica das aplicações emuladas.
+\end{itemize}
  
-\paragraph{Terceira Etapa} Nesta etapa conduziremos uma análise de desempenho do sistema
-em relação ao emulador Bochs e quantificaremos o impacto das técnicas implementadas
+\paragraph{Terceira Etapa} Análise de desempenho.
+
+Nesta etapa conduziremos uma análise de desempenho do sistema em relação ao emulador Bochs e quantificaremos o impacto das técnicas implementadas
 na etapa 2 no sistema.
-	\begin{itemize}
-		\item \textbf{Desempenho 1} Neste passo avaliaremos o desempenho do sistema
-		em relação ao emulador de sistema Bochs.
-		\item \textbf{Desempenho 2} Neste passo iremos avaliar o efeito das técnicas 
-		implementadas na etapa 2 no desempenho do sistema.
-	\end{itemize}
+
+\begin{itemize}
+ \item \textbf{Desempenho 1} Neste passo avaliaremos o desempenho do sistema em relação ao emulador de sistema Bochs.
+ \item \textbf{Desempenho 2} Neste passo iremos avaliar o efeito das técnicas implementadas na etapa 2 no desempenho do sistema.
+\end{itemize}
+
+\section{Cronograma}
+
+%Será que precisamos de uma seção de resultados esperados e contribuições?
+
+\section{Conclusão}
 
 \begin{thebibliography}{99}
 
