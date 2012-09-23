@@ -110,46 +110,20 @@ de máquinas virtuais.
 % precisamos também adicionar como objetivo a análise do desempenho
 % da nossa implementação em relação ao Bochs.
 
-Como comentamos na seção anterior, o objetivo deste texto é apresentar
-uma proposta de desenvolvimento de uma máquina virtual de processo que
-usa interpretação como técnica de emulação. No que segue apresentamos
-nosso objetivos gerais (chamaremos de etapa) e específicos (chamaremos
-de passo):
+As diferentes implementações de MV apresentam características que determinam seu desempenho e aplicabilidade.
+Por exemplo, implementações interpretadas tem como principal característica a portabilidade de código, permitindo que sejam utilizadas em diferentes plataformas. 
+Em contrapartidada, apresentam desempenho inferior à implementações que utilizam tradução dinâmica de binários.
 
-\paragraph{Primeira Etapa} Nesta etapa implementaremos a versão básica da 
-máquina virtual. Ao final desta etapa teremos uma máquina virtual de
-processo capaz de interpretar um executável compilado com linkagem
-dinamica para execução em uma máquina Linux de 32 bits.
-	\begin{itemize}
-		\item \textbf{Carregador} Neste passo implementaremos o código responsável
-		por ler e decodificar o executável principal e suas dependencias
-		e montar o espaço de endereçamento onde a interpretação ocorrerá.
-		\item \textbf{Decodificador} Neste passo implementaremos as rotinas de 
-		decodificação das instruções x86 32 bits.
-		\item \textbf{Interpretador} Neste passo implementaremos as rotinas 
-		resposáveis por interpretar as instruções do x86 32 bits.
-		\item \textbf{Syscalls} Neste passo implementaremos as rotinas que simularam
-		as syscalls da ABI guest.
-	\end{itemize}
+Neste contexto, são escassos os dados sobre os custos (recursos computacionais e desempenho) para executar uma máquina virtual de sistema e de processos. 
+Visto que a primeira apresenta o overhead de emular todos os subsistemas de um computador real e ainda executar um sistema operacional completo, enquanto que na máquina virtual de processos apenas emula o sistema operacional.
+Desta forma, o objetivo geral deste trabalhor é apresentar uma comparação sobre o desempenho destes dois tipos de máquinas virtuais.
+Como forma de atingir o objetivo descrito, os seguintes objetivos específicos serão desenvolvidos:
 
-\paragraph{Segunda Etapa} Nesta etapa implementaremos os passos que adicionam
-ao sistema inicial recursos de instrumentação e otimização da interpretação.
-	\begin{itemize}
-		\item \textbf{Otimização} Neste passo implementaremos uma das
-		das seguintes técnicas: DICache, Threaded-Interpretation ou Pre-decoding.
-		\item \textbf{Instrumentação} Neste passo implementaremos suporte para 
-		instrumentação dinâmica das aplicações emuladas.
-	\end{itemize}
- 
-\paragraph{Terceira Etapa} Nesta etapa conduziremos uma análise de desempenho do sistema
-em relação ao emulador Bochs e quantificaremos o impacto das técnicas implementadas
-na etapa 2 no sistema.
-	\begin{itemize}
-		\item \textbf{Desempenho 1} Neste passo avaliaremos o desempenho do sistema
-		em relação ao emulador de sistema Bochs.
-		\item \textbf{Desempenho 2} Neste passo iremos avaliar o efeito das técnicas 
-		implementadas na etapa 2 no desempenho do sistema.
-	\end{itemize}
+\begin{itemize}
+ \item Implementação de uma máquina virtual interpretada de processos a partir do emulador de sistemas Bochs;
+ \item Aplicação sistemáticas de teste e medição de desempenho (\emph{benchmark}) em ambiente real, no ambiente virtualizado de sistema (\emph{Bochs}) e no ambiente proposto (\emph{Box});
+ \item Implementação de mecanismos de otimização da execução como forma de melhorar o desempenho do ambiente virtualizado.
+\end{itemize} 
 
 Na próxima seção apresentamos os trabalhos relacionados a este projeto.
 
@@ -250,6 +224,47 @@ ele emula o comportamento de diversos dispositivos de hardware, como
 cache de instruções, placa de vídeo, placa de rede, etc. Como o sistema
 que estamos projetando é uma máquina virtual de processo não precisamos
 emular tais dispositivos. 
+
+Como comentamos na seção anterior, o objetivo deste texto é apresentar
+uma proposta de desenvolvimento de uma máquina virtual de processo que
+usa interpretação como técnica de emulação. No que segue apresentamos
+nosso objetivos gerais (chamaremos de etapa) e específicos (chamaremos
+de passo):
+
+\paragraph{Primeira Etapa} Nesta etapa implementaremos a versão básica da 
+máquina virtual. Ao final desta etapa teremos uma máquina virtual de
+processo capaz de interpretar um executável compilado com linkagem
+dinamica para execução em uma máquina Linux de 32 bits.
+	\begin{itemize}
+		\item \textbf{Carregador} Neste passo implementaremos o código responsável
+		por ler e decodificar o executável principal e suas dependencias
+		e montar o espaço de endereçamento onde a interpretação ocorrerá.
+		\item \textbf{Decodificador} Neste passo implementaremos as rotinas de 
+		decodificação das instruções x86 32 bits.
+		\item \textbf{Interpretador} Neste passo implementaremos as rotinas 
+		resposáveis por interpretar as instruções do x86 32 bits.
+		\item \textbf{Syscalls} Neste passo implementaremos as rotinas que simularam
+		as syscalls da ABI guest.
+	\end{itemize}
+
+\paragraph{Segunda Etapa} Nesta etapa implementaremos os passos que adicionam
+ao sistema inicial recursos de instrumentação e otimização da interpretação.
+	\begin{itemize}
+		\item \textbf{Otimização} Neste passo implementaremos uma das
+		das seguintes técnicas: DICache, Threaded-Interpretation ou Pre-decoding.
+		\item \textbf{Instrumentação} Neste passo implementaremos suporte para 
+		instrumentação dinâmica das aplicações emuladas.
+	\end{itemize}
+ 
+\paragraph{Terceira Etapa} Nesta etapa conduziremos uma análise de desempenho do sistema
+em relação ao emulador Bochs e quantificaremos o impacto das técnicas implementadas
+na etapa 2 no sistema.
+	\begin{itemize}
+		\item \textbf{Desempenho 1} Neste passo avaliaremos o desempenho do sistema
+		em relação ao emulador de sistema Bochs.
+		\item \textbf{Desempenho 2} Neste passo iremos avaliar o efeito das técnicas 
+		implementadas na etapa 2 no desempenho do sistema.
+	\end{itemize}
 
 \begin{thebibliography}{99}
 
