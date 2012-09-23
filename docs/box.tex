@@ -59,15 +59,20 @@
 %
 \title{Box: An IA-32 Process Emulator}
 
-\author{Roberto Barboza Jr\thanks{RA: 035712, rbarboza@gmail.com} \and
-Divino C. S. Lucas\thanks{RA: 115121, divcesar@gmail.com} \and
-Anderson Soares Ferreira\thanks{RA: 974530, asferreira.ferreira@gmail.com}}
+\author{
+ Roberto Barboza Jr
+   \thanks{RA: 035712, rbarboza@gmail.com} \and
+ Divino C. S. Lucas
+   \thanks{RA: 115121, divcesar@gmail.com} \and
+ Anderson Soares Ferreira
+   \thanks{RA: 974530, asferreira.ferreira@gmail.com}
+}
 
 \date{}
 
 \maketitle
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{abstract} 
  As máquinas virtuais são ferramentas amplamente utilizadas para resuloção de diversas problemas computacionais e podem ser classificadas de diversas formas, de acordo com sua implementação.
@@ -115,7 +120,7 @@ Como forma de atingir o objetivo descrito, os seguintes objetivos específicos s
 
 \begin{itemize}
  \item Implementação de uma máquina virtual interpretada de processos a partir do emulador de sistemas Bochs;
- \item Aplicação sistemáticas de teste e medição de desempenho (\emph{benchmark}) em ambiente real, no ambiente virtualizado de sistema (\emph{Bochs}) e no ambiente proposto (\emph{Box});
+ \item Aplicação sistemáticas de teste e medição e análise de desempenho em ambiente real, no ambiente virtualizado de sistema (\emph{Bochs}) e no ambiente proposto (\emph{Box});
  \item Implementação de mecanismos de otimização da execução como forma de melhorar o desempenho do ambiente virtualizado.
 \end{itemize} 
 
@@ -134,17 +139,12 @@ Na próxima seção apresentamos os trabalhos relacionados a este projeto.
 % comentar no que nosso sistema é diferente do deles.
 
 \subsection{Máquinas Virtuais}
-O Bochs \cite{bochs} é uma máquina virtual de sistema com suporte a emulação
-de diversos processadores da família x86 32 e 64 bits. Ele preza
-por portabilidade, e nesse sentido utiliza interpretação como técnica
-de emulação. Para reduzir o overhead de interpretação, o Bochs utiliza
-as técnicas de pre-decoding \cite{smith} e threaded-interpretation \cite{smith}.
-O sistema que estamos propondo se diferencia do Bochs por ser voltado
-à emulação de processos e não de sistemas.
+O Bochs \cite{bochs} é uma máquina virtual de sistema com suporte a emulação de diversos processadores da família x86 32 e 64 bits. 
+Ele preza por portabilidade, e nesse sentido utiliza interpretação como técnica de emulação. Para reduzir o overhead de interpretação, o Bochs utiliza as técnicas de pre-decoding \cite{smith} e threaded-interpretation \cite{smith}.
+O sistema que estamos propondo se diferencia do Bochs por ser voltado à emulação de processos e não de sistemas.
 
 O Pin \cite{pin} é uma máquina virtual de processo que emula os ISAs IA-32 e x86-64. 
-Ele é uma ferramenta de código fechado e possui versões tanto para Windows como para Linux, sendo reconhecido por prover uma rica
-API para criação de ferramentas (Pintools) para análise do comportamento dinâmico de aplicações. 
+Ele é uma ferramenta de código fechado e possui versões tanto para Windows como para Linux, sendo reconhecido por prover uma rica API para criação de ferramentas (Pintools) para análise do comportamento dinâmico de aplicações. 
 O Box diferencia-se do PIN por ser uma máquina virtual de código aberto e utilizar interpretação como técnica de emulação.
 Em contrapartida, os sistemas se assemelham no aspecto de proverem uma interface para instrumentação de binários e serem emuladores \emph{same-ISA}~\footnote{As duas interfaces da máquina virtual são iguais.}.
 
@@ -175,14 +175,12 @@ De forma similar ao IA-32 EL, o StarDBT é um tradutor em duas fases.
 Regiões de código que são infrequentemente executadas são traduzidas utilizando um tradutor simples e rápido, enquanto regiões de código que são frequentemente executadas são traduzidas empregando otimizações de código e posteriormente persistidas em uma cache de traduções. 
 O Box diferencia-se do StarDBT por ser capaz de traduzir apenas binários de 32 bits, compilados para Linux e não empregar tradução de binários.
 
-
 \section{Infraestrutura de Pesquisa}
 % Aqui explicamos que estamos reaproveitando as rotinas de interpretação
 % utilizadas no Bochs.
 % talvez seja interessante comentar brevemente que usamos o GitHub
 % para sincronizar o desenvolvimento do projeto.
 %
-
 
 \section{Metodologia}
 % Aqui explicamos como vamos fazer para desenvolver o projeto,
@@ -192,15 +190,14 @@ O Box diferencia-se do StarDBT por ser capaz de traduzir apenas binários de 32 
 % e do relatório atual.
 %
 
-Como comentamos na seção anterior, o objetivo deste texto é apresentar uma proposta de desenvolvimento de uma máquina virtual de processo que
-usa interpretação como técnica de emulação.
-No que segue apresentamos nosso objetivos gerais (chamaremos de etapa) e específicos (chamaremos de passo):
+Como forma de atingir o objetivo proposto, o trabalho adotará uma abordagem dividida em três etapas logicamente divididas em passos que serão descritos em detalhes a seguir.
 
-\paragraph{Primeira Etapa} Implementação da máquina virtual de processos.
+\subsection{Implementação da máquina virtual de processos}
 
-Nesta etapa implementaremos a versão básica da máquina virtual.
-Ao final desta etapa teremos uma máquina virtual de processo capaz de interpretar um executável compilado com linkagem
-dinamica para execução em uma máquina Linux de 32 bits.
+Nesta etapa será implementada a versão básica da máquina virtual.
+O sistema proposto utilizará o Bochs como ponto de partida para desenvolvimento. 
+Por ser uma máquina virtual de sistema, o Bochs implementa mecanismos de emulação para diversos subsistemas de hardware, como cache de instruções, barramentos, discos, vídeo, rede, etc. 
+Tais subsistemas são desnecessários em uma máquina virtual de processos, visto que são abstraídos pelo sistema operacional e por esse motivo serão removidos do projeto.
 
 \begin{itemize}
  \item \textbf{Carregador} Neste passo implementaremos o código responsável por ler e decodificar o executável principal e suas dependencias e montar o espaço de endereçamento onde a interpretação ocorrerá.
@@ -209,12 +206,10 @@ dinamica para execução em uma máquina Linux de 32 bits.
  \item \textbf{Syscalls} Neste passo implementaremos as rotinas que simularam as syscalls da ABI guest.
 \end{itemize}
 
-O sistema que estamos propondo utilizará o Bochs como ponto de partida para desenvolvimento.
-Uma vez que o Bochs é uma máquina virtual de sistema, ele emula o comportamento de diversos dispositivos de hardware, como
-cache de instruções, placa de vídeo, placa de rede, etc.
-Como o sistema que estamos projetando é uma máquina virtual de processo não precisamos emular tais dispositivos. 
+Ao final desta etapa teremos uma máquina virtual de processo capaz de interpretar um executável compilado com linkagem
+dinamica para execução em uma máquina Linux de 32 bits.
 
-\paragraph{Segunda Etapa} Otimização da máquina virtual.
+\subsection{Otimização da máquina virtual}
 
 Nesta etapa implementaremos os passos que adicionam ao sistema inicial recursos de instrumentação e otimização da interpretação.
 
@@ -223,7 +218,7 @@ Nesta etapa implementaremos os passos que adicionam ao sistema inicial recursos 
  \item \textbf{Instrumentação} Neste passo implementaremos suporte para instrumentação dinâmica das aplicações emuladas.
 \end{itemize}
  
-\paragraph{Terceira Etapa} Análise de desempenho.
+\subsection{Análise de desempenho}
 
 Nesta etapa conduziremos uma análise de desempenho do sistema em relação ao emulador Bochs e quantificaremos o impacto das técnicas implementadas
 na etapa 2 no sistema.
