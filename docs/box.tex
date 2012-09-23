@@ -72,7 +72,7 @@ Anderson Soares Ferreira\thanks{RA: 974530, asferreira.ferreira@gmail.com}}
 \begin{abstract} 
  As máquinas virtuais são ferramentas amplamente utilizadas para resuloção de diversas problemas computacionais e podem ser classificadas de diversas formas, de acordo com sua implementação.
  Como forma de ampliar a compreensão das implicações resultantes das diferentes características de implementação dos diversos tipos de máquinas virtuais, este trabalho apresenta uma comparação de desempenho entre máquinas virtuais interpretadas de sistema e de processo.
- Para tanto, o presente estudo faz a comparação das ferramentas {\emph Bochs}, um gerenciador de máquinas virtuais de sistema, e um gerenciador para máquinas virtuais de processo chamodo \em{Box}, desenvolvido a partir da ferramenta anterior especificamente para esse estudo.
+ Para tanto, o presente estudo faz a comparação das ferramentas \emph{Bochs}, um gerenciador de máquinas virtuais de sistema, e um gerenciador para máquinas virtuais de processo chamodo \emph{Box}, desenvolvido a partir da ferramenta anterior especificamente para esse estudo.
 \end{abstract}
 
 \section{Introdução}
@@ -82,15 +82,11 @@ Anderson Soares Ferreira\thanks{RA: 974530, asferreira.ferreira@gmail.com}}
 % pois permitem fazer analise do código, etc.
 % comentar brevemente qual ẽ o nosso objetivo no projeto.
 
-Uma Máquina Virtual (MV) é uma plataforma versátil que pode ser empregada 
-para resolver diversos problemas na área de computação. Uma MV pode ser 
-vista como uma camada de software utilizada para prover a integração
-entre duas interfaces distintas. Essas interfaces podem representar tanto
-Application Binary Interface (ABI) quanto Instruction Set Architecture (ISA) 
-diferentes, o que denominamos MV de Processo ou de Sistema, respectivamente. 
-Nesse sentido uma MV ocupa uma posição estratégica que pode ser explorada de 
-diversas formas. Por exemplo, uma MV pode efetuar a otimização dinâmica de 
-binários.
+Uma Máquina Virtual (MV) é uma plataforma versátil que pode ser empregada para resolver diversos problemas na área de computação. 
+Uma MV pode ser vista como uma camada de software utilizada para prover a integração entre duas interfaces distintas.
+As interfaces descritas podem ser tanto \emph{Application Binary Interface} (ABI) em máquinas virtuais de processo, quanto \emph{Instruction Set Architecture} (ISA) em MV de sistema.
+Nesse sentido, tais tecnologias ocupam uma posição estratégica que pode ser explorada de diversas formas:
+Na emulação de arquiteturas diferentes, permitindo que aplicações escritas para um plataforma específica possa ser executada em outra; para simulação e instrumentação de sistemas ou aplicações; ou otimização dinâmica de binários.
 
 Duas abordagens são frequentemente empregadas para implementar a emulação
 em uma máquina virtual: interpretação e tradução. Uma MV que emprega 
