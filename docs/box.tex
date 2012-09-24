@@ -83,12 +83,6 @@
 \end{abstract}
 
 \section{Introdução}
-% aqui vamos dar introdução ao assunto de máquinas virtuais
-% falar sobre os modos de emulação 
-% falar que máquinas virtuais podem ser usadas para pesquisa
-% pois permitem fazer analise do código, etc.
-% comentar brevemente qual ẽ o nosso objetivo no projeto.
-
 Uma Máquina Virtual (MV) é uma plataforma versátil que pode ser empregada para resolver diversos problemas na área de computação. 
 Uma MV pode ser vista como uma camada de software utilizada para prover a integração entre duas interfaces distintas.
 As interfaces descritas podem ser tanto \emph{Application Binary Interface} (ABI) em máquinas virtuais de processo, quanto \emph{Instruction Set Architecture} (ISA) em MV de sistema.
@@ -104,13 +98,6 @@ Nesse texto descrevemos uma proposta de implementação de uma máquina virtual 
 O objetivo desta MA não é otimizar a execução da aplicação sendo emulada mas sim, criar uma infraestrutura que permita a realização de experimentos voltados para a área de máquinas virtuais.
    
 \section{Objetivos}
-% Aqui vamos apresentar nosso objetivo principal que é desenvolver
-% uma máquina virtual de processo que emprega interpretação para
-% fazer a emulação do sistema.
-% 
-% precisamos também adicionar como objetivo a análise do desempenho
-% da nossa implementação em relação ao Bochs.
-
 As diferentes implementações de MV apresentam características que determinam seu desempenho e aplicabilidade.
 Por exemplo, implementações interpretadas tem como principal característica a portabilidade de código, permitindo que sejam utilizadas em diferentes plataformas. 
 Em contrapartidada, apresentam desempenho inferior à implementações que utilizam tradução dinâmica de binários.
@@ -130,7 +117,23 @@ Na próxima seção apresentamos os trabalhos relacionados a este projeto.
 
 \section{Fundamentação Teórica}
 
- \subsection{Emulação}
+\subsection{Máquinas Virtuais}
+
+Uma máquina virtual tem como finalidade, implementar as interfaces de um sistema a partir de outro sistema com características diferentes.
+De modo geral, existem dois tipos de interfaces que são implementadas por máquinas virtuais:
+
+\begin{itemize}
+ \item \emph{Instruction Set Architecture} (ISA) é a interface que torna visível os recursos do processador como unidades funcionais, registradores e as operações que manipulam esses recursos.    
+Um ISA é composto por duas partes: as instruções de computação geral (user-ISA), utilizadas pelas aplicações; e as instruções de controle e gerenciamento de recursos (system-ISA), utilizadas pelo sistema operacional.
+Máquinas virtuais que implementam a interface ISA disponibilizam os mesmos recursos existentes em computadores reais, permitindo desta forma a execução de sistemas operacionais completos. 
+
+ \item \emph{Application Binary Interface} (ABI) é a interface que permite que a aplicação tenha acesso a recursos de hardware e serviços disponíveis no sistema\cite{Smith2005a}. 
+Ainda segundo os autores, a ABI possui dois componentes básicos: as instruções pertencentes ao user-ISA, ou seja, instruções não privilegiadas; e uma interface para comunicação com o sistema operacional, a qual garante acesso aos recursos do sistema.
+Em sistemas operacionais Unix-like, esta interface é chamadas de \emph{system calls} (syscalls). 
+Máquinas virtuais que implementam a interface ABI são chamadas de MV de processo, e disponibilizam os mesmos recursos fornecidos pelo sistema operacional, permitindo assim a execução de aplicações.
+\end{itemize}
+
+\subsection{Técnicas de Emulação}
 Segundo \cite{Smith2005}, a emulação é um processo de implementação das funcionalidades e interfaces de um sistema em outro sistema com características diferentes. 
 Como exemplo, podemos citar a execução de máquinas virtuais que permitem a execução de código PowerPC em um arquitetura x86. 
 Para isso, faz-se necessária a implementação de interfaces que permitam a emulação do ISA PowerPC, utilizando instruções x86.
@@ -143,22 +146,18 @@ A interpretação envolve a recuperação da instrução original (\emph{fetch})
 \end{itemize}
 
 As implicações do uso de interpretação ou tradução influênciam diretamente o desempenho e a aplicabilidade da máquina virtual.
-Em sistemas interpretados, o desempenho é consideravelmente baixo, uma vez, que cada instrução é interpretada individualmente, e ná maior parte das vezes, repetidamente.
-Apesar disso, tais sistemas são extremamente portáveis o que permite que a sua execução em diversas plataformas, com poucos, ou até mesmo sem nenhuma alteração em seu código original.
-Nos sistemas de traduções de binários, existe um custo inicial (\emph{overhead}) grande, visto que o código original precisa ser traduzido antes de sua execução, porém, uma vez traduzido, o codigo resultante é executado nativamente, garantindo melhor desempenho.
+Em sistemas interpretados, o desempenho é relativamente baixo, uma vez que cada instrução é interpretada individualmente, e na maior parte das vezes, repetidamente.
+Apesar disso, tais sistemas são extremamente portáveis o que permite sua execução em diversas plataformas, com poucos, ou até mesmo sem nenhuma alteração em seu código original.
+Nos sistemas de traduções de binários, existe um custo (\emph{overhead}) inicial elevado, visto que o código original precisa ser traduzido antes de sua execução, porém, uma vez traduzido, o codigo resultante é executado nativamente, o que garante melhor desempenho.
 
- \subsection{Técnicas de Interpretação}
-
- % acham que precisamos incluir esta subsecao?
- % penso em colocar aqui um comentário sobre o ELF e sobre as syscalls do linux
- \subsection{Application Binary Interface}
+\subsection{Técnicas de Interpretação}
 
 \section{Levantamento Bibliográfico}
 % Aqui devemos comentar sobre os trabalhos relacionados ao nosso
 % podemos comentar sobre o Bochs, o PIN e o HDTrans por exemplo.
 % comentar no que nosso sistema é diferente do deles.
 
-\subsection{Máquinas Virtuais}
+%\subsection{Máquinas Virtuais}
 O Bochs \cite{Lawton1996} é uma máquina virtual de sistema com suporte a emulação de diversos processadores da família x86 32 e 64 bits. 
 Ele preza por portabilidade, e nesse sentido utiliza interpretação como técnica de emulação. Para reduzir o overhead de interpretação, o Bochs utiliza as técnicas como \emph{pre-decoding}\cite{Magnusson1994}, \emph{threaded-interpretation}\cite{Klint1981}, e \emph{lazy evaluation}\cite{Hookway1997}.
 O sistema que estamos propondo se diferencia do Bochs por ser voltado à emulação de processos e não de sistemas.
@@ -203,12 +202,6 @@ O Box diferencia-se do StarDBT por ser capaz de traduzir apenas binários de 32 
 %
 
 \section{Metodologia}
-% Aqui explicamos como vamos fazer para desenvolver o projeto,
-% quais são as principais etapas do projeto e como elas estão
-% distribuidas no intervalo de tempo que temos.
-% precisamos incluir no cronograma a redação do relatório final
-% e do relatório atual.
-%
 
 Como forma de atingir o objetivo proposto, o trabalho adotará uma abordagem dividida em três etapas logicamente divididas em passos que serão descritos em detalhes a seguir.
 
@@ -216,7 +209,7 @@ Como forma de atingir o objetivo proposto, o trabalho adotará uma abordagem div
 
 Nesta etapa será implementada a versão básica da máquina virtual.
 O interpretador proposto utilizará a infraestrutura da interpretador Bochs como ponto de partida para desenvolvimento. 
-Por ser uma máquina virtual de sistema, o Bochs implementa mecanismos de emulação para diversos subsistemas de hardware, como cache de instruções, barramentos, discos, vídeo, rede, etc.
+Por ser uma máquina virtual de sistema, o Bochs implementa mecanismos de emulação para diversos subsistemas de hardware, como cache de instruções, barramentos, discos, placas de vídeo e de rede, etc.
 Tais subsistemas são desnecessários em uma máquina virtual de processos, visto que esses dispositivos são gerenciados pelo sistema operacional, e por esse motivo serão removidos do projeto.
 
 \begin{figure}[h]
@@ -227,7 +220,7 @@ Tais subsistemas são desnecessários em uma máquina virtual de processos, vist
 \end{figure}
 
 A Figura \ref{fig:box-architecture} apresenta a arquitetura geral do interpretador, seguido da descrição de seus principais módulos.
-Através deste interpretador, será possível carregar e interpretar um executável linux (elf) de 32bits com ligação dinâmica.
+Através deste interpretador, será possível carregar e interpretar um executável linux de 32bits com ligação dinâmica.
 
 \begin{itemize}
  \item \textbf{Carregador} Responsável por ler e decodificar o executável principal e suas dependências, montar o espaço de endereçamento onde a interpretação ocorrerá e delegar o controle à CPU.
@@ -265,7 +258,7 @@ Este trabalho apresentou uma proposta de análise de desempenho entre máquinas 
 
 Além dos dados provenientes desta análise, o trabalho também apresenta como contribuições o desenvolvimento de emulador interpretado de processos para aplicações Linux de 32bits.
 Embora o desenvolvimento desta ferramenta esteja voltado para a produção de dados para a análise de desempenho, tal ferramenta pode ser utilizada em situações como: instrumentação e simulação de aplicações; e como 
-módulo de compatibilidade para execução de aplicações *nix x86 32bits em diferentes sistemas operacionais ou arquiteturas.
+módulo de compatibilidade para execução de aplicações Unix-like x86 32bits em diferentes sistemas operacionais ou arquiteturas.
 
 A implementação e análise de técnicas de otimização de desempenho para interpretadores, fornecerá recursos que poderão ser aplicados em outros interpretadores para melhora do seu desempenho. 
 
