@@ -4,7 +4,6 @@
 % Last edited on 2003-06-07 21:12:18 by stolfi
 
 % modificado em 1o. de outubro de 2008
-
 \documentclass[11pt,twoside]{article}
 \usepackage{techrep-ic}
 
@@ -142,8 +141,8 @@ Na próxima seção apresentamos os trabalhos relacionados a este projeto.
 % comentar no que nosso sistema é diferente do deles.
 
 \subsection{Máquinas Virtuais}
-O Bochs \cite{bochs} é uma máquina virtual de sistema com suporte a emulação de diversos processadores da família x86 32 e 64 bits. 
-Ele preza por portabilidade, e nesse sentido utiliza interpretação como técnica de emulação. Para reduzir o overhead de interpretação, o Bochs utiliza as técnicas de pre-decoding \cite{smith} e threaded-interpretation \cite{smith}.
+O Bochs \cite{Lawton1996} é uma máquina virtual de sistema com suporte a emulação de diversos processadores da família x86 32 e 64 bits. 
+Ele preza por portabilidade, e nesse sentido utiliza interpretação como técnica de emulação. Para reduzir o overhead de interpretação, o Bochs utiliza as técnicas de pre-decoding \cite{Smith2005} e threaded-interpretation \cite{Smith2005}.
 O sistema que estamos propondo se diferencia do Bochs por ser voltado à emulação de processos e não de sistemas.
 
 O Pin \cite{Luk2005} é uma máquina virtual de processo que emula os ISAs IA-32 e x86-64. 
@@ -165,7 +164,7 @@ Subsequentes invocações do trecho de código original serão emuladas utilizan
 O Box diferencia-se do Dynamo por não ter o foco na otimização de binários mas sim em ser um sistema que prove uma interface simples para 
 instrumentação de binários.
 
-O IA-32 EL \cite{ia32el} é uma máquina virtual de processos com o objetivo de suportar a execução de aplicações IA-32 em processadores da família IA-64.
+O IA-32 EL \cite{Baraz2003} é uma máquina virtual de processos com o objetivo de suportar a execução de aplicações IA-32 em processadores da família IA-64.
 De forma similar ao Dynamo, o IA-32 EL emprega uma abordagem de emulação em duas etapas, porém as duas etapas realizam tradução de código. 
 Inicialmente o IA-32 EL efetua a tradução de código em uma granularidade de bloco básico.
 Durante essa tradução, código de instrumentação é inserido para detectar blocos básicos que são frequentemente executados. 
@@ -173,7 +172,7 @@ Quando um número mínimo de blocos básicos é identificado, o sistema forma um
 Execuções subsequentes desses blocos básicos usam a tradução otimizada. 
 O Box diferencia-se do IA-32 EL por não fazer tradução de binários.
 
-StarDBT \cite{stardbt} é uma máquina virtual de pesquisa capaz de fazer traduções de aplicações compiladas para x86 32/64 bits para execução em hardware x86 32 bits.
+StarDBT \cite{Wang2007} é uma máquina virtual de pesquisa capaz de fazer traduções de aplicações compiladas para x86 32/64 bits para execução em hardware x86 32 bits.
 De forma similar ao IA-32 EL, o StarDBT é um tradutor em duas fases. 
 Regiões de código que são infrequentemente executadas são traduzidas utilizando um tradutor simples e rápido, enquanto regiões de código que são frequentemente executadas são traduzidas empregando otimizações de código e posteriormente persistidas em uma cache de traduções. 
 O Box diferencia-se do StarDBT por ser capaz de traduzir apenas binários de 32 bits, compilados para Linux e não empregar tradução de binários.
@@ -233,7 +232,7 @@ Nesta etapa serão implementados os passos que adicionarão ao interpretador rec
  
 \subsection{Análise de desempenho}
 
-Nesta etapa serão conduzidas medições e análises de desempenho do sistema em relação ao emulador Bochs e será qunatificado o impacto das técnicas implementadas na etapa 2 no sistema.
+Nesta etapa serão conduzidas medições e análises de desempenho do sistema em relação ao emulador \emph{Bochs} e será qunatificado o impacto das técnicas implementadas na etapa 2 no sistema.
 
 \begin{itemize}
  \item \textbf{Desempenho 1} Neste passo avaliaremos o desempenho do sistema em relação ao emulador de sistema Bochs.
