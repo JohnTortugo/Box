@@ -127,9 +127,20 @@ Como forma de atingir o objetivo descrito, os seguintes objetivos específicos s
 \end{itemize} 
 
 Na próxima seção apresentamos os trabalhos relacionados a este projeto.
+
 \section{Fundamentação Teórica}
- % acho que esse nome não está bom...
- \subsection{Técnicas de Interpretação}
+
+ \subsection{Técnicas de Emulação}
+Segundo \cite{Smith2005}, a emulação é um processo de implementação das funcionalidades e interfaces de um sistema em outro sistema com características diferentes. 
+Como exemplo, podemos citar a execução de máquinas virtuais que permitem a execução de código PowerPC em um arquitetura x86. 
+Para isso, faz-se necessária a implementação de interfaces que permitam a emulação do ISA PowerPC, utilizando instruções x86.
+A emulação de instruções, como a do exemplo citado anteriormente, é um dos pontos chave para a construção de máquinas virtuais e pode ser classificada de duas formas, de acordo com a sua forma de implementação:
+
+\begin{itemize}
+ \item \textbf{Interpretação} Processo no qual cada instrução do programa original (\emph{guest}) está associado a uma rotina que executa a função equivalente a da operação original na plataforma destino (\emph{host}).
+A interpretação envolve a recuperação da instrução original (\emph{fetch}), sua decodificação (\emph{decode}) e finalmente a execução da operação equivalente.
+ \item \textbf{Tradução de binários} Neste processo um código nativo na arquitetura destino é gerado dinâmicamente a partir do código original da aplicação e tem como função reproduzir o comportamento do código da aplicação original \cite{Sites1993}. 
+\end{itemize}
 
  % acham que precisamos incluir esta subsecao?
  % penso em colocar aqui um comentário sobre o ELF e sobre as syscalls do linux
