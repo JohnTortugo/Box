@@ -160,7 +160,7 @@ Nos sistemas de traduções de binários, existe um custo inicial (\emph{overhea
 
 \subsection{Máquinas Virtuais}
 O Bochs \cite{Lawton1996} é uma máquina virtual de sistema com suporte a emulação de diversos processadores da família x86 32 e 64 bits. 
-Ele preza por portabilidade, e nesse sentido utiliza interpretação como técnica de emulação. Para reduzir o overhead de interpretação, o Bochs utiliza as técnicas de pre-decoding \cite{Smith2005} e threaded-interpretation \cite{Klint1981}.
+Ele preza por portabilidade, e nesse sentido utiliza interpretação como técnica de emulação. Para reduzir o overhead de interpretação, o Bochs utiliza as técnicas como \emph{pre-decoding}\cite{Magnusson1994}, \emph{threaded-interpretation}\cite{Klint1981}, e \emph{lazy evaluation}\cite{Hookway1997}.
 O sistema que estamos propondo se diferencia do Bochs por ser voltado à emulação de processos e não de sistemas.
 
 O Pin \cite{Luk2005} é uma máquina virtual de processo que emula os ISAs IA-32 e x86-64. 
@@ -244,7 +244,7 @@ Através deste interpretador, será possível carregar e interpretar um executá
 Nesta etapa serão implementados os passos que adicionarão ao interpretador recursos de instrumentação e otimização de desempenho da interpretação.
 
 \begin{itemize}
- \item \textbf{Otimização} Neste passo implementaremos uma das seguintes técnicas: DICache; Threaded-Interpretation; ou Pre-decoding.
+ \item \textbf{Otimização} Neste passo implementaremos uma das seguintes técnicas: DICache\cite{Chen2012} ou Threaded-Interpretation\cite{Klint1981}.
  \item \textbf{Instrumentação} Neste passo implementaremos suporte para instrumentação dinâmica das aplicações emuladas.
 \end{itemize}
  
@@ -259,9 +259,15 @@ Nesta etapa serão conduzidas medições e análises de desempenho do sistema em
 
 \section{Cronograma}
 
-%Será que precisamos de uma seção de resultados esperados e contribuições?
-
 \section{Conclusão}
+
+Este trabalho apresentou uma proposta de análise de desempenho entre máquinas virtuais interpretadas de sistema e de processo.
+
+Além dos dados provenientes desta análise, o trabalho também apresenta como contribuições o desenvolvimento de emulador interpretado de processos para aplicações Linux de 32bits.
+Embora o desenvolvimento desta ferramenta esteja voltado para a produção de dados para a análise de desempenho, tal ferramenta pode ser utilizada em situações como: instrumentação e simulação de aplicações; e como 
+módulo de compatibilidade para execução de aplicações *nix x86 32bits em diferentes sistemas operacionais ou arquiteturas.
+
+A implementação e análise de técnicas de otimização de desempenho para interpretadores, fornecerá recursos que poderão ser aplicados em outros interpretadores para melhora do seu desempenho. 
 
 \bibliography{box}
 
