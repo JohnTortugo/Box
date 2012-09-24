@@ -24,7 +24,7 @@
 %%% PÁGINA DE CAPA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
 % Número do relatório
-\TRNumber{007}
+\TRNumber{???}
 
 % DATA DE PUBLICAÇÃO (PARA A CAPA)
 %
@@ -139,8 +139,13 @@ A emulação de instruções, como a do exemplo citado anteriormente, é um dos 
 \begin{itemize}
  \item \textbf{Interpretação} Processo no qual cada instrução do programa original (\emph{guest}) está associado a uma rotina que executa a função equivalente a da operação original na plataforma destino (\emph{host}).
 A interpretação envolve a recuperação da instrução original (\emph{fetch}), sua decodificação (\emph{decode}) e finalmente a execução da operação equivalente.
- \item \textbf{Tradução de binários} Neste processo um código nativo na arquitetura destino é gerado dinâmicamente a partir do código original da aplicação e tem como função reproduzir o comportamento do código da aplicação original \cite{Sites1993}. 
+ \item \textbf{Tradução de binários} Neste processo um código nativo na arquitetura destino é gerado dinâmicamente a partir do código original da aplicação e tem como função reproduzir o comportamento do código da aplicação original\cite{Sites1993}. 
 \end{itemize}
+
+As implicações do uso de interpretação ou tradução influênciam diretamente o desempenho e a aplicabilidade da máquina virtual.
+Em sistemas interpretados, o desempenho é consideravelmente baixo, uma vez, que cada instrução é interpretada individualmente, e ná maior parte das vezes, repetidamente.
+Apesar disso, tais sistemas são extremamente portáveis o que permite que a sua execução em diversas plataformas, com poucos, ou até mesmo sem nenhuma alteração em seu código original.
+Nos sistemas de traduções de binários, existe um custo inicial (\emph{overhead}) grande, visto que o código original precisa ser traduzido antes de sua execução, porém, uma vez traduzido, o codigo resultante é executado nativamente, garantindo melhor desempenho.
 
  % acham que precisamos incluir esta subsecao?
  % penso em colocar aqui um comentário sobre o ELF e sobre as syscalls do linux
