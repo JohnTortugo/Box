@@ -16,6 +16,7 @@
 %%% SEGUIR:
 %% \usepackage[latin1]{inputenc}
 \usepackage[utf8]{inputenc}
+\usepackage[dvips]{graphicx}
 
 \begin{document}
 
@@ -120,8 +121,8 @@ Como forma de atingir o objetivo descrito, os seguintes objetivos específicos s
 
 \begin{itemize}
  \item Implementação de uma máquina virtual interpretada de processos a partir do emulador de sistemas Bochs;
- \item Aplicação sistemáticas de teste e medição e análise de desempenho em ambiente real, no ambiente virtualizado de sistema (\emph{Bochs}) e no ambiente proposto (\emph{Box});
  \item Implementação de mecanismos de otimização da execução como forma de melhorar o desempenho do ambiente virtualizado.
+ \item Aplicação sistemáticas de teste e medição e análise de desempenho do ambiente virtualizado de sistema (\emph{Bochs}) e no ambiente proposto (\emph{Box});
 \end{itemize} 
 
 Na próxima seção apresentamos os trabalhos relacionados a este projeto.
@@ -195,33 +196,42 @@ Como forma de atingir o objetivo proposto, o trabalho adotará uma abordagem div
 \subsection{Implementação da máquina virtual de processos}
 
 Nesta etapa será implementada a versão básica da máquina virtual.
-O sistema proposto utilizará o Bochs como ponto de partida para desenvolvimento. 
-Por ser uma máquina virtual de sistema, o Bochs implementa mecanismos de emulação para diversos subsistemas de hardware, como cache de instruções, barramentos, discos, vídeo, rede, etc. 
-Tais subsistemas são desnecessários em uma máquina virtual de processos, visto que são abstraídos pelo sistema operacional e por esse motivo serão removidos do projeto.
+O interpretador proposto utilizará a infraestrutura da interpretador Bochs como ponto de partida para desenvolvimento. 
+Por ser uma máquina virtual de sistema, o Bochs implementa mecanismos de emulação para diversos subsistemas de hardware, como cache de instruções, barramentos, discos, vídeo, rede, etc.
+Tais subsistemas são desnecessários em uma máquina virtual de processos, visto que esses dispositivos são gerenciados pelo sistema operacional, e por esse motivo serão removidos do projeto.
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=0.5\columnwidth]{./figures/box-architecture.eps}
+ \caption{Arquitetura do interpretador Box}
+ \label{fig:box-architecture}
+\end{figure}
+
+A Figura \ref{fig:box-architecture} apresenta a arquitetura geral do interpretador, seguido da descrição de seus principais módulos.
+Através deste interpretador, será possível carregar e interpretar um executável linux (elf) de 32bits com ligação dinâmica.
 
 \begin{itemize}
- \item \textbf{Carregador} Neste passo implementaremos o código responsável por ler e decodificar o executável principal e suas dependencias e montar o espaço de endereçamento onde a interpretação ocorrerá.
- \item \textbf{Decodificador} Neste passo implementaremos as rotinas de decodificação das instruções x86 32 bits.
- \item \textbf{Interpretador} Neste passo implementaremos as rotinas resposáveis por interpretar as instruções do x86 32 bits.
- \item \textbf{Syscalls} Neste passo implementaremos as rotinas que simularam as syscalls da ABI guest.
+ \item \textbf{Carregador} Responsável por ler e decodificar o executável principal e suas dependências, montar o espaço de endereçamento onde a interpretação ocorrerá e delegar o controle à CPU.
+ \item \textbf{CPU} Módulo responsável por decodificar e interpretar (executar) as instruções x86 32 bits.
+% \item \textbf{Decodificador} Neste passo implementaremos as rotinas de decodificação das instruções x86 32 bits.
+% \item \textbf{Interpretador} Neste passo implementaremos as rotinas resposáveis por interpretar as instruções do x86 32 bits.
+ \item \textbf{Memória} Módulo responsável pelo gerenciamento do espaço de memória reservado para a aplicação e suas dependências.
+ \item \textbf{Syscalls} Rotinas que implementam as chamadas ao sistema operacional (\emph{system calls}) da ABI da aplicação sendo emulada (\emph{guest}).
+ \item \textbf{Exceções} Módulo de gerenciamento de exceções da CPU (\emph{traps} e \emph{faults}).
 \end{itemize}
-
-Ao final desta etapa teremos uma máquina virtual de processo capaz de interpretar um executável compilado com linkagem
-dinamica para execução em uma máquina Linux de 32 bits.
 
 \subsection{Otimização da máquina virtual}
 
-Nesta etapa implementaremos os passos que adicionam ao sistema inicial recursos de instrumentação e otimização da interpretação.
+Nesta etapa serão implementados os passos que adicionarão ao interpretador recursos de instrumentação e otimização de desempenho da interpretação.
 
 \begin{itemize}
- \item \textbf{Otimização} Neste passo implementaremos uma das seguintes técnicas: DICache, Threaded-Interpretation ou Pre-decoding.
+ \item \textbf{Otimização} Neste passo implementaremos uma das seguintes técnicas: DICache; Threaded-Interpretation; ou Pre-decoding.
  \item \textbf{Instrumentação} Neste passo implementaremos suporte para instrumentação dinâmica das aplicações emuladas.
 \end{itemize}
  
 \subsection{Análise de desempenho}
 
-Nesta etapa conduziremos uma análise de desempenho do sistema em relação ao emulador Bochs e quantificaremos o impacto das técnicas implementadas
-na etapa 2 no sistema.
+Nesta etapa serão conduzidas medições e análises de desempenho do sistema em relação ao emulador Bochs e será qunatificado o impacto das técnicas implementadas na etapa 2 no sistema.
 
 \begin{itemize}
  \item \textbf{Desempenho 1} Neste passo avaliaremos o desempenho do sistema em relação ao emulador de sistema Bochs.
@@ -237,7 +247,7 @@ na etapa 2 no sistema.
 \begin{thebibliography}{99}
 
 \bibitem{pin}Chi-Keung Luk, Robert Cohn, Robert Muth, Harish Patil, Artur
-Klauser, Geoff Lowney, Steven Wallace, Vijay Janapa Reddi, Kim Hazelwood, 
+Klauser, Geoff Lowney, Steven Wallace, Vijay Janapa Reddi, Kim Hazelwood,
 Pin: building customized program analysis tools with dynamic instrumentation, 
 Proceedings of the 2005 ACM SIGPLAN conference on Programming language design
 and implementation, June 12-15, 2005, Chicago, IL, USA 
