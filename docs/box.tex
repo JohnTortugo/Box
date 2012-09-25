@@ -17,6 +17,9 @@
 \usepackage[utf8]{inputenc}
 \usepackage[dvips]{graphicx}
 
+\usepackage{multirow}
+\usepackage{amsmath}
+
 \bibliographystyle{abbrv}
 
 \begin{document}
@@ -97,7 +100,7 @@ O processo de tradução porém, emprega técnicas da área de compiladores para
 Nesse texto descrevemos uma proposta de implementação de uma máquina virtual de processo que emprega interpretação como forma de emulação. 
 O objetivo desta MV não é otimizar a execução da aplicação sendo emulada, mas sim criar uma infraestrutura que permita a realização de experimentos voltados para a área de máquinas virtuais.
    
-\section{Objetivos}
+\section{Objetivos} \label{sec:objetivos}
 As diferentes implementações de MVs apresentam características que determinam seu desempenho e aplicabilidade.
 Por exemplo, implementações interpretadas tem como principal característica a portabilidade de código, permitindo que sejam utilizadas em diferentes plataformas. 
 Em contrapartida, apresentam desempenho inferior a implementações que utilizam tradução dinâmica de binários.
@@ -151,7 +154,7 @@ Em sistemas interpretados, o desempenho é relativamente baixo, uma vez que cada
 Apesar disso, tais sistemas são extremamente portáveis, o que permite sua execução em diversas plataformas com poucas ou até mesmo nenhuma alteração em seu código original.
 Nos sistemas de traduções de binários, existe um custo (\emph{overhead}) inicial elevado, visto que o código original precisa ser traduzido antes de sua execução, porém, uma vez traduzido, o codigo resultante é executado nativamente, o que garante melhor desempenho.
 
-\subsection{Técnicas de Interpretação}
+\subsection{Técnicas de Otimização para Interpretação}
 
 A forma mais básica de interpretação foi descrita na seção \ref{emulacao}: há um loop principal que busca a instrução original, decodifica-a e chama a função responsável pela execução da instrução, retornando ao loop principal logo em seguida. No entanto, existem diversas técnicas que tornam a interpretação um processo mais eficiente. Algumas delas estão listadas a seguir:
 
@@ -162,6 +165,22 @@ A forma mais básica de interpretação foi descrita na seção \ref{emulacao}: 
  \item \textbf{Pre Decoding} O código original é pré decodificado em estruturas mais simples de serem decodificadas, de forma simplificar este passo da interpretação.
 
  \item \textbf{Direct Threaded Interpretation} Utilizado em conjunto ao \textbf{Pre Decoding}, coloca-se diretamente os endereços das rotinas que emulam a instrução original, de forma que ao se ler a instrução pré-decodificada o interpretador faz um salto indireto diretamente a rotina.
+
+\end{itemize}
+
+\subsection{Application Binary Interface}
+
+A \emph{Application Binary Interface} (ABI) é a interface entre um binário e outros binários e entre um binário e o sistema operacional. Ela define convenções para tipos de dados, endianness, alinhamento, chamadas de funções (como devem ser passados os argumentos e o retorno) e syscalls, e, mais especificamente, o formato que os arquivos binários devem ter.
+
+O ELF (Executable and Linking Format), é o formato binário utilizado nos sistemas Unix-like atualmente, e existem 3 tipos principais:
+
+\begin{itemize}
+
+ \item \textbf{Relocatable File} contem dados e código para ser linkado a outro binário para criar um executável ou objeto compartilhado.
+
+ \item \textbf{Executable File} contem um programa que pode ser executado
+
+ \item \textbf{Shared Object} contem código e dados que podem ser linkados a outro objeto compartilhado, criando um terceiro objeto compartilhado ou pode ser combinado a um executável pelo linker dinâmico e outros objetos compartilhados para a criação de uma imagem de processo.
 
 \end{itemize}
 
@@ -207,12 +226,24 @@ De forma similar ao IA-32 EL, o StarDBT é um tradutor em duas fases.
 Regiões de código que são infrequentemente executadas são traduzidas utilizando um tradutor simples e rápido, enquanto regiões de código que são frequentemente executadas são traduzidas empregando otimizações de código e posteriormente persistidas em uma cache de traduções. 
 O Box diferencia-se do StarDBT por ser capaz de traduzir apenas binários de 32 bits, compilados para Linux e não empregar tradução de binários.
 
+
+
 \section{Infraestrutura de Pesquisa}
-% Aqui explicamos que estamos reaproveitando as rotinas de interpretação
-% utilizadas no Bochs.
-% talvez seja interessante comentar brevemente que usamos o GitHub
-% para sincronizar o desenvolvimento do projeto.
-%
+
+Como citado na Seção~\ref{sec:objetivos}, o projeto proposto utilizará como
+ponto de partida para o desenvolvimento, o emulador de sistema Bochs. Portanto 
+a infraestrutura inicial em termos de código fonte será a já presente no Bochs. 
+O código fonte do Bochs é escrito em linguagem C++ e disponibilizado para download
+no Sourceforge \cite{bochs_site}. Para iniciar o desenvolvimento do Box, criaremos
+um ``branch'' do código fonte do Bochs no sistema de versionamento distribuído
+GitHub \cite{github}, isto permitirá que os membros do projeto desenvolvam o sistema
+de forma colaborativa.
+
+Nenhum hardware, software ou material de consulta além daqueles já adquiridos 
+pelos membros do projeto será necessário para o desenvolvimento do projeto.
+
+
+
 
 \section{Metodologia}
 
@@ -266,8 +297,32 @@ Nesta etapa serão conduzidas medições e análises de desempenho do sistema em
 % A descrição da ferramenta de benchmark utilizada não deveria estar na infraestrutura de pesquisa?
 Como ferramenta de apoio ao processo de análise será utilizado o MiBench\cite{Guthaus2001}, um pacote de benchmark de código aberto que apresenta um amplo conjunto de testes voltados a avaliação de desempenho de operações se salto (\emph{branchs}) condicionais e não condicionais, ponto flutuante, armazenamento (load/store), entre outros.
  
+\subsection{Cronograma}
 
-\section{Cronograma}
+A Tabela~\ref{tab:cronograma} apresenta o cronograma previsto para o desenvolvimento do Box.
+Cada linha representa uma atividades descritas nas subseções anteriores. Cada coluna representa
+uma semana durante o desenvolvimento, a primeira semana inicia-se no dia 25 de setembro e a
+última semana encerra no dia 21 de novembro, totalizando 8 semanas.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|} \hline
+\multicolumn{1}{|c|}{\multirow{2}{*}{\textbf{Atividade}}} & \multicolumn{8}{c|}{\textbf{Semana}} \\ \cline{2-9}
+\multicolumn{1}{|c|}{} & 1\textsuperscript{a} & 2\textsuperscript{a} & 3\textsuperscript{a} & 4\textsuperscript{a} & 5\textsuperscript{a} & 6\textsuperscript{a} & 7\textsuperscript{a} & 8\textsuperscript{a} \\ \hline
+Carregador  	& $\bullet$ & $\bullet$ & $\bullet$ &  &  &  &  &  \\ \hline
+Memória     	& $\bullet$ & $\bullet$ & &  &  &  &  &  \\ \hline
+Syscalls    	&  & $\bullet$ & $\bullet$ &  &  &  &  &  \\ \hline
+Exceções    	&  & $\bullet$ & $\bullet$ &  &  &  &  &  \\ \hline
+Otimizações 	&  &  &  & $\bullet$ & $\bullet$ & $\bullet$ &  &  \\ \hline
+Análises    	&  &  &  &  & $\bullet$ & $\bullet$ & $\bullet$ &  \\ \hline
+Relatório Final	&  &  &  &  &  &  & $\bullet$ & $\bullet$ \\ \hline
+\end{tabular}
+\caption{Cronograma de desenvolvimento do Box}
+\label{tab:cronograma}
+\end{table}
+
+
+
 
 \section{Conclusão}
 
