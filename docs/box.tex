@@ -77,34 +77,34 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{abstract} 
- As máquinas virtuais são ferramentas amplamente utilizadas para resuloção de diversas problemas computacionais e podem ser classificadas de diversas formas, de acordo com sua implementação.
+ As máquinas virtuais são ferramentas amplamente utilizadas para resolução de diversas problemas computacionais e podem ser classificadas de diversas formas, de acordo com sua implementação.
  Como forma de ampliar a compreensão das implicações resultantes das diferentes características de implementação dos diversos tipos de máquinas virtuais, este trabalho apresenta uma comparação de desempenho entre máquinas virtuais interpretadas de sistema e de processo.
- Para tanto, o presente estudo faz a comparação das ferramentas \emph{Bochs}, um gerenciador de máquinas virtuais de sistema, e um gerenciador para máquinas virtuais de processo chamodo \emph{Box}, desenvolvido a partir da ferramenta anterior especificamente para esse estudo.
+ Para tanto, o presente estudo faz a comparação das ferramentas \emph{Bochs}, um gerenciador de máquinas virtuais de sistema, e um gerenciador para máquinas virtuais de processo chamado \emph{Box}, desenvolvido a partir da ferramenta anterior especificamente para esse estudo.
 \end{abstract}
 
 \section{Introdução}
 Uma Máquina Virtual (MV) é uma plataforma versátil que pode ser empregada para resolver diversos problemas na área de computação. 
-Uma MV pode ser vista como uma camada de software utilizada para prover a integração entre duas interfaces distintas.
-As interfaces descritas podem ser tanto \emph{Application Binary Interface} (ABI) em máquinas virtuais de processo, quanto \emph{Instruction Set Architecture} (ISA) em MV de sistema.
+Uma MV pode ser vista como uma camada utilizada para prover a integração entre duas interfaces. Esta camada é implementadas com emulação em software, virtualização em hardware ou uma mistura das duas abordagens.
+As interfaces podem ser tanto a \emph{Application Binary Interface} (ABI) em máquinas virtuais de processo, quanto o \emph{Instruction Set Architecture} (ISA) em MVs de sistema.
 Nesse sentido, tais tecnologias ocupam uma posição estratégica que pode ser explorada de diversas formas:
 Na emulação de arquiteturas diferentes, permitindo que aplicações escritas para um plataforma específica possa ser executada em outra; para simulação e instrumentação de sistemas ou aplicações; ou otimização dinâmica de binários.
 
 Duas abordagens são frequentemente empregadas para implementar a emulação em uma máquina virtual: interpretação e tradução.
 Uma MV que emprega interpretação utiliza funções para simular o comportamento de cada instrução da aplicação sendo emulada. 
-O processo de tradução porém, emprega técnicas da área de compiladores para produzir um código binário nativo (possívelmente otimizado) equivalente aquele da aplicação sendo emulada.
-É comum encontrarmos MV que, visando maximizar o desempenho, empregam estas abordagens em conjunto.
+O processo de tradução porém, emprega técnicas da área de compiladores para produzir um código binário nativo (possívelmente otimizado) equivalente àquele da aplicação sendo emulada.
+É comum encontrarmos MVs que, visando maximizar o desempenho, empregam estas abordagens em conjunto.
 
 Nesse texto descrevemos uma proposta de implementação de uma máquina virtual de processo que emprega interpretação como forma de emulação. 
-O objetivo desta MA não é otimizar a execução da aplicação sendo emulada mas sim, criar uma infraestrutura que permita a realização de experimentos voltados para a área de máquinas virtuais.
+O objetivo desta MV não é otimizar a execução da aplicação sendo emulada, mas sim criar uma infraestrutura que permita a realização de experimentos voltados para a área de máquinas virtuais.
    
 \section{Objetivos}
-As diferentes implementações de MV apresentam características que determinam seu desempenho e aplicabilidade.
+As diferentes implementações de MVs apresentam características que determinam seu desempenho e aplicabilidade.
 Por exemplo, implementações interpretadas tem como principal característica a portabilidade de código, permitindo que sejam utilizadas em diferentes plataformas. 
-Em contrapartidada, apresentam desempenho inferior à implementações que utilizam tradução dinâmica de binários.
+Em contrapartida, apresentam desempenho inferior a implementações que utilizam tradução dinâmica de binários.
 
 Neste contexto, são escassos os dados sobre os custos (recursos computacionais e desempenho) para executar uma máquina virtual de sistema e de processos. 
-Visto que a primeira apresenta o overhead de emular todos os subsistemas de um computador real e ainda executar um sistema operacional completo, enquanto que na máquina virtual de processos apenas emula o sistema operacional.
-Desta forma, o objetivo geral deste trabalhor é apresentar uma comparação sobre o desempenho destes dois tipos de máquinas virtuais.
+Visto que a primeira apresenta o overhead de emular todos os subsistemas de um computador real e ainda executar um sistema operacional completo, enquanto que a máquina virtual de processos apenas emula o sistema operacional.
+Desta forma, o objetivo geral deste trabalho é apresentar uma comparação sobre o desempenho destes dois tipos de máquinas virtuais.
 Como forma de atingir o objetivo descrito, os seguintes objetivos específicos serão desenvolvidos:
 
 \begin{itemize}
@@ -119,7 +119,7 @@ Na próxima seção apresentamos os trabalhos relacionados a este projeto.
 
 \subsection{Máquinas Virtuais}
 
-Uma máquina virtual tem como finalidade, implementar as interfaces de um sistema a partir de outro sistema com características diferentes.
+Uma máquina virtual tem como finalidade implementar as interfaces de um sistema a partir de outro sistema.
 De modo geral, existem dois tipos de interfaces que são implementadas por máquinas virtuais:
 
 \begin{itemize}
@@ -130,7 +130,7 @@ Máquinas virtuais que implementam a interface ISA disponibilizam os mesmos recu
  \item \emph{Application Binary Interface} (ABI) é a interface que permite que a aplicação tenha acesso a recursos de hardware e serviços disponíveis no sistema\cite{Smith2005a}. 
 Ainda segundo os autores, a ABI possui dois componentes básicos: as instruções pertencentes ao user-ISA, ou seja, instruções não privilegiadas; e uma interface para comunicação com o sistema operacional, a qual garante acesso aos recursos do sistema.
 Em sistemas operacionais Unix-like, esta interface é chamadas de \emph{system calls} (syscalls). 
-Máquinas virtuais que implementam a interface ABI são chamadas de MV de processo, e disponibilizam os mesmos recursos fornecidos pelo sistema operacional, permitindo assim a execução de aplicações.
+Máquinas virtuais que implementam a interface ABI são chamadas de MVs de processo, e disponibilizam os mesmos recursos fornecidos pelo sistema operacional, permitindo assim a execução de aplicações.
 \end{itemize}
 
 \subsection{Técnicas de Emulação}
@@ -146,8 +146,8 @@ A interpretação envolve a recuperação da instrução original (\emph{fetch})
 \end{itemize}
 
 As implicações do uso de interpretação ou tradução influênciam diretamente o desempenho e a aplicabilidade da máquina virtual.
-Em sistemas interpretados, o desempenho é relativamente baixo, uma vez que cada instrução é interpretada individualmente, e na maior parte das vezes, repetidamente.
-Apesar disso, tais sistemas são extremamente portáveis o que permite sua execução em diversas plataformas, com poucos, ou até mesmo sem nenhuma alteração em seu código original.
+Em sistemas interpretados, o desempenho é relativamente baixo, uma vez que cada instrução é emulada individualmente e, na maior parte das vezes, repetidamente.
+Apesar disso, tais sistemas são extremamente portáveis, o que permite sua execução em diversas plataformas com poucas ou até mesmo nenhuma alteração em seu código original.
 Nos sistemas de traduções de binários, existe um custo (\emph{overhead}) inicial elevado, visto que o código original precisa ser traduzido antes de sua execução, porém, uma vez traduzido, o codigo resultante é executado nativamente, o que garante melhor desempenho.
 
 \subsection{Técnicas de Interpretação}
