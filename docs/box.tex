@@ -16,7 +16,7 @@
 %% \usepackage[latin1]{inputenc}
 \usepackage[utf8]{inputenc}
 \usepackage[dvips]{graphicx}
-
+\usepackage{url}
 \usepackage{multirow}
 \usepackage{amsmath}
 
@@ -131,9 +131,10 @@ Um ISA é composto por duas partes: as instruções de computação geral (user-
 Máquinas virtuais que implementam a interface ISA disponibilizam os mesmos recursos existentes em computadores reais, permitindo desta forma a execução de sistemas operacionais completos. 
 
  \item \emph{Application Binary Interface} (ABI) é a interface que permite que a aplicação tenha acesso a recursos de hardware e serviços disponíveis no sistema\cite{Smith2005a}. 
-Ainda segundo os autores, a ABI possui dois componentes básicos: as instruções pertencentes ao user-ISA, ou seja, instruções não privilegiadas; e uma interface para comunicação com o sistema operacional, a qual garante acesso aos recursos do sistema.
+Ainda segundo os autores, a ABI possui dois componentes básicos: as instruções pertencentes ao user-ISA; e uma interface para comunicação com o sistema operacional, a qual garante acesso aos recursos do sistema.
 Em sistemas operacionais Unix-like, esta interface é chamadas de \emph{system calls} (syscalls). 
 Máquinas virtuais que implementam a interface ABI são chamadas de MVs de processo, e disponibilizam os mesmos recursos fornecidos pelo sistema operacional, permitindo assim a execução de aplicações.
+A ABI também define convenções para tipos de dados, endianness, alinhamento, chamadas de funções (como devem ser passados os argumentos e o retorno), e o formato utilizado para representar arquivos binários executáveis e bibliotecas dinâmicas.
 \end{itemize}
 
 \subsection{Técnicas de Emulação}
@@ -168,21 +169,21 @@ A forma mais básica de interpretação foi descrita na seção \ref{emulacao}: 
 
 \end{itemize}
 
-\subsection{Application Binary Interface}
+\subsection{Executable and Linking Format}
 
-A \emph{Application Binary Interface} (ABI) é a interface entre um binário e outros binários e entre um binário e o sistema operacional. Ela define convenções para tipos de dados, endianness, alinhamento, chamadas de funções (como devem ser passados os argumentos e o retorno) e syscalls, e, mais especificamente, o formato que os arquivos binários devem ter.
+%A \emph{Application Binary Interface} (ABI) é a interface entre um binário e outros binários e %entre um binário e o sistema operacional. 
+%Ela define convenções para tipos de dados, endianness, alinhamento, chamadas de funções (como %devem ser passados os argumentos e o retorno) e syscalls, e, mais especificamente, o formato que %os arquivos binários devem ter.
 
-O ELF (Executable and Linking Format), é o formato binário utilizado nos sistemas Unix-like atualmente, e existem 3 tipos principais:
+\emph{Executable and Linking Format} (ELF)\cite{SCO1997} é o formato binário flexível e extensível, utilizado atualmente em diversos sistemas Unix-like.
+Os principais tipos de arquivos representados pelo formato ELF são:
 
 \begin{itemize}
-
- \item \textbf{Relocatable File} contem dados e código para ser linkado a outro binário para criar um executável ou objeto compartilhado.
-
- \item \textbf{Executable File} contem um programa que pode ser executado
-
- \item \textbf{Shared Object} contem código e dados que podem ser linkados a outro objeto compartilhado, criando um terceiro objeto compartilhado ou pode ser combinado a um executável pelo linker dinâmico e outros objetos compartilhados para a criação de uma imagem de processo.
-
+ \item \textbf{Relocatable File} representa um arquivo objeto que contém dados e código que serão linkados a outro binário para criar um executável ou objeto compartilhado.
+ \item \textbf{Executable File} contém um programa que pode ser executado
+ \item \textbf{Shared Object} representa um biblioteca dinâmica que contém código e dados que podem ser linkados a outro objeto compartilhado, criando um terceiro objeto compartilhado, ou pode ser combinado a um executável pelo linker dinâmico e outros objetos compartilhados para a criação de uma imagem de processo.
 \end{itemize}
+
+A organização de um arquivo ELF é composta por um cabeçalho principal (\emph{ELF Header}), seguido por cabeçalhos de seção, descrevendo seções de informações (instruções, dados, símbolos) utilizados na linkagem, ou cabeçalhos de programa, que contém os segmentos da aplicação e as informações necessárias para a criação do processo executável. 
 
 \section{Levantamento Bibliográfico}
 % Aqui devemos comentar sobre os trabalhos relacionados ao nosso
