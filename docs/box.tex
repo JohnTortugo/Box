@@ -134,6 +134,7 @@ Máquinas virtuais que implementam a interface ABI são chamadas de MVs de proce
 \end{itemize}
 
 \subsection{Técnicas de Emulação}
+\label{emulacao}
 Segundo \cite{Smith2005}, a emulação é um processo de implementação das funcionalidades e interfaces de um sistema em outro sistema com características diferentes. 
 Como exemplo, podemos citar a execução de máquinas virtuais que permitem a execução de código PowerPC em um arquitetura x86. 
 Para isso, faz-se necessária a implementação de interfaces que permitam a emulação do ISA PowerPC, utilizando instruções x86.
@@ -152,6 +153,18 @@ Nos sistemas de traduções de binários, existe um custo (\emph{overhead}) inic
 
 \subsection{Técnicas de Interpretação}
 
+A forma mais básica de interpretação foi descrita na seção \ref{emulacao}: há um loop principal que busca a instrução original, decodifica-a e chama a função responsável pela execução da instrução, retornando ao loop principal logo em seguida. No entanto, existem diversas técnicas que tornam a interpretação um processo mais eficiente. Algumas delas estão listadas a seguir:
+
+\begin{itemize}
+
+ \item \textbf{Threaded Interpretation} São adicionadas ao final das funções que emulam cada uma das intruções a busca pela próxima instrução, sua decodificação e a chamada para a função responsável pela execução da instrução. Note que não existe mais um loop principal no interpretador.
+
+ \item \textbf{Pre Decoding} O código original é pré decodificado em estruturas mais simples de serem decodificadas, de forma simplificar este passo da interpretação.
+
+ \item \textbf{Direct Threaded Interpretation} Utilizado em conjunto ao \textbf{Pre Decoding}, coloca-se diretamente os endereços das rotinas que emulam a instrução original, de forma que ao se ler a instrução pré-decodificada o interpretador faz um salto indireto diretamente a rotina.
+
+\end{itemize}
+
 \section{Levantamento Bibliográfico}
 % Aqui devemos comentar sobre os trabalhos relacionados ao nosso
 % podemos comentar sobre o Bochs, o PIN e o HDTrans por exemplo.
@@ -159,7 +172,7 @@ Nos sistemas de traduções de binários, existe um custo (\emph{overhead}) inic
 
 %\subsection{Máquinas Virtuais}
 O Bochs \cite{Lawton1996} é uma máquina virtual de sistema com suporte a emulação de diversos processadores da família x86 32 e 64 bits. 
-Ele preza por portabilidade, e nesse sentido utiliza interpretação como técnica de emulação. Para reduzir o overhead de interpretação, o Bochs utiliza as técnicas como \emph{pre-decoding}\cite{Magnusson1994}, \emph{threaded-interpretation}\cite{Klint1981}, e \emph{lazy evaluation}\cite{Hookway1997}.
+Ele preza por portabilidade, e nesse sentido utiliza interpretação como técnica de emulação. Para reduzir o overhead de interpretação, o Bochs utiliza técnicas como \emph{pre-decoding}\cite{Magnusson1994}, \emph{threaded-interpretation}\cite{Klint1981}, e \emph{lazy evaluation}\cite{Hookway1997}.
 O sistema que estamos propondo se diferencia do Bochs por ser voltado à emulação de processos e não de sistemas.
 
 O Pin \cite{Luk2005} é uma máquina virtual de processo que emula os ISAs IA-32 e x86-64. 
@@ -168,7 +181,7 @@ O Box diferencia-se do PIN por ser uma máquina virtual de código aberto e util
 Em contrapartida, os sistemas se assemelham no aspecto de proverem uma interface para instrumentação de binários e serem emuladores \emph{same-ISA}~\footnote{As duas interfaces da máquina virtual são iguais.}.
 
 O HDTrans \cite{Sridhar2006} é uma máquina virtual de processo para a arquitetura IA-32.
-O HDTrans difere do Bochs e do PIN por empregar tradução de binários como técnica de emulação.
+O HDTrans difere-se do Bochs e do PIN por empregar tradução de binários como técnica de emulação.
 No entanto, o HDTrans abre mão de empregar otimizações no código traduzido (o que geralmente é feito para amortizar o overhead de tradução) em favor da implementação de uma tradução simples e rápida.
 O Box diferencia-se do HDTrans por empregar interpretação de binários.
 
@@ -260,11 +273,11 @@ Como ferramenta de apoio ao processo de análise será utilizado o MiBench\cite{
 
 Este trabalho apresentou uma proposta de análise de desempenho entre máquinas virtuais interpretadas de sistema e de processo.
 
-Além dos dados provenientes desta análise, o trabalho também apresenta como contribuições o desenvolvimento de emulador interpretado de processos para aplicações Linux de 32bits.
-Embora o desenvolvimento desta ferramenta esteja voltado para a produção de dados para a análise de desempenho, tal ferramenta pode ser utilizada em situações como: instrumentação e simulação de aplicações; e como 
+Além dos dados provenientes desta análise, o trabalho também apresenta como contribuição o desenvolvimento de emulador interpretado de processos para aplicações Linux de 32bits.
+Embora o desenvolvimento desta ferramenta esteja voltado para a produção de dados para a análise de desempenho, tal ferramenta pode ser utilizada em situações como instrumentação e simulação de aplicações e como 
 módulo de compatibilidade para execução de aplicações Unix-like x86 32bits em diferentes sistemas operacionais ou arquiteturas.
 
-A implementação e análise de técnicas de otimização de desempenho para interpretadores, fornecerá recursos que poderão ser aplicados em outros interpretadores para melhora do seu desempenho. 
+A implementação e análise de técnicas de otimização de desempenho para interpretadores fornecerá recursos que poderão ser aplicados em outros interpretadores para melhora do seu desempenho. 
 
 \bibliography{box}
 
