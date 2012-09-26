@@ -72,4 +72,6 @@ class ElfLoader {
 		void createAddressSpace();
 
 		void dumpAddressSpaceInfo();
+
+		void doRelocations();
 };

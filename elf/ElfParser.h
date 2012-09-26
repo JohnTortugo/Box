@@ -35,6 +35,10 @@ class ElfParser {
 		// content of .dynamic sections
 		vector<string> needed_libraries;
 
+		// relocation entries, with implicit and explicit addends
+		vector<Elf32_Rel> rels;
+		vector<Elf32_Rela> relas;
+
 		// onde procurar bibliotecas compartilhadas
 		string rPath;
 
@@ -49,15 +53,19 @@ class ElfParser {
 		Elf32_Word relaent;
 
 		Elf32_Word pltrel;		// indicates REL or RELA for plt relocation entries
-		Elf32_Addr jumprel;		// address of relocation entries associated with PLT
-		Elf32_Addr pltrelsz;	// total size of relocations associated with plt entries
+		Elf32_Addr jmprel;		// address of relocation entries associated with PLT
+		Elf32_Word pltrelsz;	// total size of relocations associated with plt entries
 
-		Elf32_Word hash;			// address of hash symbol table
+		Elf32_Addr hash;			// address of hash symbol table
 		Elf32_Word dynsym;		// address of dynamic symbol table
 		Elf32_Word syment;		// size of each symbol table entry
+		Elf32_Addr strtab;		// string table address
+		Elf32_Word strsz;			// size of string table
 
 		Elf32_Addr init;			// address of initialization stub
 		Elf32_Addr fini;			// address of finalization stub
+
+		Elf32_Addr pltgot;		// address of Global Offset Table
 
 	// public methods
 	public:
@@ -116,6 +124,10 @@ class ElfParser {
 		void read(Bit8u *content, Elf32_Off offset, Elf32_Word len);
 
 		string getFileName();
+
+		vector<Elf32_Rel> getRels();
+
+		vector<Elf32_Rela> getRelas();
 };
 
 #endif

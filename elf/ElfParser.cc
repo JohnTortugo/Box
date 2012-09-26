@@ -1,4 +1,5 @@
 #include "config.h"
+#include "debug.h"
 #include "ElfParser.h"
 #include <vector>
 #include <string>
@@ -85,50 +86,67 @@ void ElfParser::parseDynamicEntries() {
 			case DT_NEEDED:
 				needed_libraries.push_back((char *)&dyn_str_table[dyn.d_un.d_val]);
 				break;
-			case DT_PLTRELSZ:
-				break;
 			case DT_PLTGOT:
+				this->pltgot = dyn.d_un.d_ptr;
 				break;
 			case DT_HASH:
-				break;
-			case DT_STRTAB:
+				this->hash = dyn.d_un.d_ptr;
 				break;
 			case DT_SYMTAB:
+				this->dynsym = dyn.d_un.d_ptr;
 				break;
 			case DT_RELA:
+				this->rela = dyn.d_un.d_ptr;
 				break;
 			case DT_RELASZ:
+				this->relasz = dyn.d_un.d_val;
 				break;
 			case DT_RELAENT:
-				break;
-			case DT_STRSZ:
+				this->relaent = dyn.d_un.d_val;
 				break;
 			case DT_SYMENT:
+				this->syment = dyn.d_un.d_val;
 				break;
 			case DT_INIT:
+				this->init = dyn.d_un.d_ptr;
 				break;
 			case DT_FINI:
-				break;
-			case DT_SONAME:
+				this->fini = dyn.d_un.d_ptr;
 				break;
 			case DT_RPATH:
 				rPath = string((char *) &dyn_str_table[dyn.d_un.d_val]);
 				break;
-			case DT_SYMBOLIC:
-				break;
 			case DT_REL:
+				this->rel = dyn.d_un.d_ptr;
 				break;
 			case DT_RELSZ:
+				this->relsz = dyn.d_un.d_val;
 				break;
 			case DT_RELENT:
+				this->relent = dyn.d_un.d_val;
 				break;
 			case DT_PLTREL:
+				this->pltrel = dyn.d_un.d_val;
+				break;
+			case DT_PLTRELSZ:
+				this->pltrelsz = dyn.d_un.d_val;
+				break;
+			case DT_JMPREL:
+				this->jmprel = dyn.d_un.d_ptr;
+				break;
+			case DT_STRTAB:
+				this->strtab = dyn.d_un.d_ptr;
+				break;
+			case DT_STRSZ:
+				this->strsz = dyn.d_un.d_val;
+				break;
+			case DT_SONAME:
 				break;
 			case DT_DEBUG:
 				break;
 			case DT_TEXTREL:
 				break;
-			case DT_JMPREL:
+			case DT_SYMBOLIC:
 				break;
 			case DT_LOPROC:
 				break;
@@ -204,6 +222,8 @@ void ElfParser::printDynamicSection() {
 
 // extract each entry of .dynamic section and store in dynSecEntries
 void ElfParser::extractDynamicSection(Elf32_Shdr dSec) {
+	BX_DEBUG(("Dynamic Section is at: 0x%x\n", dSec.sh_offset));
+
 	fseek(felf, dSec.sh_offset, SEEK_SET);
 
 	while (true) {
@@ -407,4 +427,61 @@ void ElfParser::read(Bit8u *content, Elf32_Off offset, Elf32_Word len) {
 
 string ElfParser::getFileName() {
 	return this->fileName;
+}
+
+
+vector<Elf32_Rel> ElfParser::getRels() {
+	this->rels.clear();
+
+	if (this->rel == 0 && this->rela == 0) BX_DEBUG(("RELA e REL empty!!"));
+	if (this->rel == 0) return this->rels;
+
+	// set cursor for init of relocation table
+	fseek(felf, this->rel, SEEK_SET);
+
+	Elf32_Word tot_read = 0;
+
+	BX_DEBUG(("RELOFF: %x", this->rel));
+	BX_DEBUG(("RELSIZ: %x", this->relsz));
+	BX_DEBUG(("RELENT: %x", this->relent));
+
+	while (tot_read != this->relsz) {
+		Elf32_Rel reloc;
+
+		fread(&reloc, 1, this->relent, felf);
+
+		this->rels.push_back(reloc);
+
+		tot_read += this->relent;
+	}
+
+	return this->rels;
+}
+
+vector<Elf32_Rela> ElfParser::getRelas() {
+	this->relas.clear();
+
+	if (this->rela == 0 && this->rel == 0) BX_DEBUG(("RELA e REL empty!!"));
+	if (this->rela == 0) return this->relas;
+
+	// set cursor for init of relocation table
+	fseek(felf, this->rela, SEEK_SET);
+
+	Elf32_Word tot_read = 0;
+
+	BX_DEBUG(("RELAOFF: %x", this->rela));
+	BX_DEBUG(("RELASIZ: %x", this->relasz));
+	BX_DEBUG(("RELAENT: %x", this->relaent));
+
+	while (tot_read != this->relasz) {
+		Elf32_Rela reloc;
+
+		fread(&reloc, 1, this->relaent, felf);
+
+		this->relas.push_back(reloc);
+
+		tot_read += this->relaent;
+	}
+
+	return this->relas;
 }

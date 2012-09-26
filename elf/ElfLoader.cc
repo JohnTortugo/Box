@@ -28,8 +28,14 @@ ElfLoader::ElfLoader(int p_argc, char **p_argv, char *ldLibPath, Bit8u *p_memory
 
 	// create the process address space
 	BX_INFO(("Mounting Process Address Space."));
-	createAddressSpace();
+	//createAddressSpace();
+	//dumpAddressSpaceInfo();
 	BX_INFO(("Address Space Mounted."));
+
+	// Doing relocations
+	BX_INFO(("Doing relocations."));
+	doRelocations();
+	BX_INFO(("Relocations done."));
 }
 
 /*!
@@ -268,5 +274,33 @@ void ElfLoader::dumpAddressSpaceInfo() {
 		printf("0x%010x ", segDesc.hdr.p_align);
 
 		printf("\n");
+	}
+}
+
+void ElfLoader::doRelocations() {
+	// pointer to relocation table (with implicit addends)
+	vector<Elf32_Rel> rels = mainExecutable.getRels();
+	vector<Elf32_Rela> relas = mainExecutable.getRelas();
+
+	if (rels.size() > 0) {
+		printf("Relocation Table Entries (REL)\n");
+		printf("------------------------------\n");
+		printf("Offset Info Symbol Type\n");
+		for (int i=0; i<rels.size(); i++) {
+			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", rels[i].r_offset, rels[i].r_info, ELF32_R_SYM(rels[i].r_info), ELF32_R_TYPE(rels[i].r_info));
+		}
+	}
+
+	if (relas.size() > 0) {
+		printf("Relocation Table Entries (RELA)\n");
+		printf("-------------------------------\n");
+		printf("Offset Info Symbol Type Addend\n");
+		for (int i=0; i<relas.size(); i++) {
+			printf("0x%08x 0x%08x 0x%08x 0x%08x 0x%08x\n", relas[i].r_offset, relas[i].r_info, ELF32_R_SYM(relas[i].r_info), ELF32_R_TYPE(relas[i].r_info), relas[i].r_addend);
+		}
+	}
+
+	if (rels.size() == 0 && relas.size() == 0) {
+		printf("Rels e Relas equals zero!");
 	}
 }
