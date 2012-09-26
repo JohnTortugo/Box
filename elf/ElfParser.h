@@ -38,6 +38,27 @@ class ElfParser {
 		// onde procurar bibliotecas compartilhadas
 		string rPath;
 
+		// for relocations with implicit addend
+		Elf32_Addr rel;				// relocation table address
+		Elf32_Word relsz;			// relocation table size
+		Elf32_Word relent;		// relocation entry size
+
+		// for relocations with explicit addend
+		Elf32_Addr rela;
+		Elf32_Word relasz;
+		Elf32_Word relaent;
+
+		Elf32_Word pltrel;		// indicates REL or RELA for plt relocation entries
+		Elf32_Addr jumprel;		// address of relocation entries associated with PLT
+		Elf32_Addr pltrelsz;	// total size of relocations associated with plt entries
+
+		Elf32_Word hash;			// address of hash symbol table
+		Elf32_Word dynsym;		// address of dynamic symbol table
+		Elf32_Word syment;		// size of each symbol table entry
+
+		Elf32_Addr init;			// address of initialization stub
+		Elf32_Addr fini;			// address of finalization stub
+
 	// public methods
 	public:
 		ElfParser(string elfPath);
