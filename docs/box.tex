@@ -132,21 +132,20 @@ descrevem a infraestrutura e a metodologia proposta para a realização do proje
   
 \section{Objetivos} \label{sec:objetivos}
 As diferentes implementações de MVs apresentam características que determinam seu desempenho e aplicabilidade.
-Por exemplo, implementações interpretadas tem como principal característica a portabilidade de código, permitindo que sejam utilizadas em diferentes plataformas. 
+Por exemplo, implementações que utilizam a técnica de interpretação como único recurso para emulação de código tem como principal característica a portabilidade de código, permitindo que sejam utilizadas em diferentes plataformas. 
 Em contrapartida, apresentam desempenho inferior a implementações que utilizam tradução dinâmica de binários.
 
-Neste contexto, são escassos os dados sobre os custos (recursos computacionais e desempenho) para executar uma máquina virtual de sistema e de processos. 
-Visto que a primeira apresenta o overhead de emular todos os subsistemas de um computador real e ainda executar um sistema operacional completo, enquanto que a máquina virtual de processos apenas emula o sistema operacional.
+Neste contexto, são escassos os dados sobre os custos relativos de executar um benchmark em uma máquina virtual de sistema e de processos. 
+No entanto, visto que a primeira abordagem apresenta o overhead de emular todos os subsistemas de um computador real e ainda executar um sistema operacional completo, enquanto que a máquina virtual de processos apenas emula o sistema operacional, espera-se que o overhead de emulação seja consideravelmente menor no segundo caso.
 Desta forma, o objetivo geral deste trabalho é apresentar uma comparação sobre o desempenho destes dois tipos de máquinas virtuais.
-Como forma de atingir o objetivo descrito, os seguintes objetivos específicos serão desenvolvidos:
+Como forma de atingir este objetivo, os seguintes objetivos específicos serão desenvolvidos:
 
 \begin{itemize}
  \item Implementação de uma máquina virtual interpretada de processos a partir do emulador de sistemas Bochs;
- \item Implementação de mecanismos de otimização da execução como forma de melhorar o desempenho do ambiente virtualizado.
- \item Aplicação sistemáticas de teste e medição e análise de desempenho do ambiente virtualizado de sistema (\emph{Bochs}) e no ambiente proposto (\emph{Box});
+ \item Implementação de mecanismos de otimização da técnica de interpretação como forma de reduzir o overhead de emulação;
+ \item Aplicação sistemática de teste, medição e análise de desempenho de aplicações executando nos dois cenários.
 \end{itemize} 
 
-Na próxima seção apresentamos os trabalhos relacionados a este projeto.
 
 
 
