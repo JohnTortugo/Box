@@ -8,6 +8,9 @@
 #include "config.h"
 #include "debug.h"
 #include "ElfParser.h"
+#include "memory/memory.h"
+
+extern BX_MEM_C bx_mem;
 
 ElfLoader::ElfLoader(int p_argc, char **p_argv, char *ldLibPath, Bit8u *p_memory, Bit32u mem_size) : mainExecutable(p_argv[1]) {
 	this->executablePath 	= string(p_argv[1]);
