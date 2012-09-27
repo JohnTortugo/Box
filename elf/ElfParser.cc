@@ -448,7 +448,9 @@ vector<Elf32_Rel> ElfParser::getRels() {
 	while (tot_read != this->relsz) {
 		Elf32_Rel reloc;
 
-		fread(&reloc, 1, this->relent, felf);
+		int lidos = fread(&reloc, sizeof(reloc), 1, felf);
+
+		printf("Offset: %x \t lidos: %d\n", reloc.r_offset, lidos);
 
 		this->rels.push_back(reloc);
 
@@ -476,7 +478,7 @@ vector<Elf32_Rela> ElfParser::getRelas() {
 	while (tot_read != this->relasz) {
 		Elf32_Rela reloc;
 
-		fread(&reloc, 1, this->relaent, felf);
+		fread(&reloc, this->relaent, 1, felf);
 
 		this->relas.push_back(reloc);
 

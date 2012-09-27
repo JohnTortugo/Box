@@ -31,11 +31,16 @@ class BX_MEM_C {
 public:
 	Bit64u		 size;
 	Bit8u		*memory;
+	Bit32u		virtualBase;
 
 	BX_MEM_C();
 	~BX_MEM_C();
 
 	void allocate(Bit64u size);
+
+	void setVirtualMemBase(Bit32u vBase);
+	Bit32u virtualAddressToPosition(Bit32u vir);
+	Bit32u positionToVirtualAddress(Bit32u pos);
 
 	Bit8u read_byte(unsigned s, Bit32u offset);
 	Bit16u read_word(unsigned s, Bit32u offset);

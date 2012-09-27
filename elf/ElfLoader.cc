@@ -150,40 +150,52 @@ void ElfLoader::createAddressSpace() {
 	// list of all segments in mainExecutable
 	vector<Elf32_Phdr> segments = mainExecutable.getProgHdrTable();
 
+	// just to count the number of loadable segments
+	int numLoadable = 0;
+
 	// Position where the previous segment preferred to be loaded
-	Bit32u prevBase							= 0;
+	Bit32u prevBase = 0;
 
 	// find loadable segments
-	for (int i=0; i<segments.size(); i++) {
-		if (segments[i].p_type == PT_LOAD) {
+	for (int segIndex=0; segIndex<segments.size(); segIndex++) {
+		if (segments[segIndex].p_type == PT_LOAD) {
+			numLoadable++;
+			if (numLoadable > 2) {
+				BX_PANIC(("Num. of Loadable segments is greater than 2 in %s.", mainExecutable.getFileName()));
+			}
+
 			// the first loadable segment goes in the first by of memory
 			// subsequent segments goes in (p_vaddr - prevBase) bytes from
 			// the begining of the previous loaded segment
-			if (segments[i].p_offset == 0) {
-				this->memory_indx			= 0;
-				prevBase 							= segments[i].p_vaddr;
+			if (segments[segIndex].p_offset == 0) {
+				this->memory_indx	= 0;
+				prevBase 			= segments[segIndex].p_vaddr;
+
+				// register base virtual address in memory module
+				bx_mem.setVirtualMemBase(segments[segIndex].p_vaddr);
 			}
 			else {
-				this->memory_indx			+= (segments[i].p_vaddr - prevBase);
-				prevBase 							= segments[i].p_vaddr;
+				this->memory_indx	= (segments[segIndex].p_vaddr - prevBase);
+				prevBase 			= segments[segIndex].p_vaddr;
 			}
 
 			// segment description
 			LoadedSegment segDesc;
-			segDesc.fileName 			= mainExecutable.getFileName();
-			segDesc.segmentIndex 	= i;
-			segDesc.hdr 					= segments[i];
+			segDesc.fileName 		= mainExecutable.getFileName();
+			segDesc.segmentIndex 	= segIndex;
+			segDesc.hdr 			= segments[segIndex];
 			segDesc.loadedPos 		= this->memory_indx;
 
 			this->loadedSegments.push_back(segDesc);
 
 			// read p_filesz bytes from file
-			mainExecutable.read(&this->memory[this->memory_indx], segments[i].p_offset, segments[i].p_filesz);
+			mainExecutable.read(&this->memory[this->memory_indx], segments[segIndex].p_offset, segments[segIndex].p_filesz);
 
 			// fills the remainder p_memsz - p_filesz bytes with zero
-			for (int j=segments[i].p_filesz; j<segments[i].p_memsz; j++) this->memory[this->memory_indx + j] = 0;
+			for (int j=segments[segIndex].p_filesz; j<segments[segIndex].p_memsz; j++)
+				this->memory[this->memory_indx + j] = 0;
 
-			this->memory_indx += segments[i].p_memsz;
+			this->memory_indx += segments[segIndex].p_memsz;
 		}
 	}
 	// ok main executable loaded
@@ -191,25 +203,31 @@ void ElfLoader::createAddressSpace() {
 	// load shared libraries
 	for (int sIndex = 0; sIndex<sharedLibs.size(); sIndex++) {
 		// list of all segments in the shared library
-		segments = sharedLibs[sIndex].getProgHdrTable();
+		segments 	= sharedLibs[sIndex].getProgHdrTable();
+		numLoadable = 0;
 
 		// find loadable segments
 		for (int i=0; i<segments.size(); i++) {
 			if (segments[i].p_type == PT_LOAD) {
+				numLoadable++;
+				if (numLoadable > 2) {
+					BX_PANIC(("Num. of Loadable segments is greater than 2 in %s.", sharedLibs[sIndex].getFileName()));
+				}
+
 				if (segments[i].p_vaddr == 0) {
-					// this->memory_indx			= 0;
-					prevBase 							= 0;
+					prevBase 			= this->memory_indx;
 				}
 				else {
-					this->memory_indx			+= (segments[i].p_vaddr - prevBase);
-					prevBase 							= segments[i].p_vaddr;
+					// start of previous segment + offset
+					this->memory_indx	= prevBase + (segments[i].p_vaddr - 0);
+					prevBase 			= this->memory_indx;
 				}
 
 				// segment description
 				LoadedSegment segDesc;
-				segDesc.fileName 			= sharedLibs[sIndex].getFileName();
+				segDesc.fileName 		= sharedLibs[sIndex].getFileName();
 				segDesc.segmentIndex 	= i;
-				segDesc.hdr 					= segments[i];
+				segDesc.hdr 			= segments[i];
 				segDesc.loadedPos 		= this->memory_indx;
 
 				this->loadedSegments.push_back(segDesc);
@@ -218,7 +236,8 @@ void ElfLoader::createAddressSpace() {
 				sharedLibs[sIndex].read(&this->memory[this->memory_indx], segments[i].p_offset, segments[i].p_filesz);
 
 				// fills the remainder p_memsz - p_filesz bytes with zero
-				for (int j=segments[i].p_filesz; j<segments[i].p_memsz; j++) this->memory[this->memory_indx + j] = 0;
+				for (int j=segments[i].p_filesz; j<segments[i].p_memsz; j++)
+					this->memory[this->memory_indx + j] = 0;
 
 				this->memory_indx += segments[i].p_memsz;
 			}
@@ -228,7 +247,7 @@ void ElfLoader::createAddressSpace() {
 
 	// allocating space for heap (10MB) and stack (remainder)
 	LoadedSegment segDesc;
-	segDesc.fileName 			= "Heap";
+	segDesc.fileName 		= "Heap";
 	segDesc.segmentIndex 	= 0;
 	segDesc.hdr.p_align 	= segDesc.hdr.p_filesz = segDesc.hdr.p_flags = 0;
 	segDesc.hdr.p_memsz		= segDesc.hdr.p_offset = segDesc.hdr.p_paddr = 0;
@@ -243,7 +262,7 @@ void ElfLoader::createAddressSpace() {
 	this->loadedSegments.push_back(segDesc);
 
 	// stack is initialized at memory_size and is decremented until reaching heap start
-	segDesc.fileName 			= "Stack";
+	segDesc.fileName 		= "Stack";
 	segDesc.segmentIndex 	= 0;
 	segDesc.hdr.p_align 	= segDesc.hdr.p_filesz = segDesc.hdr.p_flags = 0;
 	segDesc.hdr.p_memsz		= segDesc.hdr.p_offset = segDesc.hdr.p_paddr = 0;

@@ -38,6 +38,30 @@ void BX_MEM_C::allocate(Bit64u size) {
   this->size = size;
 }
 
+/*!
+ * Set the (emulated) virtual base address which the main executable
+ * was loaded.
+ */
+void BX_MEM_C::setVirtualMemBase(Bit32u vBase) {
+	this->virtualBase = vBase;
+}
+
+/*!
+ * Translate virtual address to the correspondent index inside
+ * the memory vector.
+ */
+Bit32u BX_MEM_C::virtualAddressToPosition(Bit32u vir) {
+	return vir - this->virtualBase;
+}
+
+/*!
+ * Translate an index into the memory vector to an virtual
+ * address.
+ */
+Bit32u BX_MEM_C::positionToVirtualAddress(Bit32u pos) {
+	return this->virtualBase + pos;
+}
+
 Bit8u BX_MEM_C::read_byte(unsigned s, Bit32u offset) 
 {
    Bit32u addr = bx_cpu.get_laddr(s, offset);
