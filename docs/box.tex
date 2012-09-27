@@ -80,26 +80,56 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{abstract} 
- As máquinas virtuais são ferramentas amplamente utilizadas para resolução de diversas problemas computacionais e podem ser classificadas de diversas formas, de acordo com sua implementação.
- Como forma de ampliar a compreensão das implicações resultantes das diferentes características de implementação dos diversos tipos de máquinas virtuais, este trabalho apresenta uma comparação de desempenho entre máquinas virtuais interpretadas de sistema e de processo.
- Para tanto, o presente estudo faz a comparação das ferramentas \emph{Bochs}, um gerenciador de máquinas virtuais de sistema, e um gerenciador para máquinas virtuais de processo chamado \emph{Box}, desenvolvido a partir da ferramenta anterior especificamente para esse estudo.
+Máquinas Virtuais são ferramentas amplamente utilizadas para resolução de 
+diversos problemas computacionais e podem ser categorizadas por diversos atributos, 
+entre eles escopo de emulação (sistema ou processo) e técnica de emulação 
+(interpretação ou tradução). Como forma de ampliar a compreensão do \emph{overhead} 
+decorrente da emulação do sistema operacional e dispositivos de \emph{hardwar}e em uma
+máquina virtual de sistema, este trabalho apresenta uma comparação de 
+desempenho entre máquinas virtuais interpretadas de sistema e de processo.
+Para tanto, conduzimos uma investigação utilizando duas máquinas virtuais distintas. 
+A primeira delas, chamada \emph{Bochs}, é uma máquina virtual de sistema que 
+emprega interpretação como técnica de emulação, a segunda é uma máquina virtual 
+de processo chamada \emph{Box}, desenvolvido a partir da ferramenta anterior 
+especificamente para esse estudo.
 \end{abstract}
 
 \section{Introdução}
 Uma Máquina Virtual (MV) é uma plataforma versátil que pode ser empregada para resolver diversos problemas na área de computação. 
-Uma MV pode ser vista como uma camada utilizada para prover a integração entre duas interfaces. Esta camada é implementadas com emulação em software, virtualização em hardware ou uma mistura das duas abordagens.
-As interfaces podem ser tanto a \emph{Application Binary Interface} (ABI) em máquinas virtuais de processo, quanto o \emph{Instruction Set Architecture} (ISA) em MVs de sistema.
-Nesse sentido, tais tecnologias ocupam uma posição estratégica que pode ser explorada de diversas formas:
-Na emulação de arquiteturas diferentes, permitindo que aplicações escritas para um plataforma específica possa ser executada em outra; para simulação e instrumentação de sistemas ou aplicações; ou otimização dinâmica de binários.
+Uma MV pode ser visualizada como uma camada utilizada para prover a integração entre duas interfaces (possívelmente distintas). Esta camada pode ser implementada com emulação em software, virtualização em hardware ou uma composição das duas abordagens.
+As interfaces podem ser tanto a \emph{Application Binary Interface} (ABI) em MV de processo, quanto a \emph{Instruction Set Architecture} (ISA) em MVs de sistema.
+Dessa forma, tais ferramentas ocupam uma posição estratégica que pode ser explorada de diversas formas:
+\textit{cross-platform emulation} - permitindo que aplicações escritas para uma plataforma sejam executadas em outra; 
+\textit{simulação} - simulação do comportamento do hardware durante a execução do programa; \textit{análise} - análise do
+perfil de execução das aplicações; \textit{otimização} - aplicar otimizações no código da aplicação utilizando informações
+obtidas durante a execução do código.  
 
-Duas abordagens são frequentemente empregadas para implementar a emulação em uma máquina virtual: interpretação e tradução.
+Duas abordagens são frequentemente empregadas para implementar a emulação de código em uma máquina virtual: interpretação e tradução.
 Uma MV que emprega interpretação utiliza funções para simular o comportamento de cada instrução da aplicação sendo emulada. 
 O processo de tradução porém, emprega técnicas da área de compiladores para produzir um código binário nativo (possívelmente otimizado) equivalente àquele da aplicação sendo emulada.
 É comum encontrarmos MVs que, visando maximizar o desempenho, empregam estas abordagens em conjunto.
 
-Nesse texto descrevemos uma proposta de implementação de uma máquina virtual de processo que emprega interpretação como forma de emulação. 
-O objetivo desta MV não é otimizar a execução da aplicação sendo emulada, mas sim criar uma infraestrutura que permita a realização de experimentos voltados para a área de máquinas virtuais.
-   
+Note que, uma MV de sistema não emula apenas as instruções da arquitetura alvo, mas toda uma infraestrutura de hardware
+necessária para executar um sistema operacional, nisto são está incluso dispositivos como placa de rede, hierarquia de memória,
+placa gráfica e etc. Para tarefas como \textit{cross-platform emulation} e perfilamento da execução do código de uma aplicação
+em específico o uso de uma MV de sistema agrega ao overhead de emulação da aplicação também o overhead de emulação destes 
+dispositivos e do sistema operacional. Portanto frequentemente, nestes cenários, uma máquina virtual de processo é preferível
+em relação a uma MV de sistema.
+
+Nesse texto apresentamos uma proposta de avaliação do overhead de emulação do sistema operacional e dispositivos de hardware
+em uma máquina virtual de sistema interpretada em relação a uma máquina virtual interpretada de processo. Para tanto, propomos
+a transformação de uma máquina virtual de sistema em uma máquina virtual de processo. Além de uma melhor compreensão do overhead
+de emulação em uma máquina virtual de sistema este trabalho tem como resultado uma infraestrutura para a realização de experimentos
+voltados para a área de máquinas virtuais. 
+
+Este texto está organizado da seguinte forma. Na Seção~\ref{sec:objetivos} apresentamos com certo nível de detalhamento nossos objetivos. 
+Na Seção~\ref{sec:fundamentacao} apresentamos a fundamentação teórica para a realização do projeto. Na Seção~\ref{sec:bibliografia} apresentamos
+um levantamento bibliográfico da área de máquinas virtuais a nível de binários. A Seção~\ref{sec:infraestrutura} e Seção~\ref{sec:metodologia}
+descrevem a infraestrutura e a metodologia proposta para a realização do projeto. Por fim a Seção~\ref{sec:conclusao} apresenta a conclusão do trabalho. 
+  
+  
+  
+  
 \section{Objetivos} \label{sec:objetivos}
 As diferentes implementações de MVs apresentam características que determinam seu desempenho e aplicabilidade.
 Por exemplo, implementações interpretadas tem como principal característica a portabilidade de código, permitindo que sejam utilizadas em diferentes plataformas. 
@@ -118,7 +148,12 @@ Como forma de atingir o objetivo descrito, os seguintes objetivos específicos s
 
 Na próxima seção apresentamos os trabalhos relacionados a este projeto.
 
-\section{Fundamentação Teórica}
+
+
+
+
+
+\section{Fundamentação Teórica} \label{sec:fundamentacao}
 
 \subsection{Máquinas Virtuais}
 
@@ -187,7 +222,11 @@ Os principais tipos de arquivos representados pelo formato ELF são:
 
 A organização de um arquivo ELF é composta por um cabeçalho principal (\emph{ELF Header}), seguido por cabeçalhos de seção, descrevendo seções de informações (instruções, dados, símbolos) utilizados na linkagem, ou cabeçalhos de programa, que contém os segmentos da aplicação e as informações necessárias para a criação do processo executável. 
 
-\section{Levantamento Bibliográfico}
+
+
+
+
+\section{Levantamento Bibliográfico}  \label{sec:bibliografia}
 % Aqui devemos comentar sobre os trabalhos relacionados ao nosso
 % podemos comentar sobre o Bochs, o PIN e o HDTrans por exemplo.
 % comentar no que nosso sistema é diferente do deles.
@@ -230,7 +269,10 @@ Regiões de código que são infrequentemente executadas são traduzidas utiliza
 O Box diferencia-se do StarDBT por ser capaz de traduzir apenas binários de 32 bits, compilados para Linux e não empregar tradução de binários.
 
 
-\section{Infraestrutura de Pesquisa}
+
+
+
+\section{Infraestrutura de Pesquisa} \label{sec:infraestrutura}
 
 Como citado na Seção~\ref{sec:objetivos}, o projeto proposto utilizará como
 ponto de partida para o desenvolvimento, o emulador de sistema Bochs. Portanto 
@@ -244,7 +286,11 @@ de forma colaborativa.
 Nenhum hardware, software ou material de consulta além daqueles já adquiridos 
 pelos membros do projeto será necessário para o desenvolvimento do projeto.
 
-\section{Metodologia}
+
+
+
+
+\section{Metodologia}  \label{sec:metodologia}
 
 Como forma de atingir o objetivo proposto, o trabalho adotará uma abordagem dividida em três etapas logicamente divididas em passos que serão descritos em detalhes a seguir.
 
@@ -320,7 +366,12 @@ Relatório Final	&  &  &  &  &  &  & $\bullet$ & $\bullet$ \\ \hline
 \label{tab:cronograma}
 \end{table}
 
-\section{Conclusão}
+
+
+
+
+
+\section{Conclusão}  \label{sec:conclusao}
 
 Este trabalho apresentou uma proposta de análise de desempenho entre máquinas virtuais interpretadas de sistema e de processo.
 
