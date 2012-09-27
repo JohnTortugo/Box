@@ -40,8 +40,7 @@ BX_INCDIRS = -I. -I.. -I$(srcdir)/..
 
 BX_OBJS = \
 	ElfLoader.o \
-	ElfParser.o \
-	ElfFile.o
+	ElfParser.o
 
 BX_INCLUDES = ../bochs.h ../config.h
 
@@ -65,4 +64,3 @@ dist-clean: clean
 ###########################################
 ElfLoader.o: ElfLoader.@CPP_SUFFIX@ 
 ElfParser.o: ElfParser.@CPP_SUFFIX@ 
-ElfFile.o: ElfFile.@CPP_SUFFIX@ 

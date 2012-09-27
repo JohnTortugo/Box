@@ -302,29 +302,29 @@ void ElfLoader::dumpAddressSpaceInfo() {
 }
 
 void ElfLoader::doRelocations() {
-	// pointer to relocation table (with implicit addends)
-	vector<Elf32_Rel> rels = mainExecutable.getRels();
-	vector<Elf32_Rela> relas = mainExecutable.getRelas();
-
-	if (rels.size() > 0) {
-		printf("Relocation Table Entries (REL)\n");
-		printf("------------------------------\n");
-		printf("Offset Info Symbol Type\n");
-		for (int i=0; i<rels.size(); i++) {
-			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", rels[i].r_offset, rels[i].r_info, ELF32_R_SYM(rels[i].r_info), ELF32_R_TYPE(rels[i].r_info));
-		}
-	}
-
-	if (relas.size() > 0) {
-		printf("Relocation Table Entries (RELA)\n");
-		printf("-------------------------------\n");
-		printf("Offset Info Symbol Type Addend\n");
-		for (int i=0; i<relas.size(); i++) {
-			printf("0x%08x 0x%08x 0x%08x 0x%08x 0x%08x\n", relas[i].r_offset, relas[i].r_info, ELF32_R_SYM(relas[i].r_info), ELF32_R_TYPE(relas[i].r_info), relas[i].r_addend);
-		}
-	}
-
-	if (rels.size() == 0 && relas.size() == 0) {
-		printf("Rels e Relas equals zero!");
-	}
+//	// pointer to relocation table (with implicit addends)
+//	vector<Elf32_Rel> rels = mainExecutable.getRels();
+//	vector<Elf32_Rela> relas = mainExecutable.getRelas();
+//
+//	if (rels.size() > 0) {
+//		printf("Relocation Table Entries (REL)\n");
+//		printf("------------------------------\n");
+//		printf("Offset Info Symbol Type\n");
+//		for (int i=0; i<rels.size(); i++) {
+//			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", rels[i].r_offset, rels[i].r_info, ELF32_R_SYM(rels[i].r_info), ELF32_R_TYPE(rels[i].r_info));
+//		}
+//	}
+//
+//	if (relas.size() > 0) {
+//		printf("Relocation Table Entries (RELA)\n");
+//		printf("-------------------------------\n");
+//		printf("Offset Info Symbol Type Addend\n");
+//		for (int i=0; i<relas.size(); i++) {
+//			printf("0x%08x 0x%08x 0x%08x 0x%08x 0x%08x\n", relas[i].r_offset, relas[i].r_info, ELF32_R_SYM(relas[i].r_info), ELF32_R_TYPE(relas[i].r_info), relas[i].r_addend);
+//		}
+//	}
+//
+//	if (rels.size() == 0 && relas.size() == 0) {
+//		printf("Rels e Relas equals zero!");
+//	}
 }
