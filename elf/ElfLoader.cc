@@ -164,7 +164,8 @@ void ElfLoader::createAddressSpace() {
 		if (segments[segIndex].p_type == PT_LOAD) {
 			numLoadable++;
 			if (numLoadable > 2) {
-				BX_PANIC(("Num. of Loadable segments is greater than 2 in %s.", mainExecutable.getFileName()));
+				BX_PANIC(("Num. of Loadable segments is greater than 2 in %s.",
+						         mainExecutable.getFileName().c_str()));
 			}
 
 			// the first loadable segment goes in the first by of memory
@@ -214,7 +215,8 @@ void ElfLoader::createAddressSpace() {
 			if (segments[i].p_type == PT_LOAD) {
 				numLoadable++;
 				if (numLoadable > 2) {
-					BX_PANIC(("Num. of Loadable segments is greater than 2 in %s.", sharedLibs[sIndex].getFileName()));
+					BX_PANIC(("Num. of Loadable segments is greater than 2 in %s.",
+							         sharedLibs[sIndex].getFileName().c_str()));
 				}
 
 				if (segments[i].p_vaddr == 0) {

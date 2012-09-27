@@ -24,7 +24,7 @@
 #include "cpu/cpu.h"
 #include "debug.h"
 
-BX_MEM_C::BX_MEM_C() : size(0), memory(NULL)
+BX_MEM_C::BX_MEM_C() : virtualBase(0), size(0), memory(NULL)
 {
 }
 
