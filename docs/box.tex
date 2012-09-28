@@ -477,11 +477,17 @@ proposto em relação ao emulador Bochs. Essa etapa é divida em duas partes:
 Como descrito anteriormente na Seção~\ref{sec:infraestrutura}, o benchmark 
 MiBench~\cite{Guthaus2001} será utilizado para fazer a análise do sistema
 proposto.
- 
+
+
+
+
+
+
+
 \subsection{Cronograma}
 
 A Tabela~\ref{tab:cronograma} apresenta o cronograma previsto para o desenvolvimento do Box.
-Cada linha representa uma atividades descritas nas subseções anteriores. Cada coluna representa
+Cada linha representa uma das etapas/passos descritos nas subseções anteriores. Cada coluna representa
 uma semana durante o desenvolvimento, a primeira semana inicia-se no dia 25 de setembro e a
 última semana encerra no dia 21 de novembro, totalizando 8 semanas.
 
@@ -490,6 +496,7 @@ uma semana durante o desenvolvimento, a primeira semana inicia-se no dia 25 de s
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|} \hline
 \multicolumn{1}{|c|}{\multirow{2}{*}{\textbf{Atividade}}} & \multicolumn{8}{c|}{\textbf{Semana}} \\ \cline{2-9}
 \multicolumn{1}{|c|}{} & 1\textsuperscript{a} & 2\textsuperscript{a} & 3\textsuperscript{a} & 4\textsuperscript{a} & 5\textsuperscript{a} & 6\textsuperscript{a} & 7\textsuperscript{a} & 8\textsuperscript{a} \\ \hline
+CPU             & $\bullet$ & $\bullet$ &  &  &  &  &  &  \\ \hline
 Carregador  	& $\bullet$ & $\bullet$ & $\bullet$ &  &  &  &  &  \\ \hline
 Memória     	& $\bullet$ & $\bullet$ & &  &  &  &  &  \\ \hline
 Syscalls    	&  & $\bullet$ & $\bullet$ &  &  &  &  &  \\ \hline
@@ -501,6 +508,12 @@ Relatório Final	&  &  &  &  &  &  & $\bullet$ & $\bullet$ \\ \hline
 \caption{Cronograma de desenvolvimento do Box}
 \label{tab:cronograma}
 \end{table}
+
+Este projeto será desenvolvido por três alunos, portanto justificando a sobreposição
+de tarefas no cronograma. Além disso note que alguns desses componentes já faziam 
+parte da base de código do Bochs (por exemplo: decodificador e interpretador) e
+outros (como syscalls, memória e carregador) já tiveram seu desenvolvimento iniciado
+antes da escrita deste relatório.
 
 
 
