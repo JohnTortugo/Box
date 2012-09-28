@@ -382,14 +382,20 @@ pelos membros do projeto será necessário para o desenvolvimento do projeto.
 
 \section{Metodologia}  \label{sec:metodologia}
 
-Como forma de atingir o objetivo proposto, o trabalho adotará uma abordagem dividida em três etapas logicamente divididas em passos que serão descritos em detalhes a seguir.
+Como forma de atingir o objetivo proposto, o trabalho adotará uma abordagem 
+dividida em três etapas logicamente divididas em passos que serão descritos 
+em detalhes a seguir.
 
 \subsection{Implementação da máquina virtual de processos}
 
-Nesta etapa será implementada a versão básica da máquina virtual.
-O interpretador proposto utilizará a infraestrutura da interpretador Bochs como ponto de partida para desenvolvimento. 
-Por ser uma máquina virtual de sistema, o Bochs implementa mecanismos de emulação para diversos subsistemas de hardware, como cache de instruções, barramentos, discos, placas de vídeo e de rede, etc.
-Tais subsistemas são desnecessários em uma máquina virtual de processos, visto que esses dispositivos são gerenciados pelo sistema operacional, e por esse motivo serão removidos do projeto.
+Nesta etapa será implementada a versão básica da máquina virtual. O 
+interpretador proposto utilizará a infraestrutura da interpretador Bochs 
+como ponto de partida para desenvolvimento. Por ser uma máquina virtual de 
+sistema, o Bochs implementa mecanismos de emulação para diversos subsistemas 
+de hardware, como BIOS, hierarquia de memória, placas de vídeo e de rede, etc. 
+Tais subsistemas são desnecessários em uma máquina virtual de processos, visto 
+que esses dispositivos não são acessiveis diretamente por programas de usuário, 
+e por esse motivo serão removidos do projeto.
 
 \begin{figure}[h]
  \centering
@@ -398,17 +404,37 @@ Tais subsistemas são desnecessários em uma máquina virtual de processos, vist
  \label{fig:box-architecture}
 \end{figure}
 
-A Figura \ref{fig:box-architecture} apresenta a arquitetura geral do interpretador, seguido da descrição de seus principais módulos.
-Através deste interpretador, será possível carregar e interpretar um executável linux de 32bits com ligação dinâmica.
+A Figura \ref{fig:box-architecture} apresenta a arquitetura geral do interpretador.
+O sistema será composto de seis modulos principais que serão gerenciador pelo runtime
+da máquina virtual: carregador, emulador de memória, decodificador, interpretador, 
+emulador de chamadas de sistema e emulador de exceções. Utilizando esta arquitetura 
+será possível carregar e interpretar um executável linux de 32 Bits com ligação dinâmica. 
+Segue abaixo a descrição de cada um destes módulos:
 
 \begin{itemize}
- \item \textbf{Carregador} Responsável por ler e decodificar o executável principal e suas dependências, montar o espaço de endereçamento onde a interpretação ocorrerá e delegar o controle à CPU.
- \item \textbf{CPU} Módulo responsável por decodificar e interpretar (executar) as instruções x86 32 bits.
-% \item \textbf{Decodificador} Neste passo implementaremos as rotinas de decodificação das instruções x86 32 bits.
-% \item \textbf{Interpretador} Neste passo implementaremos as rotinas resposáveis por interpretar as instruções do x86 32 bits.
- \item \textbf{Memória} Módulo responsável pelo gerenciamento do espaço de memória reservado para a aplicação e suas dependências.
- \item \textbf{Syscalls} Rotinas que implementam as chamadas ao sistema operacional (\emph{system calls}) da ABI da aplicação sendo emulada (\emph{guest}).
- \item \textbf{Exceções} Módulo de gerenciamento de exceções da CPU (\emph{traps} e \emph{faults}).
+    \item \textbf{Carregador:} É o módulo responsável por ler, decodificar e resolver as
+    dependencias dinâmicas do executável principal e bibliotecas compartilhadas. A entrada 
+    desse módulo é o binário principal a ser emulado e a saída é o espaço de endereçamento 
+    onde a interpretação do processo ocorrerá.
+
+    \item \textbf{CPU:} Este módulo é composto por dois componentes principais: o decodificador
+    e o interpretador. A CPU é responsável por controlar o fluxo de emulação da aplicação,
+    nesse sentido ela direciona o decodificador a buscar e decodificar uma instrução no
+    módulo de memória e em seguida a CPU passa a informação decodificada para o módulo de 
+    interpretação que emulará o comportamento da instrução decodificada.
+
+    \item \textbf{Memória:} Módulo responsável pelo gerenciamento do espaço de memória reservado 
+    para a aplicação, suas dependências, área de stack e heap. Este módulo é o responsável por
+    emular leituras e escritas na área de dados do espaço de endereçamento.
+
+    \item \textbf{Chamadas de sistema:} Este módulo é composto por rotinas que são wrappers
+    para as \emph{system calls} do sistema nativo. Quando o processo sendo emulado faz uma
+    syscall o interpretador decodifica a interrupção e redireciona a execução para a rotina
+    que simula o comportamento da system call desejada. 
+    
+    \item \textbf{Exceções:} Este módulo é o responsável pelo gerenciamento de exceções 
+    geradas pele programa sendo emulado e redireciona-las para os devidos tratadores de
+    exceção ou encerrar a execução do programa. 
 \end{itemize}
 
 \subsection{Otimização da máquina virtual}
