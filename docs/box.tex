@@ -225,33 +225,55 @@ regiões de código que serão frequentemente executadas afim de traduzir e otim
 
 \subsection{Técnicas de Otimização para Interpretação}
 
-A forma mais básica de interpretação foi descrita na seção \ref{emulacao}: há um loop principal que busca a instrução original, decodifica-a e chama a função responsável pela execução da instrução, retornando ao loop principal logo em seguida. No entanto, existem diversas técnicas que tornam a interpretação um processo mais eficiente. Algumas delas estão listadas a seguir:
+Na forma mais básica de interpretação há um loop principal que busca a instrução original, decodifica-a e chama 
+a função responsável pela execução da instrução, retornando ao loop principal logo em seguida. No entanto, 
+existem diversas técnicas que tornam a interpretação um processo mais eficiente. Algumas delas estão listadas 
+a seguir:
 
 \begin{itemize}
+ 	\item \textbf{Threaded Interpretation:} São adicionadas ao final das funções que emulam cada uma das intruções a 
+ 	busca pela próxima instrução, sua decodificação e a chamada para a função responsável pela execução da instrução. 
+ 	Note que isto reduz drasticamente o número de iterações do loop principal do interpretador.
 
- \item \textbf{Threaded Interpretation} São adicionadas ao final das funções que emulam cada uma das intruções a busca pela próxima instrução, sua decodificação e a chamada para a função responsável pela execução da instrução. Note que não existe mais um loop principal no interpretador.
+ 	\item \textbf{Pre Decoding:} As instruções são decodificadas, por exemplo, sempre que uma nova página de código é 
+ 	carregada do disco, e os campos como \emph{opcode} e operandos são salvos em estruturas de dados padronizadas, o 
+ 	que torna possível uma implementação mais simples e eficiente dos mecanismos de despacho e interpretação. 
+ 	
+ 	\item \textbf{Direct Threaded Interpretation:} Utilizado em conjunto ao \textbf{Pre Decoding}. Anota-se junto com
+ 	as informações de decodificação, o endereço da rotina que deve fazer a interpretação de cada instrução, dessa forma
+ 	ao final de cada rotina de interpretação é feito um salto indireto ``diretamente'' para a rotina que interpreta a
+ 	próxima instrução - evitando a consulta por uma rotina de instrumentação.  
 
- \item \textbf{Pre Decoding} O código original é pré decodificado em estruturas mais simples de serem decodificadas, de forma simplificar este passo da interpretação.
-
- \item \textbf{Direct Threaded Interpretation} Utilizado em conjunto ao \textbf{Pre Decoding}, coloca-se diretamente os endereços das rotinas que emulam a instrução original, de forma que ao se ler a instrução pré-decodificada o interpretador faz um salto indireto diretamente a rotina.
+	\item \textbf{DICache:} É uma proposta de utilização de uma cache de decodificação para as instruções interpretadas
+	frequentemente. A DICache \cite{dicache} funciona como uma cache convencional e pode ser implementada tanto em software como em 
+	hardware. Cada linha da cache contém uma rótulo para identificar a instrução mapeada para aquela linha, os operandos
+	da instrução e o endereço da rotina que faz a interpretação dessa instrução.
 
 \end{itemize}
 
 \subsection{Executable and Linking Format}
 
-%A \emph{Application Binary Interface} (ABI) é a interface entre um binário e outros binários e %entre um binário e o sistema operacional. 
-%Ela define convenções para tipos de dados, endianness, alinhamento, chamadas de funções (como %devem ser passados os argumentos e o retorno) e syscalls, e, mais especificamente, o formato que %os arquivos binários devem ter.
-
-\emph{Executable and Linking Format} (ELF)\cite{SCO1997} é o formato binário flexível e extensível, utilizado atualmente em diversos sistemas Unix-like.
-Os principais tipos de arquivos representados pelo formato ELF são:
+O \emph{Executable and Linking Format} (ELF) \cite{SCO1997} é o formato de arquivos binários executáveis, 
+bibliotecas compartilhadas, códigos objetos, etc. utilizados em ambientes Unix-like. Um arquivo ELF pode
+encaixa-se em um destes três tipos:
 
 \begin{itemize}
- \item \textbf{Relocatable File} representa um arquivo objeto que contém dados e código que serão linkados a outro binário para criar um executável ou objeto compartilhado.
- \item \textbf{Executable File} contém um programa que pode ser executado.
- \item \textbf{Shared Object} representa um biblioteca dinâmica que contém código e dados que podem ser linkados a outro objeto compartilhado, criando um terceiro objeto compartilhado, ou pode ser combinado a um executável pelo linker dinâmico e outros objetos compartilhados para a criação de uma imagem de processo.
+ 	\item \textbf{Relocatable File:} Representa um arquivo objeto que contém dados e código que serão linkados 
+ 	a outro binário para criar um executável ou objeto compartilhado. Em geral são arquivos utilizados durante
+ 	o processo de compilação estática.
+ 
+ 	\item \textbf{Executable File:} Representa um programa compilado. O programa pode possuir dependências que
+ 	devem ser resolvidas em tempo de execução ou pode ter linkagem estática o que significa que todas as bibliotecas
+ 	necessárias para sua execução já foram resolvidas durante a compilação.
+ 
+ 	\item \textbf{Shared Object:} Representa um biblioteca dinâmica que contém código e dados que podem ser 
+ 	linkados a outro objeto compartilhado, criando um terceiro objeto compartilhado, ou pode ser combinado a 
+ 	um executável pelo linker dinâmico e outros objetos compartilhados para a criação de uma imagem de processo.
 \end{itemize}
 
-A organização de um arquivo ELF é composta por um cabeçalho principal (\emph{ELF Header}), seguido por cabeçalhos de seção, descrevendo seções de informações (instruções, dados, símbolos) utilizados na linkagem, ou cabeçalhos de programa, que contém os segmentos da aplicação e as informações necessárias para a criação do processo executável. 
+A organização de um arquivo ELF é composta por um cabeçalho principal (\emph{ELF Header}), seguido por cabeçalhos 
+de seção - descrevendo seções de informações (instruções, dados, símbolos) utilizados na linkagem estática - ou cabeçalhos 
+de programa - que contém os segmentos da aplicação e as informações necessárias para a criação do processo. 
 
 
 
