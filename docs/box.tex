@@ -249,7 +249,7 @@ a seguir:
  	carregada do disco, e os campos como \emph{opcode} e operandos são salvos em estruturas de dados padronizadas, o 
  	que torna possível uma implementação mais simples e eficiente dos mecanismos de despacho e interpretação. 
  	
- 	\item \textbf{Direct Threaded Interpretation:} Utilizado em conjunto ao \textbf{Pre Decoding}. Anota-se junto com
+ 	\item \textbf{Direct Threaded Interpretation:} Utilizado em conjunto ao Pre Decoding. Anota-se junto com
  	as informações de decodificação, o endereço da rotina que deve fazer a interpretação de cada instrução, dessa forma
  	ao final de cada rotina de interpretação é feito um salto indireto ``diretamente'' para a rotina que interpreta a
  	próxima instrução - evitando a consulta por uma rotina de instrumentação.  
@@ -400,7 +400,8 @@ e por esse motivo serão removidos do projeto.
 \begin{figure}[h]
  \centering
  \includegraphics[width=0.5\columnwidth]{./figures/box-architecture.eps}
- \caption{Arquitetura do interpretador Box}
+ \caption{Arquitetura do interpretador de processos Box. 
+ O Box é uma máquina virtual same-ISA para aplicações compiladas para Linux x86 32 Bits.}
  \label{fig:box-architecture}
 \end{figure}
 
@@ -439,22 +440,43 @@ Segue abaixo a descrição de cada um destes módulos:
 
 \subsection{Otimização da máquina virtual}
 
-Nesta etapa serão implementados os passos que adicionarão ao interpretador recursos de instrumentação e otimização de desempenho da interpretação.
+Nesta etapa serão implementados os passos que adicionarão ao interpretador 
+recursos de instrumentação e otimização de desempenho da interpretação.
 
 \begin{itemize}
- \item \textbf{Otimização} Neste passo implementaremos uma das seguintes técnicas: DICache\cite{Chen2012} ou Threaded-Interpretation\cite{Klint1981}.
- \item \textbf{Instrumentação} Neste passo implementaremos suporte para instrumentação dinâmica das aplicações emuladas.
+    \item \textbf{Otimização:} Neste passo implementaremos uma das seguintes 
+    técnicas: DICache~\cite{Chen2012} ou Threaded-Interpretation~\cite{Klint1981}.
+    Como descrito na Seção~\ref{sec:fundamentacao} essas técnicas tem o objetivo 
+    de agilizar o processo de busca e despacho das instruções a serem interpretadas.
+ 
+    \item \textbf{Instrumentação:} Neste passo implementaremos suporte para 
+    instrumentação dinâmica das aplicações emuladas. Recursos como interceptação
+    de acessos a memória, detecção de instruções de desvio e interrupções serão 
+    adicionados ao sistema base.
 \end{itemize}
  
 \subsection{Análise de desempenho}
 
-Nesta etapa serão conduzidas medições e análises de desempenho do sistema em relação ao emulador \emph{Bochs} e será qunatificado o impacto das técnicas implementadas na etapa 2 no sistema.
+Nesta etapa serão conduzidos testes e medições para análisar o desempenho do sistema
+proposto em relação ao emulador Bochs. Essa etapa é divida em duas partes:
 
 \begin{itemize}
- \item \textbf{Desempenho 1} Neste passo avaliaremos o desempenho do sistema em relação ao emulador de sistema Bochs.
- \item \textbf{Desempenho 2} Neste passo iremos avaliar o efeito das técnicas implementadas na etapa 2 no desempenho do sistema.
+    \item \textbf{Análise 1:} Nesta análise avaliaremos o desempenho da versão 
+    base do sistema proposto em relação ao emulador de sistema Bochs. Para esta 
+    análise utilizaremos uma versão do Box que não consta com otimizações além 
+    daquelas já implementadas no Bochs. O resultado deste passo será a quantificação
+    do overhead decorrente da emulação do sistema operacional e dispositivos de
+    hardware em uma máquina virtual de sistema. 
+    
+    \item \textbf{Análise 2:} Nesta análise iremos avaliar o impacto das técnicas 
+    de otimização implementadas na etapa 2 no desempenho do sistema. O resultado
+    deste passo será a quantificação do speedup (ou overhead) decorrente da 
+    utilização de tais técnicas.
 \end{itemize}
 
+Como descrito anteriormente na Seção~\ref{sec:infraestrutura}, o benchmark 
+MiBench~\cite{Guthaus2001} será utilizado para fazer a análise do sistema
+proposto.
  
 \subsection{Cronograma}
 
