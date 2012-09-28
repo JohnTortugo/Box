@@ -94,6 +94,11 @@ de processo chamada \emph{Box}, desenvolvido a partir da ferramenta anterior
 especificamente para esse estudo.
 \end{abstract}
 
+
+
+
+
+
 \section{Introdução}
 Uma Máquina Virtual (MV) é uma plataforma versátil que pode ser empregada para resolver diversos problemas na área de computação. 
 Uma MV pode ser visualizada como uma camada utilizada para prover a integração entre duas interfaces (possívelmente distintas). Esta camada pode ser implementada com emulação em software, virtualização em hardware ou uma composição das duas abordagens.
@@ -126,6 +131,9 @@ Este texto está organizado da seguinte forma. Na Seção~\ref{sec:objetivos} ap
 Na Seção~\ref{sec:fundamentacao} apresentamos a fundamentação teórica para a realização do projeto. Na Seção~\ref{sec:bibliografia} apresentamos
 um levantamento bibliográfico da área de máquinas virtuais a nível de binários. A Seção~\ref{sec:infraestrutura} e Seção~\ref{sec:metodologia}
 descrevem a infraestrutura e a metodologia proposta para a realização do projeto. Por fim a Seção~\ref{sec:conclusao} apresenta a conclusão do trabalho. 
+  
+  
+  
   
   
   
@@ -184,6 +192,9 @@ virtual em de sistema ou de processo dependendo de qual o escopo de emulação �
 
 
 
+
+
+
 \subsection{Técnicas de Emulação} \label{emulacao}
 
 Segundo \cite{Smith2005}, a emulação é um processo de implementação das funcionalidades e interfaces de 
@@ -222,7 +233,6 @@ porém, uma vez traduzido, o codigo resultante é executado nativamente, o que g
 que empregam tradução em duas (ou mais) etapas são ainda mais sofisticados e empregam técnicas para prever 
 regiões de código que serão frequentemente executadas afim de traduzir e otimizar tais regiões.
 
-
 \subsection{Técnicas de Otimização para Interpretação}
 
 Na forma mais básica de interpretação há um loop principal que busca a instrução original, decodifica-a e chama 
@@ -248,7 +258,6 @@ a seguir:
 	frequentemente. A DICache \cite{dicache} funciona como uma cache convencional e pode ser implementada tanto em software como em 
 	hardware. Cada linha da cache contém uma rótulo para identificar a instrução mapeada para aquela linha, os operandos
 	da instrução e o endereço da rotina que faz a interpretação dessa instrução.
-
 \end{itemize}
 
 \subsection{Executable and Linking Format}
@@ -279,48 +288,70 @@ de programa - que contém os segmentos da aplicação e as informações necess�
 
 
 
+
+
 \section{Levantamento Bibliográfico}  \label{sec:bibliografia}
-% Aqui devemos comentar sobre os trabalhos relacionados ao nosso
-% podemos comentar sobre o Bochs, o PIN e o HDTrans por exemplo.
-% comentar no que nosso sistema é diferente do deles.
 
-%\subsection{Máquinas Virtuais}
-O Bochs \cite{Lawton1996} é uma máquina virtual de sistema com suporte a emulação de diversos processadores da família x86 32 e 64 bits. 
-Ele preza por portabilidade, e nesse sentido utiliza interpretação como técnica de emulação. Para reduzir o overhead de interpretação, o Bochs utiliza técnicas como \emph{pre-decoding}\cite{Magnusson1994}, \emph{threaded-interpretation}\cite{Klint1981}, e \emph{lazy evaluation}\cite{Hookway1997}.
-O sistema que estamos propondo se diferencia do Bochs por ser voltado à emulação de processos e não de sistemas.
+O Bochs \cite{Lawton1996} é uma máquina virtual de sistema com suporte a emulação 
+de diversos processadores da família x86 32 e 64 bits. Ele preza por portabilidade, 
+e nesse sentido utiliza interpretação como técnica de emulação. Para reduzir o 
+overhead de interpretação, o Bochs utiliza técnicas como \emph{pre-decoding}~\cite{Magnusson1994}, 
+\emph{threaded-interpretation}~\cite{Klint1981}, e \emph{lazy evaluation}~\cite{Hookway1997}.
+O sistema que estamos propondo se diferencia do Bochs por ser voltado à emulação 
+de processos e não de sistemas.
 
-O Pin \cite{Luk2005} é uma máquina virtual de processo que emula os ISAs IA-32 e x86-64. 
-Ele é uma ferramenta de código fechado e possui versões tanto para Windows como para Linux, sendo reconhecido por prover uma rica API para criação de ferramentas (Pintools) para análise do comportamento dinâmico de aplicações. 
-O Box diferencia-se do PIN por ser uma máquina virtual de código aberto e utilizar interpretação como técnica de emulação.
-Em contrapartida, os sistemas se assemelham no aspecto de proverem uma interface para instrumentação de binários e serem emuladores \emph{same-ISA}~\footnote{As duas interfaces da máquina virtual são iguais.}.
+O Pin \cite{Luk2005} é uma máquina virtual de processo que emula os ISAs IA-32 e 
+x86-64. Ele é uma ferramenta de código fechado e possui versões tanto para Windows 
+como para Linux, sendo reconhecido por prover uma rica API para criação de 
+ferramentas (Pintools) para análise do comportamento dinâmico de aplicações. O Box 
+difere do PIN por ser uma máquina virtual de código aberto e utilizar interpretação 
+como técnica de emulação. Em contrapartida, em comum estes dois sistemas tem o 
+aspecto de proverem uma interface para instrumentação de binários e serem emuladores 
+\emph{same-ISA}~\footnote{Em uma máquina virtual same-ISA as duas interfaces da 
+máquina virtual são iguais, possivelmente diferindo apenas em relação a ABI.}.
 
-O HDTrans \cite{Sridhar2006} é uma máquina virtual de processo para a arquitetura IA-32.
-O HDTrans difere-se do Bochs e do PIN por empregar tradução de binários como técnica de emulação.
-No entanto, o HDTrans abre mão de empregar otimizações no código traduzido (o que geralmente é feito para amortizar o overhead de tradução) em favor da implementação de uma tradução simples e rápida.
-O Box diferencia-se do HDTrans por empregar interpretação de binários.
+O HDTrans \cite{Sridhar2006} é uma máquina virtual de processo para a arquitetura 
+IA-32. O HDTrans difere do Bochs e do PIN por empregar tradução de binários como 
+técnica de emulação. No entanto, o HDTrans abre mão de empregar otimizações no 
+código traduzido (o que geralmente é feito para amortizar o overhead de tradução) 
+em favor da implementação de uma tradução simples e rápida. O Box diferencia-se do 
+HDTrans por empregar interpretação de binários.
 
-O Dynamo \cite{Bala2000} é uma máquina virtual de processo para a arquitetura do HP PA-800. 
-Diferentemente do PIN, Bochs e HDTrans, o Dynamo é uma máquina virtual cujo objetivo é otimizar a execução do programa sendo emulado.
-Para tanto o Dynamo emprega uma combinação das técnicas de interpretação e emulação. 
-O sistema inicialmente interpreta o código da aplicação sendo emulada. 
-Uma vez que uma região é declarada como quente, o Dynamo aplica otimizações nesta região e salva o código otimizado em uma cache de traduções. 
-Subsequentes invocações do trecho de código original serão emuladas utilizando o código traduzido. 
-O Box diferencia-se do Dynamo por não ter o foco na otimização de binários mas sim em ser um sistema que prove uma interface simples para 
-instrumentação de binários.
+O Dynamo \cite{Bala2000} é uma máquina virtual de processo para a arquitetura do 
+HP PA-8000. Diferentemente do PIN, Bochs e HDTrans, o Dynamo é uma máquina virtual 
+cujo objetivo é otimizar a execução do programa sendo emulado. Para tanto o Dynamo 
+emprega uma combinação das técnicas de interpretação e emulação. O sistema 
+inicialmente interpreta o código da aplicação sendo emulada. Uma vez que uma região 
+é declarada como quente~\footnote{Uma região de código é quente quando ela é 
+frequentemente executada.}, o Dynamo aplica otimizações nesta região e salva o 
+código otimizado em uma cache de traduções. Subsequentes invocações do trecho de 
+código original serão emuladas utilizando o código traduzido. O Box diferencia-se 
+do Dynamo por não ter o foco na otimização de binários mas sim em ser um sistema 
+que prove uma interface simples para instrumentação de binários.
 
-O IA-32 EL \cite{Baraz2003} é uma máquina virtual de processos com o objetivo de suportar a execução de aplicações IA-32 em processadores da família IA-64.
-De forma similar ao Dynamo, o IA-32 EL emprega uma abordagem de emulação em duas etapas, porém as duas etapas realizam tradução de código. 
-Inicialmente o IA-32 EL efetua a tradução de código em uma granularidade de bloco básico.
-Durante essa tradução, código de instrumentação é inserido para detectar blocos básicos que são frequentemente executados. 
-Quando um número mínimo de blocos básicos é identificado, o sistema forma uma região de código envolvendo esses blocos básicos, os otimiza e posteriormente salva em uma cache de traduções. 
-Execuções subsequentes desses blocos básicos usam a tradução otimizada. 
+O IA-32 EL \cite{Baraz2003} é uma máquina virtual de processos com o objetivo de 
+suportar a execução de aplicações IA-32 em processadores da família IA-64. De forma 
+similar ao Dynamo, o IA-32 EL emprega uma abordagem de emulação em duas etapas, 
+porém as duas etapas realizam tradução de código. Inicialmente o IA-32 EL efetua a 
+tradução de código em uma granularidade de bloco básico. Durante essa tradução, 
+código de instrumentação é inserido para detectar blocos básicos quentes. Quando um 
+número mínimo de blocos básicos é identificado, o sistema forma uma região de código 
+envolvendo esses blocos básicos, os otimiza e posteriormente salva em uma cache de 
+traduções. Execuções subsequentes desses blocos básicos usam a tradução otimizada. 
 O Box diferencia-se do IA-32 EL por não fazer tradução de binários.
 
-StarDBT \cite{Wang2007} é uma máquina virtual de pesquisa capaz de fazer traduções de aplicações compiladas para x86 32/64 bits para execução em hardware x86 32 bits.
-De forma similar ao IA-32 EL, o StarDBT é um tradutor em duas fases. 
-Regiões de código que são infrequentemente executadas são traduzidas utilizando um tradutor simples e rápido, enquanto regiões de código que são frequentemente executadas são traduzidas empregando otimizações de código e posteriormente persistidas em uma cache de traduções. 
-O Box diferencia-se do StarDBT por ser capaz de traduzir apenas binários de 32 bits, compilados para Linux e não empregar tradução de binários.
+StarDBT \cite{Wang2007} é uma máquina virtual de pesquisa capaz de fazer traduções de 
+aplicações compiladas para x86 32/64 bits para execução em hardware x86 32 bits. De 
+forma similar ao IA-32 EL e ao Dynamo, o StarDBT é um tradutor em duas fases. Regiões 
+de código que são infrequentemente executadas são traduzidas utilizando um tradutor 
+simples e rápido, enquanto regiões de código que são frequentemente executadas são 
+traduzidas empregando otimizações de código e posteriormente persistidas em uma cache 
+de traduções. O Box diferencia-se do StarDBT por ser capaz de traduzir apenas binários 
+de 32 bits, compilados para Linux e não empregar tradução de binários.
 
+% Acho que seria interessante colocarmos alguns papers que investigaram sobre
+% o overhead de emulação em máquinas virtuais, especificamente sobre a emulação
+% de sistemas operacionais em relação a processos. Será que achamos? Será que tem? 
 
 
 
