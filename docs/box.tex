@@ -182,26 +182,45 @@ virtual em de sistema ou de processo dependendo de qual o escopo de emulação �
 \end{itemize}
 
 
+
+
 \subsection{Técnicas de Emulação} \label{emulacao}
 
-Segundo \cite{Smith2005}, a emulação é um processo de implementação das funcionalidades e interfaces de um sistema em outro sistema com características diferentes. 
-Como exemplo, podemos citar a execução de máquinas virtuais que permitem a execução de código PowerPC em um arquitetura x86. 
-Para isso, faz-se necessária a implementação de interfaces que permitam a emulação do ISA PowerPC, utilizando instruções x86.
-A emulação de instruções, como a do exemplo citado anteriormente, é um dos pontos chave para a construção de máquinas virtuais e pode ser classificada de duas formas, de acordo com a sua forma de implementação:
+Segundo \cite{Smith2005}, a emulação é um processo de implementação das funcionalidades e interfaces de 
+um sistema em outro sistema com características diferentes. Por exemplo, para criar uma máquina virtual
+que executa um sistema compilado para o x86 em uma arquitetura PowerPC será necessário emular
+tanto a interface do x86 (instruções) quanto funcionalidades (ex: \emph{calling convetion}) utilizando
+instruções disponíveis na arquitetura PowerPC. O processo de emulação é central em uma máquina virtual
+e a técnica utilizada para implementa-lo é fundamental para o desempenho do sistema, entre as técnicas 
+frequentemente utilizadas para implementar emulação em uma máquina virtual estão: 
 
 \begin{itemize}
- \item \textbf{Interpretação} Processo no qual cada instrução do programa original (\emph{guest}) está associado a uma rotina que executa a função equivalente a da operação original na plataforma destino (\emph{host}).
-		A interpretação envolve a recuperação da instrução original (\emph{fetch}), sua decodificação (\emph{decode}) e finalmente a execução da operação equivalente.
+  \item \textbf{Interpretação:} Processo no qual cada instrução do programa original (\emph{guest}) possui 
+  uma rotina na plataforma destino (\emph{host}) que implementa a semântica da instrução na arquitetura \emph{guest}. 
+  A interpretação envolve a recuperação da instrução original (\emph{fetch}), sua decodificação (\emph{decode}) 
+  e finalmente a execução da operação equivalente.
  
- \item \textbf{Tradução de binários} Neste processo um código nativo na arquitetura destino é gerado dinâmicamente a partir do código original da aplicação e tem como função reproduzir o comportamento do código da aplicação original\cite{Sites1993}. 
+  \item \textbf{Tradução de binários:} Neste processo um código nativo na arquitetura destino é gerado 
+  dinâmicamente (\emph{Just-in-time}) a partir do código original da aplicação e tem como função reproduzir o 
+  comportamento do código da aplicação original \cite{Sites1993}. Esta forma de implementação assemelha-se ao
+  processo de compilação estático onde um código fonte é decodificado e traduzido para uma linguagem destino.
+ 
+  \item \textbf{Tradução em duas etapas:} Nesta forma de implementação o sistema utiliza uma combinação de interpretação e tradução para
+  reduzir o overhead de emulação. Regiões de código que são infrequemente executadas são apenas interpretadas
+  (uma vez que o custo de tradução seria maior que o de sempre interpretar a região), porções de código que são 
+  frequentemente executas são traduzidas uma vez que a execução do código de forma otimizada amortiza o custo da
+  tradução.
 \end{itemize}
 
-As implicações do uso de interpretação ou tradução influênciam diretamente o desempenho e a aplicabilidade da máquina virtual.
-Em sistemas interpretados, o desempenho é relativamente baixo, uma vez que cada instrução é emulada individualmente e, na maior parte das vezes, repetidamente.
-Apesar disso, tais sistemas são extremamente portáveis, o que permite sua execução em diversas plataformas com poucas ou até mesmo nenhuma alteração em seu código original.
-Nos sistemas de traduções de binários, existe um custo (\emph{overhead}) inicial elevado, visto que o código original precisa ser traduzido antes de sua execução, porém, uma vez traduzido, o codigo resultante é executado nativamente, o que garante melhor desempenho.
-
-
+As implicações do uso de interpretação ou tradução influênciam diretamente o desempenho e a aplicabilidade da 
+máquina virtual. Em sistemas interpretados, o desempenho é relativamente baixo, uma vez que cada instrução é 
+emulada individualmente por uma função, o que adiciona todo o overhead de chamada e retorno de funções. Apesar 
+disso, tais sistemas são extremamente portáveis, o que permite sua execução em diversas plataformas com poucas 
+ou até mesmo nenhuma alteração em seu código original. Nos sistemas de traduções de binários, existe um custo 
+(\emph{overhead}) inicial elevado, visto que o código original precisa ser traduzido antes de sua execução, 
+porém, uma vez traduzido, o codigo resultante é executado nativamente, o que garante melhor desempenho. Sistemas
+que empregam tradução em duas (ou mais) etapas são ainda mais sofisticados e empregam técnicas para prever 
+regiões de código que serão frequentemente executadas afim de traduzir e otimizar tais regiões.
 
 
 \subsection{Técnicas de Otimização para Interpretação}
