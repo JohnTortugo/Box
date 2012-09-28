@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 
   // salta para o interpretador
   BX_INFO(("Running Interpreter."));
-  run();
+  //run();
 
   // execute fini stubs
 

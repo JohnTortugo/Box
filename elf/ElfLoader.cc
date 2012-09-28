@@ -31,8 +31,8 @@ ElfLoader::ElfLoader(int p_argc, char **p_argv, char *ldLibPath, Bit8u *p_memory
 
 	// create the process address space
 	BX_INFO(("Mounting Process Address Space."));
-	//createAddressSpace();
-	//dumpAddressSpaceInfo();
+	createAddressSpace();
+	dumpAddressSpaceInfo();
 	BX_INFO(("Address Space Mounted."));
 
 	// Doing relocations
@@ -78,7 +78,7 @@ void ElfLoader::loadSharedLibs() {
 				alreadyLoadedLibs.insert(libName);
 			}
 			else {
-				BX_ERROR(("Library not found: %s\n", libName.c_str()));
+				BX_ERROR(("Library not found: %s", libName.c_str()));
 			}
 		}
 	}
@@ -185,9 +185,9 @@ void ElfLoader::createAddressSpace() {
 
 			// segment description
 			LoadedSegment segDesc;
-			segDesc.fileName 		= mainExecutable.getFileName();
+			segDesc.fileName 			= mainExecutable.getFileName();
 			segDesc.segmentIndex 	= segIndex;
-			segDesc.hdr 			= segments[segIndex];
+			segDesc.hdr 					= segments[segIndex];
 			segDesc.loadedPos 		= this->memory_indx;
 
 			this->loadedSegments.push_back(segDesc);
@@ -302,29 +302,42 @@ void ElfLoader::dumpAddressSpaceInfo() {
 }
 
 void ElfLoader::doRelocations() {
-//	// pointer to relocation table (with implicit addends)
-//	vector<Elf32_Rel> rels = mainExecutable.getRels();
-//	vector<Elf32_Rela> relas = mainExecutable.getRelas();
-//
-//	if (rels.size() > 0) {
-//		printf("Relocation Table Entries (REL)\n");
-//		printf("------------------------------\n");
-//		printf("Offset Info Symbol Type\n");
-//		for (int i=0; i<rels.size(); i++) {
-//			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", rels[i].r_offset, rels[i].r_info, ELF32_R_SYM(rels[i].r_info), ELF32_R_TYPE(rels[i].r_info));
-//		}
-//	}
-//
-//	if (relas.size() > 0) {
-//		printf("Relocation Table Entries (RELA)\n");
-//		printf("-------------------------------\n");
-//		printf("Offset Info Symbol Type Addend\n");
+	// pointer to relocation table (with implicit addends)
+	Elf32_Addr rel 		= mainExecutable.getRel();
+	Elf32_Addr rela 	= mainExecutable.getRela();
+
+	// if there are any relocation (implicit) solve them
+	if (rel > 0) {
+		Bit32u aRead 		= 0;
+
+		rel = bx_mem.virtualAddressToPosition(rel);
+
+		printf("Relocation Table Entries (REL) [%x]\n", rel);
+		printf("------------------------------\n");
+		printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
+		while (aRead < mainExecutable.getRelsz()) {
+			Elf32_Rel reloc;
+
+			mainExecutable.read((Bit8u *)&reloc, rel, mainExecutable.getRelent());
+
+			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
+
+			aRead += mainExecutable.getRelent();
+			rel		+= mainExecutable.getRelent();
+		}
+	}
+
+	if (rela > 0) {
+		printf("RELA: %x (%x)\n", rela, rela - this->loadedSegments[0].hdr.p_vaddr);
+		printf("Relocation Table Entries (RELA)\n");
+		printf("-------------------------------\n");
+		printf("Offset Info Symbol Type Addend\n");
 //		for (int i=0; i<relas.size(); i++) {
 //			printf("0x%08x 0x%08x 0x%08x 0x%08x 0x%08x\n", relas[i].r_offset, relas[i].r_info, ELF32_R_SYM(relas[i].r_info), ELF32_R_TYPE(relas[i].r_info), relas[i].r_addend);
 //		}
-//	}
-//
-//	if (rels.size() == 0 && relas.size() == 0) {
-//		printf("Rels e Relas equals zero!");
-//	}
+	}
+
+	if (rel == 0 && rela == 0) {
+		printf("REL and RELA equals zero!");
+	}
 }

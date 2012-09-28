@@ -12,11 +12,21 @@
 
 using namespace std;
 
+/*!
+ * This class describe an ELF loadable segment loaded in BX_MEM_C.memory
+ */
 class LoadedSegment {
 	public:
+		// the name of the elf file where this segment came from
 		string fileName;
+
+		// the segment index inside the elf file program segments
 		Bit8u segmentIndex;
+
+		// the elf header describing this segment
 		Elf32_Phdr hdr;
+
+		// position inside bx_mem.memory where the segment was loaded
 		Bit32u loadedPos;
 };
 

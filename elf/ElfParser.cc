@@ -10,7 +10,27 @@
 using namespace std;
 
 ElfParser::ElfParser(string elfPath) {
-	this->fileName = elfPath;
+	this->rel 			= 0;
+	this->rela 			= 0;
+	this->rel 			= 0;
+	this->relsz 		= 0;
+	this->relent 		= 0;
+	this->rela 			= 0;
+	this->relasz 		= 0;
+	this->relaent 	= 0;
+	this->pltrel 		= 0;
+	this->jmprel 		= 0;
+	this->pltrelsz 	= 0;
+	this->hash 			= 0;
+	this->dynsym 		= 0;
+	this->syment 		= 0;
+	this->strtab 		= 0;
+	this->strsz 		= 0;
+	this->init 			= 0;
+	this->fini 			= 0;
+	this->pltgot 		= 0;
+	this->rPath			= "";
+	this->fileName 	= elfPath;
 
 	// open elf file
 	felf = fopen(elfPath.c_str(), "rb");
