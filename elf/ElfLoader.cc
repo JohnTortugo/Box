@@ -341,12 +341,16 @@ void ElfLoader::dumpAddressSpaceInfo() {
 
 
 void ElfLoader::doRelocations() {
-	// pointer to relocation table (with implicit addends)
+	// pointer to relocation tables
+	// REL and RELA are relocations for data and
+	// JMPREL is the relocation table for PLT
 	Elf32_Addr rel 		= mainExecutable.getRel();
+	Elf32_Addr jmprel	= mainExecutable.getJmprel();
 	Elf32_Addr rela 	= mainExecutable.getRela();
 
 	if (rel == 0 && rela == 0) BX_DEBUG(("REL and RELA equals zero for mainExecutable."));
 
+	// Data Relocations
 	// check if there are any relocation (implicit) for the
 	// main executable
 	if (rel > 0) {
@@ -355,7 +359,7 @@ void ElfLoader::doRelocations() {
 
 		rel = bx_mem.virtualAddressToPosition(rel);
 
-		printf("Relocation Table Entries (REL) [%x] (%s)\n", rel, mainExecutable.getFileName().c_str());
+		printf("Data Relocation Table Entries (REL) [%x] (%s)\n", rel, mainExecutable.getFileName().c_str());
 		printf("------------------------------\n");
 		printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 		while (aRead < mainExecutable.getRelsz()) {
@@ -370,14 +374,47 @@ void ElfLoader::doRelocations() {
 		}
 	}
 
+	// PLT Relocations
+	if (jmprel > 0) {
+		// bytes already read
+		Bit32u aRead = 0;
+
+		jmprel = bx_mem.virtualAddressToPosition(jmprel);
+
+		printf("PLT Relocation Table Entries (JMPREL) [%x] (%s)\n", jmprel, mainExecutable.getFileName().c_str());
+		printf("------------------------------\n");
+		printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
+		while (aRead < mainExecutable.getPltrelsz()) {
+			Elf32_Rel reloc;
+
+			bx_mem.read((Bit8u *)&reloc, jmprel, mainExecutable.getRelent());
+
+			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
+
+			aRead 	+= mainExecutable.getRelent();
+			jmprel	+= mainExecutable.getRelent();
+		}
+	}
+
+
+
 	// check each shared library for relocations that
 	// need to be solved
+	//
+	// these 2*(slIndex + 1) calculations are for making correspondence
+	// between the sharedLib index and the loaded segments. That is,
+	// for each shared library there were loaded two segments (TEXT and
+	// DATA) and we need increment one because the mainExecutable has
+	// also two segments loaded but it isn't in sharedLibs, so we need
+	// to skip its index.
 	for (int slIndex = 0; slIndex<sharedLibs.size(); slIndex++) {
 		rel 	= sharedLibs[slIndex].getRel();
+		jmprel	= sharedLibs[slIndex].getJmprel();
 		rela 	= sharedLibs[slIndex].getRela();
 
 		if (rel == 0 && rela == 0) BX_DEBUG(("REL and RELA equals zero for SharedLib[%d].", slIndex));
 
+		// Data Relocations
 		// check if there are any relocation (implicit) for the
 		// shared library
 		if (rel > 0) {
@@ -387,7 +424,7 @@ void ElfLoader::doRelocations() {
 			// rel indicates an offset inside the shared library code
 			rel = loadedSegments[2*(slIndex + 1)].loadedPos + rel;
 
-			printf("Relocation Table Entries (REL) (%x) [%x] (%s)\n", rel - loadedSegments[2*(slIndex + 1)].loadedPos, rel, sharedLibs[slIndex].getFileName().c_str());
+			printf("Data Relocation Table Entries (REL) (%x) [%x] (%s)\n", rel - loadedSegments[2*(slIndex + 1)].loadedPos, rel, sharedLibs[slIndex].getFileName().c_str());
 			printf("------------------------------\n");
 			printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 			while (aRead < sharedLibs[slIndex].getRelsz()) {
@@ -399,6 +436,29 @@ void ElfLoader::doRelocations() {
 
 				aRead 	+= sharedLibs[slIndex].getRelent();
 				rel		+= sharedLibs[slIndex].getRelent();
+			}
+		}
+
+		// PLT Relocations
+		if (jmprel > 0) {
+			// bytes already read
+			Bit32u aRead = 0;
+
+			// rel indicates an offset inside the shared library code
+			jmprel = loadedSegments[2*(slIndex + 1)].loadedPos + jmprel;
+
+			printf("PLT Relocation Table Entries (JMPREL) (%x) [%x] (%s)\n", jmprel - loadedSegments[2*(slIndex + 1)].loadedPos, jmprel, sharedLibs[slIndex].getFileName().c_str());
+			printf("------------------------------\n");
+			printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
+			while (aRead < sharedLibs[slIndex].getPltrelsz()) {
+				Elf32_Rel reloc;
+
+				bx_mem.read((Bit8u *)&reloc, jmprel, sharedLibs[slIndex].getRelent());
+
+				printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
+
+				aRead 	+= sharedLibs[slIndex].getRelent();
+				jmprel	+= sharedLibs[slIndex].getRelent();
 			}
 		}
 	}
