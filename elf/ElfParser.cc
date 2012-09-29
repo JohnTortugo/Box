@@ -36,7 +36,7 @@ ElfParser::ElfParser(string elfPath) {
 	felf = fopen(elfPath.c_str(), "rb");
 
 	if (!felf) {
-		printf("unable to open elf file: %s\n", elfPath.c_str());
+		BX_ERROR(("unable to open elf file: %s\n", elfPath.c_str()));
 		return ;
 	}
 
@@ -242,8 +242,6 @@ void ElfParser::printDynamicSection() {
 
 // extract each entry of .dynamic section and store in dynSecEntries
 void ElfParser::extractDynamicSection(Elf32_Shdr dSec) {
-	BX_DEBUG(("Dynamic Section is at: 0x%x\n", dSec.sh_offset));
-
 	fseek(felf, dSec.sh_offset, SEEK_SET);
 
 	while (true) {

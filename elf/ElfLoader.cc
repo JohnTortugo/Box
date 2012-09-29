@@ -70,7 +70,7 @@ void ElfLoader::loadSharedLibs() {
 			string libPath = findLibrary(libName, elf.getRpath());
 
 			if (libPath != "") {
-				ElfParser lib(libPath + "/" + libName);
+				ElfParser lib(libPath);
 
 				// new shared library to insert in address space
 				sharedLibs.push_back(lib);
@@ -89,49 +89,80 @@ void ElfLoader::loadSharedLibs() {
 }
 
 /*!
- * procura a biblioteca libName nos diretorios padroes
+ * procura pela biblioteca com SONAME libName.
+ *
+ * Search order:
+ * DT_RPATH, LD_LIBRARY_PATH, DT_RUNPATH, ld.so.cache, /lib e /usr/lib
+ *
+ * DT_RPATH and DT_RUNPATH are not generally used, here we
+ * omit support for DT_RUNPATH as it doesn't appear in ELF
+ * specification.
  */
 string ElfLoader::findLibrary(string libName, string Rpath) {
-	/* verifica se esta onde a lib disse que estaria */
+	// search for the library in DT_RPATH
 	if (Rpath != "") {
-		//printf("Searching %s in Rpath %s\n", libName.c_str(), Rpath.c_str());
 		vector<string> paths = parseLibPath(Rpath);
 
-		// find the needed library
+		// verify the existence of the library in each path
 		for (int i=0; i<paths.size(); i++) {
-			FILE *fp = fopen((paths[i] + "/" + libName).c_str(), "r");
+			string path = paths[i] + "/" + libName;
+
+			FILE *fp = fopen(path.c_str(), "r");
 			if (fp) {
-				BX_DEBUG(("Lib %s found at %s", libName.c_str(), paths[i].c_str()));
+				BX_DEBUG(("Lib %s found at %s", libName.c_str(), path.c_str()));
 				fclose(fp);
-				return paths[i];
+				return path;
 			}
 		}
 	}
 
-	/* verifica os diretorios padroes do ambiente */
+	// Check if the library is present in LD_LIBRARY_PATH
 	if (ldLibraryPath != NULL) {
-		//printf("Starting search of %s in ld_library_path %s\n", libName.c_str(), ldLibraryPath);
 		vector<string> paths = parseLibPath(ldLibraryPath);
 
-		// find the needed library
+		// verify the existence of the library in each path
 		for (int i=0; i<paths.size(); i++) {
-			FILE *fp = fopen((paths[i] + "/" + libName).c_str(), "r");
+			string path = paths[i] + "/" + libName;
+
+			FILE *fp = fopen(path.c_str(), "r");
 			if (fp) {
-				BX_DEBUG(("Lib %s found at %s", libName.c_str(), paths[i].c_str()));
+				BX_DEBUG(("Lib %s found at %s", libName.c_str(), path.c_str()));
 				fclose(fp);
-				return paths[i];
+				return path;
 			}
 		}
 	}
 
-	/* por fim, verifica em /usr/lib */
-	FILE *fp = fopen(("/usr/lib/" + libName).c_str(), "r");
-	if (fp) {
-		BX_DEBUG(("Lib %s found at %s", libName.c_str(), "/usr/lib/"));
-		fclose(fp);
-		return "/usr/lib/";
+	// Check if the library is in DT_RUNPATH
+	// omited
+
+
+	// Check if the library is in ld.so.cache
+	for (int cIndex=0; cIndex<this->ldCache.size(); cIndex++) {
+		if (this->ldCache[cIndex].first == libName) {
+			BX_DEBUG(("Lib %s found at %s", libName.c_str(), this->ldCache[cIndex].second.c_str()));
+			return this->ldCache[cIndex].second;
+		}
 	}
 
+	// Finally, check if the library is present in /lib or /usr/lib
+	string pathUsr = "/usr/lib/" + libName;
+	FILE *fpUsr = fopen(pathUsr.c_str(), "r");
+	if (fpUsr) {
+		BX_DEBUG(("Lib %s found at %s", libName.c_str(), pathUsr.c_str()));
+		fclose(fpUsr);
+		return pathUsr;
+	}
+
+	string pathLib = "/lib/" + libName;
+	FILE *fpLib = fopen(pathLib.c_str(), "r");
+	if (fpLib) {
+		BX_DEBUG(("Lib %s found at %s", libName.c_str(), pathLib.c_str()));
+		fclose(fpLib);
+		return pathLib;
+	}
+
+	// Library not found
 	return "";
 }
 
