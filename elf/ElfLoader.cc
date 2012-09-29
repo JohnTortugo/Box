@@ -84,7 +84,9 @@ void ElfLoader::loadSharedLibs() {
 	}
 }
 
-/* procura a biblioteca libName nos diretorios padroes */
+/*!
+ * procura a biblioteca libName nos diretorios padroes
+ */
 string ElfLoader::findLibrary(string libName, string Rpath) {
 	/* verifica se esta onde a lib disse que estaria */
 	if (Rpath != "") {
@@ -306,13 +308,17 @@ void ElfLoader::doRelocations() {
 	Elf32_Addr rel 		= mainExecutable.getRel();
 	Elf32_Addr rela 	= mainExecutable.getRela();
 
-	// if there are any relocation (implicit) solve them
+	if (rel == 0 && rela == 0) BX_DEBUG(("REL and RELA equals zero for mainExecutable."));
+
+	// check if there are any relocation (implicit) for the
+	// main executable
 	if (rel > 0) {
-		Bit32u aRead 		= 0;
+		// bytes already read
+		Bit32u aRead = 0;
 
 		rel = bx_mem.virtualAddressToPosition(rel);
 
-		printf("Relocation Table Entries (REL) [%x]\n", rel);
+		printf("Relocation Table Entries (REL) [%x] (%s)\n", rel, mainExecutable.getFileName().c_str());
 		printf("------------------------------\n");
 		printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 		while (aRead < mainExecutable.getRelsz()) {
@@ -322,22 +328,41 @@ void ElfLoader::doRelocations() {
 
 			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
 
-			aRead += mainExecutable.getRelent();
+			aRead 	+= mainExecutable.getRelent();
 			rel		+= mainExecutable.getRelent();
 		}
 	}
 
-	if (rela > 0) {
-		printf("RELA: %x (%x)\n", rela, rela - this->loadedSegments[0].hdr.p_vaddr);
-		printf("Relocation Table Entries (RELA)\n");
-		printf("-------------------------------\n");
-		printf("Offset Info Symbol Type Addend\n");
-//		for (int i=0; i<relas.size(); i++) {
-//			printf("0x%08x 0x%08x 0x%08x 0x%08x 0x%08x\n", relas[i].r_offset, relas[i].r_info, ELF32_R_SYM(relas[i].r_info), ELF32_R_TYPE(relas[i].r_info), relas[i].r_addend);
-//		}
-	}
+	// check each shared library for relocations that
+	// need to be solved
+	for (int slIndex = 0; slIndex<sharedLibs.size(); slIndex++) {
+		rel 	= sharedLibs[slIndex].getRel();
+		rela 	= sharedLibs[slIndex].getRela();
 
-	if (rel == 0 && rela == 0) {
-		printf("REL and RELA equals zero!");
+		if (rel == 0 && rela == 0) BX_DEBUG(("REL and RELA equals zero for SharedLib[%d].", slIndex));
+
+		// check if there are any relocation (implicit) for the
+		// shared library
+		if (rel > 0) {
+			// bytes already read
+			Bit32u aRead = 0;
+
+			// rel indicates an offset inside the shared library code
+			rel = loadedSegments[slIndex].loadedPos + rel;
+
+			printf("Relocation Table Entries (REL) [%x] (%s)\n", rel, sharedLibs[slIndex].getFileName().c_str());
+			printf("------------------------------\n");
+			printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
+			while (aRead < sharedLibs[slIndex].getRelsz()) {
+				Elf32_Rel reloc;
+
+				sharedLibs[slIndex].read((Bit8u *)&reloc, rel, sharedLibs[slIndex].getRelent());
+
+				printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
+
+				aRead 	+= sharedLibs[slIndex].getRelent();
+				rel		+= sharedLibs[slIndex].getRelent();
+			}
+		}
 	}
 }

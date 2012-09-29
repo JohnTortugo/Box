@@ -441,8 +441,16 @@ string ElfParser::getRpath() {
 }
 
 void ElfParser::read(Bit8u *content, Elf32_Off offset, Elf32_Word len) {
+	// Position the FILE cursor at OFFSET from the BEGINING of FILE
 	fseek(felf, offset, SEEK_SET);
-	fread(content, 1, len, felf);
+
+	// clear the target buffer
+	memset(content, 0, len);
+
+	// read len bytes from file
+	Elf32_Word len2 = fread(content, 1, len, felf);
+
+	if (len2 != len) BX_PANIC(("%d bytes read, %d was expected.", len2, len));
 }
 
 string ElfParser::getFileName() {
