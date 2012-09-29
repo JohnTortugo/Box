@@ -23,8 +23,12 @@ ElfLoader::ElfLoader(int p_argc, char **p_argv, char *ldLibPath, Bit8u *p_memory
 
 	BX_INFO(("Main Executable Loaded."));
 
+	// parse the content of ld.so.cache
+	BX_INFO(("Parsing the content of ld.so.cache"));
+	parseLdCache();
+
 	// start loading shared libs
-	BX_INFO(("Loading Shared Libraries. %d Dependencies.", sharedLibs.size()));
+	BX_INFO(("Loading Shared Libraries."));
 	hasDependencies.push(mainExecutable);
 	loadSharedLibs();
 	BX_INFO(("%d Libraries Loaded.", sharedLibs.size()));
@@ -365,4 +369,42 @@ void ElfLoader::doRelocations() {
 			}
 		}
 	}
+}
+
+/*!
+ * This method parses the content of /etc/ld.so.cache and
+ * update the vector ldCache with the cross-references found.
+ * the ldCache contain a pairs [lib-soname -- library-path]
+ */
+void ElfLoader::parseLdCache() {
+	FILE* pipe = popen("/sbin/ldconfig -p", "r");
+
+	if (!pipe) { BX_INFO(("Can't execute /sbin/ldconfig")); }
+
+	if (feof(pipe)) { BX_INFO(("Output of /sbin/ldconfig -p is empty.")); }
+
+	Bit32u numEntries;
+	char buffer[500], soname[500], path[500];
+
+	// reset ldCache
+	ldCache.clear();
+
+	// to check later if we read all entries correctly
+	fgets(buffer, 500, pipe);
+	sscanf(buffer, "%d%*[^\n]\n", &numEntries);
+
+	// parse all pairs and insert them into ldCache
+	while(!feof(pipe)) {
+		if(fgets(buffer, 500, pipe) != NULL) {
+			sscanf(buffer, "%s (%*[^)]) => %[^\n]\n", soname, path);
+			ldCache.push_back(make_pair(string(soname), string(path)));
+		}
+	}
+
+	// check if we read all entries correctly
+	if (ldCache.size() != numEntries) {
+		BX_PANIC(("ldCache.size() (%d) and numEntries (%d) didn't match!", ldCache.size(), numEntries));
+	}
+
+	pclose(pipe);
 }

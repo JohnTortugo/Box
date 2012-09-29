@@ -3,6 +3,7 @@
 #include <iostream>
 #include <queue>
 #include <set>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -62,6 +63,10 @@ class ElfLoader {
 		// description list of loaded segments
 		vector<LoadedSegment> loadedSegments;
 
+		// map the content of ld.so.cache, that is
+		// library-soname to library-path
+		vector< pair<string, string> > ldCache;
+
 	public:
 		ElfLoader(int p_argc, char **p_argv, char *ldLibPath, Bit8u *p_memory, Bit32u mem_size);
 
@@ -84,4 +89,6 @@ class ElfLoader {
 		void dumpAddressSpaceInfo();
 
 		void doRelocations();
+
+		void parseLdCache();
 };
