@@ -314,6 +314,7 @@ void ElfLoader::createAddressSpace() {
 	this->loadedSegments.push_back(segDesc);
 }
 
+
 void ElfLoader::dumpAddressSpaceInfo() {
 	printf("%25s %10s %12s %s %11s %12s %12s %12s %12s %12s %12s %12s\n", "File", "SegIndx", "RealPos", "|", "Type","Offset","VirtAddr","PhysAddr","FileSiz","MemSiz","Flag","Align");
 
@@ -338,6 +339,7 @@ void ElfLoader::dumpAddressSpaceInfo() {
 	}
 }
 
+
 void ElfLoader::doRelocations() {
 	// pointer to relocation table (with implicit addends)
 	Elf32_Addr rel 		= mainExecutable.getRel();
@@ -359,7 +361,7 @@ void ElfLoader::doRelocations() {
 		while (aRead < mainExecutable.getRelsz()) {
 			Elf32_Rel reloc;
 
-			mainExecutable.read((Bit8u *)&reloc, rel, mainExecutable.getRelent());
+			bx_mem.read((Bit8u *)&reloc, rel, mainExecutable.getRelent());
 
 			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
 
@@ -383,15 +385,15 @@ void ElfLoader::doRelocations() {
 			Bit32u aRead = 0;
 
 			// rel indicates an offset inside the shared library code
-			rel = loadedSegments[slIndex].loadedPos + rel;
+			rel = loadedSegments[2*(slIndex + 1)].loadedPos + rel;
 
-			printf("Relocation Table Entries (REL) [%x] (%s)\n", rel, sharedLibs[slIndex].getFileName().c_str());
+			printf("Relocation Table Entries (REL) (%x) [%x] (%s)\n", rel - loadedSegments[2*(slIndex + 1)].loadedPos, rel, sharedLibs[slIndex].getFileName().c_str());
 			printf("------------------------------\n");
 			printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 			while (aRead < sharedLibs[slIndex].getRelsz()) {
 				Elf32_Rel reloc;
 
-				sharedLibs[slIndex].read((Bit8u *)&reloc, rel, sharedLibs[slIndex].getRelent());
+				bx_mem.read((Bit8u *)&reloc, rel, sharedLibs[slIndex].getRelent());
 
 				printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
 

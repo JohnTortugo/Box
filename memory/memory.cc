@@ -138,48 +138,48 @@ Bit32u BX_MEM_C::RealToVirtualAddress(Bit32u address)
 
 int BX_MEM_C::loadFile(char * fname, Bit32u addr)
 {
-  struct stat stat_buf;
-  int fd, ret;
-  unsigned long size, offset;
-
-  if ( addr > this->size )
-     BX_PANIC(("Attempt to write beyond memory size limit. Address: %lx\n",addr));
-
-  // read file
-  fd = open(fname, O_RDONLY);
-
-  if (fd < 0) 
-     BX_PANIC(("loadFile: couldn't open image file '%s'.", fname));
-
-  ret = fstat(fd, &stat_buf);
-
-  if (ret) 
-     BX_PANIC(("loadFile: couldn't stat image file '%s'.", fname));
-
-  
-  size = (unsigned long) stat_buf.st_size;
-  
-  if ((addr + size) > this->size) 
-     BX_PANIC(("loadFile: address range > physical memsize!"));
-  
-  offset = 0;
-
-  while (size > 0) {
-     ret = read(fd, (bx_ptr_t) (this->memory+offset), size);
-
-     if (ret <= 0) 
-        BX_PANIC(("loadFile: read failed on image"));
-
-     size -= ret;
-     offset += ret;
-  }
-
-  close(fd);
-
-  BX_INFO(("loadFile: '%s', size=%u read into memory at %08x",
-           fname, (unsigned) stat_buf.st_size, (unsigned) addr));
-  
-  return stat_buf.st_size;
+//  struct stat stat_buf;
+//  int fd, ret;
+//  unsigned long size, offset;
+//
+//  if ( addr > this->size )
+//     BX_PANIC(("Attempt to write beyond memory size limit. Address: %lx\n",addr));
+//
+//  // read file
+//  fd = open(fname, O_RDONLY);
+//
+//  if (fd < 0)
+//     BX_PANIC(("loadFile: couldn't open image file '%s'.", fname));
+//
+//  ret = fstat(fd, &stat_buf);
+//
+//  if (ret)
+//     BX_PANIC(("loadFile: couldn't stat image file '%s'.", fname));
+//
+//
+//  size = (unsigned long) stat_buf.st_size;
+//
+//  if ((addr + size) > this->size)
+//     BX_PANIC(("loadFile: address range > physical memsize!"));
+//
+//  offset = 0;
+//
+//  while (size > 0) {
+//     ret = read(fd, (bx_ptr_t) (this->memory+offset), size);
+//
+//     if (ret <= 0)
+//        BX_PANIC(("loadFile: read failed on image"));
+//
+//     size -= ret;
+//     offset += ret;
+//  }
+//
+//  close(fd);
+//
+//  BX_INFO(("loadFile: '%s', size=%u read into memory at %08x",
+//           fname, (unsigned) stat_buf.st_size, (unsigned) addr));
+//
+//  return stat_buf.st_size;
 }
 
 int BX_MEM_C::loadData(void * ptr, Bit32u size, Bit32u addr)
@@ -190,4 +190,11 @@ int BX_MEM_C::loadData(void * ptr, Bit32u size, Bit32u addr)
   memcpy((void *) memory+addr, ptr, size);
 
   return 0;
+}
+
+void BX_MEM_C::read(Bit8u *content, Bit32u offset, Bit32u len) {
+	// read len bytes from memory
+	for (int i=0; i<len; i++) {
+		content[i] = this->memory[offset++];
+	}
 }
