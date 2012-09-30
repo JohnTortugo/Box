@@ -163,6 +163,6 @@ void verifyParams(int argc, char **argv) {
 }
 
 void printBanner() {
-	printf("%s\n",VER_STRING);
-	printf("--------------------------------\n");
+	printf("Box x86 32-Bits Process Version %s\n", VER_STRING);
+	printf("---------------------------------------\n");
 }

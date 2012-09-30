@@ -161,6 +161,7 @@ void ElfParser::parseDynamicEntries() {
 				this->strsz = dyn.d_un.d_val;
 				break;
 			case DT_SONAME:
+				this->soname = string((char *) &dyn_str_table[dyn.d_un.d_val]);
 				break;
 			case DT_DEBUG:
 				break;
@@ -446,8 +447,4 @@ void ElfParser::read(Bit8u *content, Elf32_Off offset, Elf32_Word len) {
 	Elf32_Word len2 = fread(content, 1, len, felf);
 
 	if (len2 != len) BX_PANIC(("%d bytes read, %d was expected.", len2, len));
-}
-
-string ElfParser::getFileName() {
-	return this->fileName;
 }

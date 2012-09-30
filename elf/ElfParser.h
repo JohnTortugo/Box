@@ -32,6 +32,9 @@ private:
 	vector<Elf32_Shdr> shEntries;
 	vector<Elf32_Dyn> dynSecEntries;
 
+	// library shared object name (soname)
+	string soname;
+
 	// content of .dynamic sections
 	vector<string> needed_libraries;
 
@@ -119,8 +122,6 @@ public:
 
 	void read(Bit8u *content, Elf32_Off offset, Elf32_Word len);
 
-	string getFileName();
-
 	Elf32_Word getDynsym() const {
 		return dynsym;
 	}
@@ -187,6 +188,19 @@ public:
 
 	Elf32_Word getSyment() const {
 		return syment;
+	}
+
+	string getFileName() const {
+		return fileName;
+	}
+
+	string getSoname() const {
+		if (soname == "") BX_ERROR(("SONAME is empty for %s\n", getFileName().c_str()));
+		return soname;
+	}
+
+	Elf32_Ehdr getHdr() const {
+		return hdr;
 	}
 };
 

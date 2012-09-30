@@ -58,7 +58,7 @@ class ElfLoader {
 		queue<ElfParser> hasDependencies;
 
 		// Name of shared libraries that have already been loaded
-		set<string> alreadyLoadedLibs;
+		map<string, Bit32u> alreadyLoadedLibs;
 
 		// description list of loaded segments
 		vector<LoadedSegment> loadedSegments;
@@ -66,6 +66,8 @@ class ElfLoader {
 		// map the content of ld.so.cache, that is
 		// library-soname to library-path
 		vector< pair<string, string> > ldCache;
+
+		vector< vector<Bit8s> > symbolScopeMap;
 
 	public:
 		ElfLoader(int p_argc, char **p_argv, char *ldLibPath, Bit8u *p_memory, Bit32u mem_size);
@@ -91,4 +93,8 @@ class ElfLoader {
 		void doRelocations();
 
 		void parseLdCache();
+
+		void dumpSymbolScopeMap();
+
+		void expandSymbolScopeMap();
 };

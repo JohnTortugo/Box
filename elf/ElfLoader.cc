@@ -3,6 +3,7 @@
 #include <iostream>
 #include <queue>
 #include <set>
+#include <map>
 #include <string>
 
 #include "config.h"
@@ -21,23 +22,32 @@ ElfLoader::ElfLoader(int p_argc, char **p_argv, char *ldLibPath, Bit8u *p_memory
 	this->argc						= p_argc;
 	this->argv						= p_argv;
 
-	BX_INFO(("Main Executable Loaded."));
+	// check if the argument was indeed an ELF executable
+	// file.
+	if (mainExecutable.getHdr().e_type != ET_EXEC) {
+		BX_PANIC(("%s isn't an ELF executable file.", p_argv[1]));
+	}
+
+	BX_INFO(("Main executable loaded."));
 
 	// parse the content of ld.so.cache
 	BX_INFO(("Parsing the content of ld.so.cache"));
 	parseLdCache();
+	BX_INFO(("ld.so.cache parsed read %d definitions.", ldCache.size()));
 
 	// start loading shared libs
-	BX_INFO(("Loading Shared Libraries."));
-	hasDependencies.push(mainExecutable);
+	BX_INFO(("Loading shared libraries."));
 	loadSharedLibs();
-	BX_INFO(("%d Libraries Loaded.", sharedLibs.size()));
+	BX_INFO(("Expanding symbol lookup scope."));
+	expandSymbolScopeMap();
+	//dumpSymbolScopeMap();
+	BX_INFO(("%d libraries loaded.", sharedLibs.size()));
 
 	// create the process address space
-	BX_INFO(("Mounting Process Address Space."));
+	BX_INFO(("Mounting process address space."));
 	createAddressSpace();
-	dumpAddressSpaceInfo();
-	BX_INFO(("Address Space Mounted."));
+	//dumpAddressSpaceInfo();
+	BX_INFO(("Address space mounted."));
 
 	// Doing relocations
 	BX_INFO(("Doing relocations."));
@@ -46,13 +56,73 @@ ElfLoader::ElfLoader(int p_argc, char **p_argv, char *ldLibPath, Bit8u *p_memory
 }
 
 /*!
- * Carrega todas as bibliotecas necessarias a execucao de mainExecutable
+ * Load all dependencies of mainExecutable and the dependencies
+ * of its dependencies and so on..
+ * Fill the first level of a DFS scope index for symbol resolution.
  */
 void ElfLoader::loadSharedLibs() {
+	// first of all we will solve the dependencies for the
+	// main executable.
+	// get list of dynamically needed libraries
+	vector<string> libs = mainExecutable.getNeededLibraries();
 
+	// auxiliary variable
+	vector<Bit8s> scope;
+
+	// the first item symbol scope list is the mainExecutable
+	// for libraries is the mainExecutable plus the library
+	scope.push_back(-1);
+
+	// iterate over all LIBs
+	for (int i=0; i<libs.size(); i++) {
+		string libName = libs[i];
+
+		// check if the LIB isn't already loaded
+		// if it is take its loaded number and insert into the symbol scope map
+		// because when doing symbol lookup we need to consider this library
+		if (alreadyLoadedLibs.find(libName) != alreadyLoadedLibs.end()) {
+			scope.push_back(alreadyLoadedLibs[libName]);
+			continue;
+		}
+
+		// find the library
+		string libPath = findLibrary(libName, mainExecutable.getRpath());
+
+		if (libPath != "") {
+			ElfParser lib(libPath);
+
+			// new shared library to insert in address space
+			Bit32u libIndex = sharedLibs.size();
+			sharedLibs.push_back(lib);
+
+			// annotate to verify the dependencies
+			hasDependencies.push(lib);
+
+			// mark as already checked library
+			alreadyLoadedLibs[libName] = libIndex;
+
+			// insert into symbol scope..
+			scope.push_back(libIndex);
+		}
+		else {
+			BX_ERROR(("Library not found: %s", libName.c_str()));
+		}
+	}
+
+	// save mainExecutable scope
+	symbolScopeMap.push_back(scope);
+	scope.clear();
+
+
+	// Now re solve all dependencies between shared libraries
 	// while still have an ELF object with dependencies not satisfied
-	while ( !hasDependencies.empty() ) {
+	while (!hasDependencies.empty()) {
 		ElfParser elf = hasDependencies.front(); hasDependencies.pop();
+
+		// the first item symbol scope list is the mainExecutable
+		// for libraries is the mainExecutable plus the library
+		scope.push_back(-1); 									// mainExecutable
+		scope.push_back(alreadyLoadedLibs[elf.getSoname()]);	// the library itself
 
 		// get list of dynamically needed libraries
 		vector<string> libs = elf.getNeededLibraries();
@@ -63,6 +133,7 @@ void ElfLoader::loadSharedLibs() {
 
 			// check if the lib isn't already loaded
 			if (alreadyLoadedLibs.find(libName) != alreadyLoadedLibs.end()) {
+				scope.push_back(alreadyLoadedLibs[libName]);
 				continue;
 			}
 
@@ -73,18 +144,99 @@ void ElfLoader::loadSharedLibs() {
 				ElfParser lib(libPath);
 
 				// new shared library to insert in address space
+				Bit32u libIndex = sharedLibs.size();
 				sharedLibs.push_back(lib);
 
 				// annotate to verify the dependencies
 				hasDependencies.push(lib);
 
 				// mark as already checked library
-				alreadyLoadedLibs.insert(libName);
+				alreadyLoadedLibs[libName] = libIndex;
+
+				// update library symbol scope
+				scope.push_back(libIndex);
 			}
 			else {
 				BX_ERROR(("Library not found: %s", libName.c_str()));
 			}
 		}
+
+		// save mainExecutable scope
+		symbolScopeMap.push_back(scope);
+		scope.clear();
+	}
+}
+
+/*!
+ * This function expand the symbol scope resolution across
+ * the levels of a breadth-first-search. That is, loadSharedLibs
+ * already filled scope with the first level dependencies, this
+ * method expand the scope with entries of further levels.
+ */
+void ElfLoader::expandSymbolScopeMap() {
+	// for each shared library and the mainExecutable
+	for (int sI=0; sI<symbolScopeMap.size(); sI++) {
+		vector<Bit8s> scope = symbolScopeMap[sI];
+
+		// start on the third item in scope list, because the first
+		// is mainExecutable and it is above all nodes, also skip
+		// the node it self (second) because it already has its
+		// first level entries expanded (they are the next entries)
+		for (int scopeI=2; scopeI<scope.size(); scopeI++) {
+			Bit8s dep = scope[scopeI];
+
+			// + 1 because the indexes are in relation to sharedLibs
+			// entries but in symbolScope there are +1 entry for the
+			// mainExecutable
+			vector<Bit8s> scopeTarget = symbolScopeMap[dep+1];
+
+			// iterate over all dependencies of the target and
+			// add those that haven't already been added
+			// start in 2 because first is mainExecutable and
+			// second entry is DEP (above)
+			for (int sTarIndex=2; sTarIndex<scopeTarget.size(); sTarIndex++) {
+				Bit8s depTar = scopeTarget[sTarIndex];
+				bool found	 = false;
+
+				// search on the library scope of 'dep' to see if any of
+				// its libraries isn't in 'sI' scope
+				for (int scopeIPrev=0; scopeIPrev<scope.size(); scopeIPrev++) {
+					if (scope[scopeIPrev] == depTar) {
+						found = true;
+						break;
+					}
+				}
+
+				// if this library wasn't already addeded in the scope of sI
+				// add it now
+				if (!found) {
+					scope.push_back(depTar);
+				}
+			}
+		}
+
+		// we need update the 'sI' entry in symbolScopeMap
+		symbolScopeMap[sI] = scope;
+	}
+}
+
+void ElfLoader::dumpSymbolScopeMap() {
+	for (int sI=0; sI<symbolScopeMap.size(); sI++) {
+		if (sI == 0)
+			printf("[%15s] ", "Main");
+		else
+			printf("[%15s] ", this->sharedLibs[sI-1].getSoname().c_str());
+
+		vector<Bit8s> scope = symbolScopeMap[sI];
+
+		for (int scopeI=0; scopeI<scope.size(); scopeI++) {
+			if (scope[scopeI] == -1)
+				printf("%15s", "Main");
+			else
+				printf("%15s ", this->sharedLibs[scope[scopeI]].getSoname().c_str());
+		}
+
+		printf("\n");
 	}
 }
 
@@ -166,9 +318,11 @@ string ElfLoader::findLibrary(string libName, string Rpath) {
 	return "";
 }
 
+
 vector<string> ElfLoader::parseLibPath(string str) {
 	return parseLibPath(str.c_str());
 }
+
 
 vector<string> ElfLoader::parseLibPath(char *str) {
 	vector<string> paths;
