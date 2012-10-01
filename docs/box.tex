@@ -84,7 +84,7 @@ Máquinas Virtuais são ferramentas amplamente utilizadas para resolução de
 diversos problemas computacionais e podem ser categorizadas por diversos atributos, 
 entre eles escopo de emulação (sistema ou processo) e técnica de emulação 
 (interpretação ou tradução). Como forma de ampliar a compreensão do \emph{overhead} 
-decorrente da emulação do sistema operacional e dispositivos de \emph{hardwar}e em uma
+decorrente da emulação do sistema operacional e dispositivos de \emph{hardware} em uma
 máquina virtual de sistema, este trabalho apresenta uma comparação de 
 desempenho entre máquinas virtuais interpretadas de sistema e de processo.
 Para tanto, conduzimos uma investigação utilizando duas máquinas virtuais distintas. 
@@ -101,7 +101,7 @@ especificamente para esse estudo.
 
 \section{Introdução}
 Uma Máquina Virtual (MV) é uma plataforma versátil que pode ser empregada para resolver diversos problemas na área de computação. 
-Uma MV pode ser visualizada como uma camada utilizada para prover a integração entre duas interfaces (possívelmente distintas). Esta camada pode ser implementada com emulação em software, virtualização em hardware ou uma composição das duas abordagens.
+Uma MV pode ser visualizada como uma camada utilizada para prover a integração entre duas interfaces (possivelmente distintas). Esta camada pode ser implementada com emulação em software, virtualização em hardware ou uma composição das duas abordagens.
 As interfaces podem ser tanto a \emph{Application Binary Interface} (ABI) em MV de processo, quanto a \emph{Instruction Set Architecture} (ISA) em MVs de sistema.
 Dessa forma, tais ferramentas ocupam uma posição estratégica que pode ser explorada de diversas formas:
 \textit{cross-platform emulation} - permitindo que aplicações escritas para uma plataforma sejam executadas em outra; 
@@ -111,19 +111,19 @@ obtidas durante a execução do código.
 
 Duas abordagens são frequentemente empregadas para implementar a emulação de código em uma máquina virtual: interpretação e tradução.
 Uma MV que emprega interpretação utiliza funções para simular o comportamento de cada instrução da aplicação sendo emulada. 
-O processo de tradução porém, emprega técnicas da área de compiladores para produzir um código binário nativo (possívelmente otimizado) equivalente àquele da aplicação sendo emulada.
+O processo de tradução porém, emprega técnicas da área de compiladores para produzir um código binário nativo (possivelmente otimizado) equivalente àquele da aplicação sendo emulada.
 É comum encontrarmos MVs que, visando maximizar o desempenho, empregam estas abordagens em conjunto.
 
 Note que, uma MV de sistema não emula apenas as instruções da arquitetura alvo, mas toda uma infraestrutura de hardware
 necessária para executar um sistema operacional, nisto são está incluso dispositivos como placa de rede, hierarquia de memória,
 placa gráfica e etc. Para tarefas como \textit{cross-platform emulation} e perfilamento da execução do código de uma aplicação
-em específico o uso de uma MV de sistema agrega ao overhead de emulação da aplicação também o overhead de emulação destes 
+em específico o uso de uma MV de sistema agrega ao \textit{overhead} de emulação da aplicação também o \textit{overhead} de emulação destes 
 dispositivos e do sistema operacional. Portanto frequentemente, nestes cenários, uma máquina virtual de processo é preferível
 em relação a uma MV de sistema.
 
-Nesse texto apresentamos uma proposta de avaliação do overhead de emulação do sistema operacional e dispositivos de hardware
+Nesse texto apresentamos uma proposta de avaliação do \textit{overhead} de emulação do sistema operacional e dispositivos de hardware
 em uma máquina virtual de sistema interpretada em relação a uma máquina virtual interpretada de processo. Para tanto, propomos
-a transformação de uma máquina virtual de sistema em uma máquina virtual de processo. Além de uma melhor compreensão do overhead
+a transformação de uma máquina virtual de sistema em uma máquina virtual de processo. Além de uma melhor compreensão do \textit{overhead}
 de emulação em uma máquina virtual de sistema este trabalho tem como resultado uma infraestrutura para a realização de experimentos
 voltados para a área de máquinas virtuais. 
 
@@ -146,14 +146,14 @@ Em contrapartida, apresentam desempenho inferior a implementações que utilizam
 % Acho que falta uma conexao entre esses dois parágrafos
 % remover o parágrafo anterior é uma opcao 
 
-Neste contexto, são escassos os dados sobre os custos relativos de executar um benchmark em uma máquina virtual de sistema e de processos. 
-No entanto, visto que a primeira abordagem apresenta o overhead de emular todos os subsistemas de um computador real e ainda executar um sistema operacional completo, enquanto que a máquina virtual de processos apenas emula o sistema operacional, espera-se que o overhead de emulação seja consideravelmente menor no segundo caso.
+Neste contexto, são escassos os dados sobre os custos relativos de executar um \textit{benchmark} em uma máquina virtual de sistema e de processos. 
+No entanto, visto que a primeira abordagem apresenta o \textit{overhead} de emular todos os subsistemas de um computador real e ainda executar um sistema operacional completo, enquanto que a máquina virtual de processos apenas emula o sistema operacional, espera-se que o \textit{overhead} de emulação seja consideravelmente menor no segundo caso.
 Desta forma, o objetivo geral deste trabalho é apresentar uma comparação sobre o desempenho destes dois tipos de máquinas virtuais.
 Como forma de atingir este objetivo, os seguintes objetivos específicos serão desenvolvidos:
 
 \begin{itemize}
  \item Implementação de uma máquina virtual interpretada de processos a partir do emulador de sistemas Bochs;
- \item Implementação de mecanismos de otimização da técnica de interpretação como forma de reduzir o overhead de emulação;
+ \item Implementação de mecanismos de otimização da técnica de interpretação como forma de reduzir o \textit{overhead} de emulação;
  \item Aplicação sistemática de teste, medição e análise de desempenho de aplicações executando nos dois cenários.
 \end{itemize} 
 
@@ -173,18 +173,18 @@ virtual em de sistema ou de processo dependendo de qual o escopo de emulação �
 
 \begin{itemize}
 	\item \textbf{Máquina Virtual de Sistema:} A interface emulada é a nível da \emph{Instruction Set Architecture}. A ISA de
-	um computador é composta de duas partes: as instruções de computação de propósito geral (user-ISA) e as instruções de 
-	controle dos periféricos do sistema (system-ISA). Uma máquina virtual de sistema portanto deve emular tanto os dispositivos
-	de hardware como placas de rede e video quanto as instruções que controlam tais dispositivos. Dessa forma uma máquina
+	um computador é composta de duas partes: as instruções de computação de propósito geral (\textit{user-ISA}) e as instruções de 
+	controle dos periféricos do sistema (\textit{system-ISA}). Uma máquina virtual de sistema portanto deve emular tanto os dispositivos
+	de hardware como placas de rede e vídeo quanto as instruções que controlam tais dispositivos. Dessa forma uma máquina
 	virtual de sistema permite a execução de um sistema operacional completo de forma transparente para a aplicação sendo
 	emulada. 
 
 	\item \textbf{Máquina Virtual de Processo:} A interface emulada é a nível da \emph{Application Binary Interface}. A ABI  
-	define diversos padrões, os principais são: um subconjunto da ISA que é visivel aos programas de usuário (user-ISA) e uma 
+	define diversos padrões, os principais são: um subconjunto da ISA que é visível aos programas de usuário (\textit{user-ISA}) e uma 
 	interface para que programas possam se comunicar com o sistema operacional para utilizar os recursos disponíveis no sistema. 
-	Em sistemas operacionais Unix-like, esta interface com o sistema operacional é através de \emph{system calls} (syscalls). 
+	Em sistemas operacionais \textit{Unix-like}, esta interface com o sistema operacional é através de \emph{system calls} (syscalls). 
 
-	A ABI também define convenções para tipos de dados, endianness, alinhamento, chamadas de funções (como devem ser passados 
+	A ABI também define convenções para tipos de dados, \textit{endianness}, alinhamento, chamadas de funções (como devem ser passados 
 	os argumentos e o retorno), e o formato utilizado para representar arquivos binários executáveis e bibliotecas dinâmicas.
 	No Linux o formato utilizado para representar tais arquivos é o \emph{Executable and Linking Format} (ELF).
 \end{itemize}
@@ -212,44 +212,44 @@ frequentemente utilizadas para implementar emulação em uma máquina virtual es
   e finalmente a execução da operação equivalente.
  
   \item \textbf{Tradução de binários:} Neste processo um código nativo na arquitetura destino é gerado 
-  dinâmicamente (\emph{Just-in-time}) a partir do código original da aplicação e tem como função reproduzir o 
+  dinamicamente (\emph{Just-in-time}) a partir do código original da aplicação e tem como função reproduzir o 
   comportamento do código da aplicação original \cite{Sites1993}. Esta forma de implementação assemelha-se ao
   processo de compilação estático onde um código fonte é decodificado e traduzido para uma linguagem destino.
  
   \item \textbf{Tradução em duas etapas:} Nesta forma de implementação o sistema utiliza uma combinação de interpretação e tradução para
-  reduzir o overhead de emulação. Regiões de código que são infrequemente executadas são apenas interpretadas
+  reduzir o \textit{overhead} de emulação. Regiões de código que são raramente executadas são apenas interpretadas
   (uma vez que o custo de tradução seria maior que o de sempre interpretar a região), porções de código que são 
   frequentemente executas são traduzidas uma vez que a execução do código de forma otimizada amortiza o custo da
   tradução.
 \end{itemize}
 
-As implicações do uso de interpretação ou tradução influênciam diretamente o desempenho e a aplicabilidade da 
+As implicações do uso de interpretação ou tradução influenciam diretamente o desempenho e a aplicabilidade da 
 máquina virtual. Em sistemas interpretados, o desempenho é relativamente baixo, uma vez que cada instrução é 
-emulada individualmente por uma função, o que adiciona todo o overhead de chamada e retorno de funções. Apesar 
+emulada individualmente por uma função, o que adiciona todo o \textit{overhead} de chamada e retorno de funções. Apesar 
 disso, tais sistemas são extremamente portáveis, o que permite sua execução em diversas plataformas com poucas 
 ou até mesmo nenhuma alteração em seu código original. Nos sistemas de traduções de binários, existe um custo 
 (\emph{overhead}) inicial elevado, visto que o código original precisa ser traduzido antes de sua execução, 
-porém, uma vez traduzido, o codigo resultante é executado nativamente, o que garante melhor desempenho. Sistemas
+porém, uma vez traduzido, o código resultante é executado nativamente, o que garante melhor desempenho. Sistemas
 que empregam tradução em duas (ou mais) etapas são ainda mais sofisticados e empregam técnicas para prever 
 regiões de código que serão frequentemente executadas afim de traduzir e otimizar tais regiões.
 
 \subsection{Técnicas de Otimização para Interpretação}
 
-Na forma mais básica de interpretação há um loop principal que busca a instrução original, decodifica-a e chama 
-a função responsável pela execução da instrução, retornando ao loop principal logo em seguida. No entanto, 
+Na forma mais básica de interpretação há um \textit{loop} principal que busca a instrução original, decodifica-a e chama 
+a função responsável pela execução da instrução, retornando ao \textit{loop} principal logo em seguida. No entanto, 
 existem diversas técnicas que tornam a interpretação um processo mais eficiente. Algumas delas estão listadas 
 a seguir:
 
 \begin{itemize}
- 	\item \textbf{Threaded Interpretation:} São adicionadas ao final das funções que emulam cada uma das intruções a 
+ 	\item \textbf{Threaded Interpretation:} São adicionadas ao final das funções que emulam cada uma das instruções a 
  	busca pela próxima instrução, sua decodificação e a chamada para a função responsável pela execução da instrução. 
- 	Note que isto reduz drasticamente o número de iterações do loop principal do interpretador.
+ 	Note que isto reduz drasticamente o número de iterações do \textit{loop} principal do interpretador.
 
  	\item \textbf{Pre Decoding:} As instruções são decodificadas, por exemplo, sempre que uma nova página de código é 
  	carregada do disco, e os campos como \emph{opcode} e operandos são salvos em estruturas de dados padronizadas, o 
  	que torna possível uma implementação mais simples e eficiente dos mecanismos de despacho e interpretação. 
  	
- 	\item \textbf{Direct Threaded Interpretation:} Utilizado em conjunto ao Pre Decoding. Anota-se junto com
+ 	\item \textbf{Direct Threaded Interpretation:} Utilizado em conjunto ao \textit{Pre Decoding}. Anota-se junto com
  	as informações de decodificação, o endereço da rotina que deve fazer a interpretação de cada instrução, dessa forma
  	ao final de cada rotina de interpretação é feito um salto indireto ``diretamente'' para a rotina que interpreta a
  	próxima instrução - evitando a consulta por uma rotina de instrumentação.  
@@ -263,25 +263,25 @@ a seguir:
 \subsection{Executable and Linking Format}
 
 O \emph{Executable and Linking Format} (ELF) \cite{SCO1997} é o formato de arquivos binários executáveis, 
-bibliotecas compartilhadas, códigos objetos, etc. utilizados em ambientes Unix-like. Um arquivo ELF pode
+bibliotecas compartilhadas, códigos objetos, etc. utilizados em ambientes \textit{Unix-like}. Um arquivo ELF pode
 encaixa-se em um destes três tipos:
 
 \begin{itemize}
- 	\item \textbf{Relocatable File:} Representa um arquivo objeto que contém dados e código que serão linkados 
+ 	\item \textbf{Relocatable File:} Representa um arquivo objeto que contém dados e código que serão ``linkados" 
  	a outro binário para criar um executável ou objeto compartilhado. Em geral são arquivos utilizados durante
  	o processo de compilação estática.
  
  	\item \textbf{Executable File:} Representa um programa compilado. O programa pode possuir dependências que
- 	devem ser resolvidas em tempo de execução ou pode ter linkagem estática o que significa que todas as bibliotecas
+ 	devem ser resolvidas em tempo de execução ou pode ter ``linkagem" estática o que significa que todas as bibliotecas
  	necessárias para sua execução já foram resolvidas durante a compilação.
  
  	\item \textbf{Shared Object:} Representa um biblioteca dinâmica que contém código e dados que podem ser 
- 	linkados a outro objeto compartilhado, criando um terceiro objeto compartilhado, ou pode ser combinado a 
- 	um executável pelo linker dinâmico e outros objetos compartilhados para a criação de uma imagem de processo.
+ 	``linkados" a outro objeto compartilhado, criando um terceiro objeto compartilhado, ou pode ser combinado a 
+ 	um executável pelo \textit{linker} dinâmico e outros objetos compartilhados para a criação de uma imagem de processo.
 \end{itemize}
 
 A organização de um arquivo ELF é composta por um cabeçalho principal (\emph{ELF Header}), seguido por cabeçalhos 
-de seção - descrevendo seções de informações (instruções, dados, símbolos) utilizados na linkagem estática - ou cabeçalhos 
+de seção - descrevendo seções de informações (instruções, dados, símbolos) utilizados na ``linkagem" estática - ou cabeçalhos 
 de programa - que contém os segmentos da aplicação e as informações necessárias para a criação do processo. 
 
 
@@ -295,7 +295,7 @@ de programa - que contém os segmentos da aplicação e as informações necess�
 O Bochs \cite{bochs} é uma máquina virtual de sistema com suporte a emulação 
 de diversos processadores da família x86 32 e 64 bits. Ele preza por portabilidade, 
 e nesse sentido utiliza interpretação como técnica de emulação. Para reduzir o 
-overhead de interpretação, o Bochs utiliza técnicas como \emph{pre-decoding}~\cite{Magnusson1994}, 
+\textit{overhead} de interpretação, o Bochs utiliza técnicas como \emph{pre-decoding}~\cite{Magnusson1994}, 
 \emph{threaded-interpretation}~\cite{Klint1981}, e \emph{lazy evaluation}~\cite{Hookway1997}.
 O sistema que estamos propondo se diferencia do Bochs por ser voltado à emulação 
 de processos e não de sistemas.
@@ -313,7 +313,7 @@ máquina virtual são iguais, possivelmente diferindo apenas em relação a ABI.
 O HDTrans \cite{Sridhar2006} é uma máquina virtual de processo para a arquitetura 
 IA-32. O HDTrans difere do Bochs e do PIN por empregar tradução de binários como 
 técnica de emulação. No entanto, o HDTrans abre mão de empregar otimizações no 
-código traduzido (o que geralmente é feito para amortizar o overhead de tradução) 
+código traduzido (o que geralmente é feito para amortizar o \textit{overhead} de tradução) 
 em favor da implementação de uma tradução simples e rápida. O Box diferencia-se do 
 HDTrans por empregar interpretação de binários.
 
@@ -363,12 +363,12 @@ ponto de partida para o desenvolvimento, o emulador de sistema Bochs. Portanto
 a infraestrutura inicial em termos de código fonte será a já presente no Bochs. 
 O código fonte do Bochs é escrito em linguagem C++ e disponibilizado para download
 no Sourceforge \cite{bochs_site}. Para iniciar o desenvolvimento do Box, criaremos
-um ``branch'' do código fonte do Bochs no sistema de versionamento distribuído
+um \emph{branch} do código fonte do Bochs no sistema de versionamento distribuído
 GitHub \cite{github}, isto permitirá que os membros do projeto desenvolvam o sistema
 de forma colaborativa.
 
-O benchmark utilizado para fazer o teste e a análise de desempenho dos sistemas será
-o MiBench~\cite{Guthaus2001}. Este benchmark foi escolhido por ser gratuito, possuir
+O \textit{benchmark} utilizado para fazer o teste e a análise de desempenho dos sistemas será
+o MiBench~\cite{Guthaus2001}. Este \textit{benchmark} foi escolhido por ser gratuito, possuir
 um número razoável de programas (mais de 35) representativos de diversos cenários de 
 aplicação, serem programas com uma pequena base de código e terem um curto período
 de execução.
@@ -394,7 +394,7 @@ como ponto de partida para desenvolvimento. Por ser uma máquina virtual de
 sistema, o Bochs implementa mecanismos de emulação para diversos subsistemas 
 de hardware, como BIOS, hierarquia de memória, placas de vídeo e de rede, etc. 
 Tais subsistemas são desnecessários em uma máquina virtual de processos, visto 
-que esses dispositivos não são acessiveis diretamente por programas de usuário, 
+que esses dispositivos não são acessíveis diretamente por programas de usuário, 
 e por esse motivo serão removidos do projeto.
 
 \begin{figure}[h]
@@ -406,15 +406,15 @@ e por esse motivo serão removidos do projeto.
 \end{figure}
 
 A Figura \ref{fig:box-architecture} apresenta a arquitetura geral do interpretador.
-O sistema será composto de seis modulos principais que serão gerenciador pelo runtime
+O sistema será composto de seis módulos principais que serão gerenciador pelo \textit{runtime}
 da máquina virtual: carregador, emulador de memória, decodificador, interpretador, 
 emulador de chamadas de sistema e emulador de exceções. Utilizando esta arquitetura 
-será possível carregar e interpretar um executável linux de 32 Bits com ligação dinâmica. 
+será possível carregar e interpretar um executável Linux de 32 Bits com ligação dinâmica. 
 Segue abaixo a descrição de cada um destes módulos:
 
 \begin{itemize}
     \item \textbf{Carregador:} É o módulo responsável por ler, decodificar e resolver as
-    dependencias dinâmicas do executável principal e bibliotecas compartilhadas. A entrada 
+    dependências dinâmicas do executável principal e bibliotecas compartilhadas. A entrada 
     desse módulo é o binário principal a ser emulado e a saída é o espaço de endereçamento 
     onde a interpretação do processo ocorrerá.
 
@@ -425,13 +425,13 @@ Segue abaixo a descrição de cada um destes módulos:
     interpretação que emulará o comportamento da instrução decodificada.
 
     \item \textbf{Memória:} Módulo responsável pelo gerenciamento do espaço de memória reservado 
-    para a aplicação, suas dependências, área de stack e heap. Este módulo é o responsável por
+    para a aplicação, suas dependências, área de \textit{stack} e \textit{heap}. Este módulo é o responsável por
     emular leituras e escritas na área de dados do espaço de endereçamento.
 
-    \item \textbf{Chamadas de sistema:} Este módulo é composto por rotinas que são wrappers
+    \item \textbf{Chamadas de sistema:} Este módulo é composto por rotinas que são \textit{wrappers}
     para as \emph{system calls} do sistema nativo. Quando o processo sendo emulado faz uma
     syscall o interpretador decodifica a interrupção e redireciona a execução para a rotina
-    que simula o comportamento da system call desejada. 
+    que simula o comportamento da \textit{system call} desejada. 
     
     \item \textbf{Exceções:} Este módulo é o responsável pelo gerenciamento de exceções 
     geradas pele programa sendo emulado e redireciona-las para os devidos tratadores de
@@ -457,7 +457,7 @@ recursos de instrumentação e otimização de desempenho da interpretação.
  
 \subsection{Análise de desempenho}
 
-Nesta etapa serão conduzidos testes e medições para análisar o desempenho do sistema
+Nesta etapa serão conduzidos testes e medições para analisar o desempenho do sistema
 proposto em relação ao emulador Bochs. Essa etapa é divida em duas partes:
 
 \begin{itemize}
@@ -465,16 +465,16 @@ proposto em relação ao emulador Bochs. Essa etapa é divida em duas partes:
     base do sistema proposto em relação ao emulador de sistema Bochs. Para esta 
     análise utilizaremos uma versão do Box que não consta com otimizações além 
     daquelas já implementadas no Bochs. O resultado deste passo será a quantificação
-    do overhead decorrente da emulação do sistema operacional e dispositivos de
+    do \textit{overhead} decorrente da emulação do sistema operacional e dispositivos de
     hardware em uma máquina virtual de sistema. 
     
     \item \textbf{Análise 2:} Nesta análise iremos avaliar o impacto das técnicas 
     de otimização implementadas na etapa 2 no desempenho do sistema. O resultado
-    deste passo será a quantificação do speedup (ou overhead) decorrente da 
+    deste passo será a quantificação do \textit{speedup} (ou \textit{overhead}) decorrente da 
     utilização de tais técnicas.
 \end{itemize}
 
-Como descrito anteriormente na Seção~\ref{sec:infraestrutura}, o benchmark 
+Como descrito anteriormente na Seção~\ref{sec:infraestrutura}, o \textit{benchmark} 
 MiBench~\cite{Guthaus2001} será utilizado para fazer a análise do sistema
 proposto.
 
@@ -530,7 +530,7 @@ contribuição o desenvolvimento de uma máquina virtual interpretada de process
 aplicações Linux x86 de 32 Bits. Embora o desenvolvimento desta ferramenta esteja 
 voltado para a produção de dados para a análise de desempenho, tal ferramenta 
 pode ser utilizada em situações como instrumentação e simulação de aplicações 
-e como módulo de compatibilidade para execução de aplicações Unix-like x86 
+e como módulo de compatibilidade para execução de aplicações \textit{Unix-like} x86 
 32 Bits em diferentes sistemas operacionais ou arquiteturas.
 
 A implementação e análise de técnicas de otimização de desempenho para 
