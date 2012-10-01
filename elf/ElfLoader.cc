@@ -523,6 +523,9 @@ void ElfLoader::doRelocations() {
 
 			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
 
+			// scopeMap index for mainExecutable is zero
+			solveRelocation(reloc, 0);
+
 			aRead 	+= mainExecutable.getRelent();
 			rel		+= mainExecutable.getRelent();
 		}
@@ -544,6 +547,9 @@ void ElfLoader::doRelocations() {
 			bx_mem.read((Bit8u *)&reloc, jmprel, mainExecutable.getRelent());
 
 			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
+
+			// scopeMap index for mainExecutable is zero
+			solveRelocation(reloc, 0);
 
 			aRead 	+= mainExecutable.getRelent();
 			jmprel	+= mainExecutable.getRelent();
@@ -588,6 +594,10 @@ void ElfLoader::doRelocations() {
 
 				printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
 
+				// scopeMap index for sharedLibrary is +1 because in
+				// scopeMap there is one entry for mainExecutable
+				solveRelocation(reloc, slIndex+1);
+
 				aRead 	+= sharedLibs[slIndex].getRelent();
 				rel		+= sharedLibs[slIndex].getRelent();
 			}
@@ -610,12 +620,140 @@ void ElfLoader::doRelocations() {
 				bx_mem.read((Bit8u *)&reloc, jmprel, sharedLibs[slIndex].getRelent());
 
 				printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
+				// scopeMap index for sharedLibrary is +1 because in
+				// scopeMap there is one entry for mainExecutable
+				solveRelocation(reloc, slIndex+1);
 
 				aRead 	+= sharedLibs[slIndex].getRelent();
 				jmprel	+= sharedLibs[slIndex].getRelent();
 			}
 		}
 	}
+}
+
+/*!
+ * This method is responsible to manage the symbol lookup scope
+ * search, identify what kind of relocation is need and apply it.
+ */
+void ElfLoader::solveRelocation(Elf32_Rel reloc, Bit8u scopeIndex) {
+	// offset where relocation apply
+	Elf32_Addr relOff 	= reloc.r_offset;
+
+	// for what symbol is the relocation
+	Bit32u symbIndex 	= ELF32_R_SYM(reloc.r_info);
+
+	// what type of relocation is to be made
+	Bit32u relType 		= ELF32_R_TYPE(reloc.r_info);
+
+	// get the virtual address where the symbol is defined
+	Bit32u symbAddr		= 0;
+
+	// if the relocation need a symbol solve it address now
+	//if (relType == 1 || relType == 2 || relType == 6 || relType == 7 || relType == 9) {
+		symbAddr = symbolLookup(symbIndex, scopeIndex);
+	//}
+}
+
+/*!
+ * This method is responsible for searching an symbol definition
+ * across the symbolScopeMap. Return the virtual address where
+ * the symbol where loaded.
+ */
+Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex) {
+	vector<Bit8s> scope = symbolScopeMap[scopeIndex];
+
+	// Check if the symbol index is valid
+	if (symbIndex == 0) {
+		BX_ERROR(("Symbol with index zero passed to lookup."));
+		return 0;
+	}
+
+	// contains the symbol name
+	Bit8u *symName = NULL;
+
+	// we first get the symbol name in the symbol table/str table
+	// of the ELF that has the relocation
+	if (scopeIndex == 0) { // main executable
+		symName = symbolName(mainExecutable, symbIndex, -loadedSegments[0].hdr.p_vaddr);
+	}
+	else {	// shared library (-1)
+		Bit32u slIndex = scopeIndex-1;
+
+		symName = symbolName(sharedLibs[slIndex], symbIndex, loadedSegments[2*(slIndex+1)].loadedPos);
+	}
+
+	printf("sym. name: %s\n", symName);
+
+	// for each entry in scope
+	for (int sI=0; sI<scope.size(); sI++) {
+		Bit8s scEntry = scope[sI];
+
+		// these first two case cope with the case where we need
+		// to search the symbol directly in the dynsym table, the
+		// last case threat the case where we need a hash of the
+		// symbol name to find an entry for it in the dynsym table.
+		if (scopeIndex == 0 && sI == 1) {	// symbol search by index
+			// the symbol content
+			Elf32_Sym symbol;
+
+			// symbol table address
+			Elf32_Addr symTableAddr = mainExecutable.getDynsym();
+
+			// physical address
+			Elf32_Addr symEntry = bx_mem.virtualAddressToPosition(symTableAddr + symbIndex*sizeof(symbol));
+
+			// read the symbol definition
+			bx_mem.read((Bit8u *)&symbol, symEntry, sizeof(symbol));
+		}
+		else if (scopeIndex > 0 && sI == 2) {	// symbol search by index
+			Bit32u slIndex = scopeIndex-1;
+
+			// the symbol content
+			Elf32_Sym symbol;
+
+			// symbol table address
+			Elf32_Addr symTableAddr = sharedLibs[slIndex].getDynsym();
+
+			// physical address
+			Elf32_Addr symEntry = loadedSegments[2*(slIndex+1)].loadedPos + symTableAddr + symbIndex*sizeof(symbol);
+
+			// read the symbol definition
+			bx_mem.read((Bit8u *)&symbol, symEntry, sizeof(symbol));
+		}
+		else {	// symbol search by name hash
+
+		}
+	}
+
+	return 0;
+}
+
+/*!
+ * This method return the name of the symb that have index in symbIndex
+ * as tell the symbol table and dynamic string table of ELF file elf.
+ * Care must be taken to pass the correct address in loadedPos.
+ */
+Bit8u * ElfLoader::symbolName(ElfParser elf, Bit32u symbIndex, Bit32s loadedPos) {
+	// the symbol content
+	Elf32_Sym symbol;
+
+	// symbol table address
+	Elf32_Addr symTableAddr = elf.getDynsym();
+
+	// physical address
+	Elf32_Addr symEntry = loadedPos + symTableAddr + symbIndex*sizeof(symbol);
+
+	// read the symbol definition
+	bx_mem.read((Bit8u *)&symbol, symEntry, sizeof(symbol));
+
+	// string table address
+	Elf32_Addr strTableAddr = elf.getStrtab();
+
+	// physical address
+	Elf32_Addr strEntry = loadedPos + strTableAddr + symbol.st_name;
+
+	// read the symbol name
+	return bx_mem.memStrdup(strEntry);
 }
 
 /*!

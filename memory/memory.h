@@ -42,6 +42,7 @@ public:
 	Bit32u virtualAddressToPosition(Bit32u vir);
 	Bit32u positionToVirtualAddress(Bit32u pos);
 	void read(Bit8u *content, Bit32u offset, Bit32u len);
+	Bit8u * memStrdup(Bit32u offset);
 
 	Bit8u read_byte(unsigned s, Bit32u offset);
 	Bit16u read_word(unsigned s, Bit32u offset);

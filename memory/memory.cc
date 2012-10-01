@@ -24,6 +24,8 @@
 #include "cpu/cpu.h"
 #include "debug.h"
 
+#include <string.h>
+
 BX_MEM_C::BX_MEM_C() : virtualBase(0), size(0), memory(NULL)
 {
 }
@@ -184,17 +186,33 @@ int BX_MEM_C::loadFile(char * fname, Bit32u addr)
 
 int BX_MEM_C::loadData(void * ptr, Bit32u size, Bit32u addr)
 {
-  if ((addr + size) > this->size) 
-     BX_PANIC(("loadData: address range > physical memsize!"));
-
-  memcpy((void *) memory+addr, ptr, size);
-
-  return 0;
+//  if ((addr + size) > this->size)
+//     BX_PANIC(("loadData: address range > physical memsize!"));
+//
+//  memcpy((void *) memory+addr, ptr, size);
+//
+	return 0;
 }
 
+/*!
+ * Read len bytes from the memory starting at offset and put them
+ * in the memory pointed by content.
+ */
 void BX_MEM_C::read(Bit8u *content, Bit32u offset, Bit32u len) {
 	// read len bytes from memory
 	for (int i=0; i<len; i++) {
 		content[i] = this->memory[offset++];
 	}
+}
+
+/*!
+ * Read the content starting at offset until reach an '\0'.
+ * Return a pointer to the content just read.
+ */
+Bit8u * BX_MEM_C::memStrdup(Bit32u offset) {
+	Bit8u *ptr = (Bit8u *) strdup((const char *)&memory[offset]);
+
+	if (ptr == NULL) BX_ERROR(("memStrdup returning NULL."));
+
+	return ptr;
 }
