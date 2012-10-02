@@ -40,7 +40,7 @@ ElfLoader::ElfLoader(int p_argc, char **p_argv, char *ldLibPath, Bit8u *p_memory
 	loadSharedLibs();
 	BX_INFO(("Expanding symbol lookup scope."));
 	expandSymbolScopeMap();
-	//dumpSymbolScopeMap();
+	dumpSymbolScopeMap();
 	BX_INFO(("%d libraries loaded.", sharedLibs.size()));
 
 	// create the process address space
@@ -649,9 +649,9 @@ void ElfLoader::solveRelocation(Elf32_Rel reloc, Bit8u scopeIndex) {
 	Bit32u symbAddr		= 0;
 
 	// if the relocation need a symbol solve it address now
-	//if (relType == 1 || relType == 2 || relType == 6 || relType == 7 || relType == 9) {
+	if (relType == 1 || relType == 2 || relType == 6 || relType == 7 || relType == 9) {
 		symbAddr = symbolLookup(symbIndex, scopeIndex);
-	//}
+	}
 }
 
 /*!
@@ -660,13 +660,20 @@ void ElfLoader::solveRelocation(Elf32_Rel reloc, Bit8u scopeIndex) {
  * the symbol where loaded.
  */
 Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex) {
-	vector<Bit8s> scope = symbolScopeMap[scopeIndex];
-
 	// Check if the symbol index is valid
 	if (symbIndex == 0) {
 		BX_ERROR(("Symbol with index zero passed to lookup."));
 		return 0;
 	}
+
+	// whether the symbol was found or not
+	bool found = false;
+
+	// the scope which we should search the symbol
+	vector<Bit8s> scope = symbolScopeMap[scopeIndex];
+
+	// the symbol content
+	Elf32_Sym symbol;
 
 	// contains the symbol name
 	Bit8u *symName = NULL;
@@ -674,28 +681,28 @@ Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex) {
 	// we first get the symbol name in the symbol table/str table
 	// of the ELF that has the relocation
 	if (scopeIndex == 0) { // main executable
-		symName = symbolName(mainExecutable, symbIndex, -loadedSegments[0].hdr.p_vaddr);
+		symName = symbolNameFromSymbIndex(mainExecutable, symbIndex, -loadedSegments[0].hdr.p_vaddr);
 	}
 	else {	// shared library (-1)
 		Bit32u slIndex = scopeIndex-1;
 
-		symName = symbolName(sharedLibs[slIndex], symbIndex, loadedSegments[2*(slIndex+1)].loadedPos);
+		symName = symbolNameFromSymbIndex(sharedLibs[slIndex], symbIndex, loadedSegments[2*(slIndex+1)].loadedPos);
 	}
 
-	printf("sym. name: %s\n", symName);
+	printf("Searching symbol: %s\n", symName);
+//	printf("Scope size: %d\n", scope.size());
 
 	// for each entry in scope
 	for (int sI=0; sI<scope.size(); sI++) {
-		Bit8s scEntry = scope[sI];
+		Bit8s scEntry 	= scope[sI];
+
+//		printf("In sI = %d, scEntry = %d\n", sI, scEntry);
 
 		// these first two case cope with the case where we need
 		// to search the symbol directly in the dynsym table, the
 		// last case threat the case where we need a hash of the
 		// symbol name to find an entry for it in the dynsym table.
-		if (scopeIndex == 0 && sI == 1) {	// symbol search by index
-			// the symbol content
-			Elf32_Sym symbol;
-
+		if (scopeIndex == 0 && sI == 0) {	// symbol search by index
 			// symbol table address
 			Elf32_Addr symTableAddr = mainExecutable.getDynsym();
 
@@ -704,12 +711,18 @@ Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex) {
 
 			// read the symbol definition
 			bx_mem.read((Bit8u *)&symbol, symEntry, sizeof(symbol));
-		}
-		else if (scopeIndex > 0 && sI == 2) {	// symbol search by index
-			Bit32u slIndex = scopeIndex-1;
 
-			// the symbol content
-			Elf32_Sym symbol;
+			// verifica se o symbol em symbEntry é o procurado
+			if (symbol.st_shndx != SHN_UNDEF) {
+				Bit8u *actSymbName = symbolNameFromSymbol(mainExecutable, symbol, -loadedSegments[0].hdr.p_vaddr);
+				printf("\tTesting symbol %s\n", actSymbName);
+				if (strcmp((char *)actSymbName, (char *)symName) == 0) {
+					found = true;
+				}
+			}
+		}
+		else if (scopeIndex > 0 && sI == 1) {	// symbol search by index
+			Bit32u slIndex = scopeIndex-1;
 
 			// symbol table address
 			Elf32_Addr symTableAddr = sharedLibs[slIndex].getDynsym();
@@ -719,10 +732,99 @@ Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex) {
 
 			// read the symbol definition
 			bx_mem.read((Bit8u *)&symbol, symEntry, sizeof(symbol));
+
+			// verifica se o symbol em symbEntry é o procurado
+			if (symbol.st_shndx != SHN_UNDEF) {
+				Bit8u *actSymbName = symbolNameFromSymbol(sharedLibs[slIndex], symbol, loadedSegments[2*(slIndex+1)].loadedPos);
+				printf("\tTesting symbol %s\n", actSymbName);
+				if (strcmp((char *)actSymbName, (char *)symName) == 0) {
+					found = true;
+				}
+			}
 		}
 		else {	// symbol search by name hash
+			Elf32_Addr hashAddr = 0, bucksAddr = 0, chainsAddr = 0, symTableAddr = 0;
+			Elf32_Word nbucket  = 0, nchain    = 0;
+			Bit32s loadedPos = 0;
+			ElfParser *elf;
 
+			// the current object scope is the mainExecutable or is a shared lib?
+			if (scEntry == -1) {
+				elf = &mainExecutable;
+
+				hashAddr = mainExecutable.getHash();
+				hashAddr = bx_mem.virtualAddressToPosition(hashAddr);
+
+				symTableAddr = mainExecutable.getDynsym();
+				symTableAddr = bx_mem.virtualAddressToPosition(symTableAddr);
+
+				loadedPos = -loadedSegments[0].hdr.p_vaddr;
+			}
+			else {
+				elf = &sharedLibs[scEntry];
+
+				hashAddr = sharedLibs[scEntry].getHash();
+				hashAddr = loadedSegments[2*(scEntry + 1)].loadedPos + hashAddr;
+
+				symTableAddr = sharedLibs[scEntry].getDynsym();
+				symTableAddr = loadedSegments[2*(scEntry + 1)].loadedPos + symTableAddr;
+
+				loadedPos = loadedSegments[2*(scEntry + 1)].loadedPos;
+			}
+
+			// read the number of buckets and the number of chains
+			bx_mem.read((Bit8u *)&nbucket, hashAddr, sizeof(nbucket));
+			bx_mem.read((Bit8u *)&nchain, hashAddr + sizeof(nbucket), sizeof(nchain));
+
+			//printf("Name: %s\n", elf->getFileName().c_str());
+			//printf("Nbucket %d\n", nbucket);
+			//printf("Nchain %d\n", nchain);
+
+			// bucks start  8 bytes after hash address
+			// chains start 8 bytes + all buckets after hash address
+			bucksAddr 	= hashAddr + 2*sizeof(nbucket);
+			chainsAddr 	= bucksAddr + nbucket*sizeof(nbucket);
+
+			// hash to access nbuckets
+			Elf32_Word x = elfHash(symName);
+			Elf32_Word h = x % nbucket;
+
+			// the symbol content
+			Elf32_Word y;
+
+			// index buckets by y and get symbol table entry
+			bx_mem.read((Bit8u *)&y, bucksAddr + h * sizeof(nbucket), sizeof(y));
+
+			while (y != 0) {
+				// symbol table entry pointed by nbucket
+				Elf32_Addr symEntry = symTableAddr + y*sizeof(symbol);
+
+				// read the symbol definition
+				bx_mem.read((Bit8u *)&symbol, symEntry, sizeof(symbol));
+
+				// verifica se o symbol em symbEntry é o procurado
+				if (symbol.st_shndx != SHN_UNDEF) {
+					Bit8u *actSymbName = symbolNameFromSymbol(*elf, symbol, loadedPos);
+//					printf("\tTesting symbol %s\n", actSymbName);
+					if (strcmp((char *)actSymbName, (char *)symName) == 0) {
+						found = true;
+						break;
+					}
+				}
+
+				// already calculate the next position to search
+				bx_mem.read((Bit8u *)&y, chainsAddr + y * sizeof(nbucket), sizeof(y));
+			}
 		}
+
+		if (found) {
+			printf("Symbol found.\n");
+			break;
+		}
+	}
+
+	if (!found) {
+		printf("Symbol not found.\n");
 	}
 
 	return 0;
@@ -731,9 +833,10 @@ Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex) {
 /*!
  * This method return the name of the symb that have index in symbIndex
  * as tell the symbol table and dynamic string table of ELF file elf.
- * Care must be taken to pass the correct address in loadedPos.
+ * Care must be taken to pass the correct address in loadedPos
+ * (negative offset for mainExecutable).
  */
-Bit8u * ElfLoader::symbolName(ElfParser elf, Bit32u symbIndex, Bit32s loadedPos) {
+Bit8u * ElfLoader::symbolNameFromSymbIndex(ElfParser elf, Bit32u symbIndex, Bit32s loadedPos) {
 	// the symbol content
 	Elf32_Sym symbol;
 
@@ -746,6 +849,22 @@ Bit8u * ElfLoader::symbolName(ElfParser elf, Bit32u symbIndex, Bit32s loadedPos)
 	// read the symbol definition
 	bx_mem.read((Bit8u *)&symbol, symEntry, sizeof(symbol));
 
+	// string table address
+	Elf32_Addr strTableAddr = elf.getStrtab();
+
+	// physical address
+	Elf32_Addr strEntry = loadedPos + strTableAddr + symbol.st_name;
+
+	// read the symbol name
+	return bx_mem.memStrdup(strEntry);
+}
+
+/*!
+ * This method return the name of the symbol passed.
+ * Care must be taken to pass the correct address in loadedPos
+ * (negative offset for mainExecutable).
+ */
+Bit8u * ElfLoader::symbolNameFromSymbol(ElfParser elf, Elf32_Sym symbol, Bit32s loadedPos) {
 	// string table address
 	Elf32_Addr strTableAddr = elf.getStrtab();
 

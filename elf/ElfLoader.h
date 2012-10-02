@@ -102,5 +102,21 @@ public:
 
 	Bit32u symbolLookup(Bit32u symbIndex, Bit8u scopeIndex);
 
-	Bit8u * symbolName(ElfParser elf, Bit32u symbIndex, Bit32s loadedPos);
+	Bit8u * symbolNameFromSymbIndex(ElfParser elf, Bit32u symbIndex, Bit32s loadedPos);
+
+	Bit8u * symbolNameFromSymbol(ElfParser elf, Elf32_Sym symbol, Bit32s loadedPos);
+
+	Bit32u elfHash(const unsigned char *name) {
+		Bit32u h = 0, g;
+		while (*name) {
+			h = (h << 4) + *name++;
+
+			if (g = (h & 0xf0000000)) h ^= g >> 24;
+
+			h &= ~g;
+		}
+
+		return h;
+	}
+
 };
