@@ -6,6 +6,8 @@
 #include "syscall.h"
 #include "debug.h"
 
+extern BX_MEM_C bx_mem;
+
 
 void BX_SYSCALL::handle()
 {
@@ -23,7 +25,11 @@ void BX_SYSCALL::handle()
 			printf("read.\n");
 			break;
 		case __NR_write:
-			EAX = write(EBX, (const void *) ECX , EDX);
+		   {
+			  Bit32u ptr;
+			  ptr = bx_mem.VirtualToRealAddress(ECX);
+			  EAX = write(EBX, (const void *) ptr , EDX);
+			}
 			printf("write.\n");
 			break;
 		case __NR_open:

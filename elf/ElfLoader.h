@@ -106,6 +106,8 @@ public:
 
 	Bit8u * symbolNameFromSymbol(ElfParser elf, Elf32_Sym symbol, Bit32s loadedPos);
 
+	Bit32u getEntryAddress() const { return mainExecutable.getEntryAddress(); }
+
 	Bit32u elfHash(const unsigned char *name) {
 		Bit32u h = 0, g;
 		while (*name) {

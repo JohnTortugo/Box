@@ -122,6 +122,10 @@ public:
 
 	void read(Bit8u *content, Elf32_Off offset, Elf32_Word len);
 
+	Elf32_Addr getEntryAddress() const {
+		return hdr.e_entry;
+	}
+
 	Elf32_Word getDynsym() const {
 		return dynsym;
 	}

@@ -15,7 +15,7 @@ BX_SYSCALL bx_sys;
 
 void verifyParams(int argc, char **argv);
 void printBanner();
-int run();
+int run(Bit32u entry);
 void bx_load_null_kernel_hack();
 
 int main(int argc, char **argv) {
@@ -37,16 +37,16 @@ int main(int argc, char **argv) {
 
   // salta para o interpretador
   BX_INFO(("Running Interpreter."));
-  //run();
+  run(loader.getEntryAddress());
 
   // execute fini stubs
 
   return 0;
 }
 
-int run() {
+int run(Bit32u entry) {
 	int CacheSize;
-
+/*
 	char instr[] =  {
                         0xb8,0x01,0x00,0x00,0x00,      	        // mov    $0x1,%eax
                         0xbb,0x02,0x00,0x00,0x00,      	        // mov    $0x2,%ebx
@@ -81,10 +81,11 @@ int run() {
 
 		CacheSize = sizeof(instr);
 		bx_mem.loadData( (void *) instr, CacheSize,0);
-
+*/
     bx_cpu.initialize();
     bx_cpu.sanity_checks();
     bx_cpu.register_state();
+
 
     BX_INSTR_INITIALIZE(0);
 
@@ -94,7 +95,9 @@ int run() {
 
     BX_DEBUG(("CPU mode: %s", cpu_mode_string(bx_cpu.get_cpu_mode())));
 
-    bx_cpu.gen_reg[BX_32BIT_REG_EIP].dword.erx = (intptr_t) 0;
+    BX_INFO(("Start interpretation at: %08lx",entry));
+
+    bx_cpu.gen_reg[BX_32BIT_REG_EIP].dword.erx = (intptr_t) entry;
 
     bx_cpu.cpu_loop();
 
