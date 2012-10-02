@@ -30,7 +30,6 @@ void BX_SYSCALL::handle()
 			  ptr = bx_mem.VirtualToRealAddress(ECX);
 			  EAX = write(EBX, (const void *) ptr , EDX);
 			}
-			printf("write.\n");
 			break;
 		case __NR_open:
 			printf("open.\n");
