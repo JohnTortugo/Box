@@ -101,7 +101,8 @@ especificamente para esse estudo.
 
 \section{Introdução}
 Uma Máquina Virtual (MV) é uma plataforma versátil que pode ser empregada para resolver diversos problemas na área de computação. 
-Uma MV pode ser visualizada como uma camada utilizada para prover a integração entre duas interfaces (possivelmente distintas). Esta camada pode ser implementada com emulação em software, virtualização em hardware ou uma composição das duas abordagens.
+Uma MV pode ser vista como uma camada utilizada para prover a integração entre duas interfaces (possivelmente distintas). 
+Esta camada pode ser implementada com emulação em software, virtualização em hardware ou uma composição das duas abordagens.
 As interfaces podem ser tanto a \emph{Application Binary Interface} (ABI) em MVs de processo, quanto a \emph{Instruction Set Architecture} (ISA) em MVs de sistema.
 Dessa forma, tais ferramentas ocupam uma posição estratégica que pode ser explorada de diversas formas:
 \textit{cross-platform emulation} - permitindo que aplicações escritas para uma plataforma sejam executadas em outra; 
@@ -121,21 +122,15 @@ em específico, o uso de uma MV de sistema também agrega ao \textit{overhead} d
 dispositivos e do sistema operacional. Portanto frequentemente nestes cenários uma máquina virtual de processo é preferível
 em relação a uma MV de sistema.
 
-Nesse texto apresentamos uma proposta de avaliação do \textit{overhead} de emulação do sistema operacional e dispositivos de hardware
-em uma máquina virtual de sistema interpretada em relação a uma máquina virtual de processo interpretada. Para tanto, propomos
-a transformação de uma máquina virtual de sistema em uma máquina virtual de processo. Além de uma melhor compreensão do \textit{overhead}
-de emulação em uma máquina virtual de sistema, este trabalho tem como resultado uma infraestrutura para a realização de experimentos
-voltados para a área de máquinas virtuais. 
+Nesse texto apresentamos uma proposta de avaliação do \textit{overhead} de emulação do sistema operacional e dispositivos de hardware em uma máquina virtual de sistema interpretada em relação a uma máquina virtual de processo interpretada. 
+
+Para tanto, propomos a transformação de uma máquina virtual de sistema em uma máquina virtual de processo. 
+Além de uma melhor compreensão do \textit{overhead} de emulação em uma máquina virtual de sistema, este trabalho tem como resultado uma infraestrutura para a realização de experimentos voltados para a área de máquinas virtuais. 
 
 Este texto está organizado da seguinte forma. Na Seção~\ref{sec:objetivos} apresentamos com certo nível de detalhamento nossos objetivos. 
-Na Seção~\ref{sec:fundamentacao} apresentamos a fundamentação teórica para a realização do projeto. Na Seção~\ref{sec:bibliografia} apresentamos
-um levantamento bibliográfico da área de máquinas virtuais a nível de binários. A Seção~\ref{sec:infraestrutura} e a Seção~\ref{sec:metodologia}
-descrevem a infraestrutura e a metodologia proposta para a realização do projeto. Por fim a Seção~\ref{sec:conclusao} apresenta a conclusão do trabalho. 
-  
-  
-  
-  
-  
+Na Seção~\ref{sec:fundamentacao} apresentamos a fundamentação teórica para a realização do projeto. Na Seção~\ref{sec:bibliografia} apresentamos um levantamento bibliográfico da área de máquinas virtuais a nível de binários. 
+A Seção~\ref{sec:infraestrutura} e a Seção~\ref{sec:metodologia} descrevem a infraestrutura e a metodologia proposta para a realização do projeto, respectivamente. 
+Por fim a Seção~\ref{sec:conclusao} apresenta a conclusão do trabalho. 
   
   
 \section{Objetivos} \label{sec:objetivos}
