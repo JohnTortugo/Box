@@ -513,15 +513,15 @@ void ElfLoader::doRelocations() {
 
 		rel = bx_mem.virtualAddressToPosition(rel);
 
-		printf("Data Relocation Table Entries (REL) [%x] (%s)\n", rel, mainExecutable.getFileName().c_str());
-		printf("------------------------------\n");
-		printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
+//		printf("Data Relocation Table Entries (REL) [%x] (%s)\n", rel, mainExecutable.getFileName().c_str());
+//		printf("------------------------------\n");
+//		printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 		while (aRead < mainExecutable.getRelsz()) {
 			Elf32_Rel reloc;
 
 			bx_mem.read((Bit8u *)&reloc, rel, mainExecutable.getRelent());
 
-			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
+//			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
 
 			// scopeMap index for mainExecutable is zero
 			solveRelocation(reloc, 0);
@@ -538,15 +538,15 @@ void ElfLoader::doRelocations() {
 
 		jmprel = bx_mem.virtualAddressToPosition(jmprel);
 
-		printf("PLT Relocation Table Entries (JMPREL) [%x] (%s)\n", jmprel, mainExecutable.getFileName().c_str());
-		printf("------------------------------\n");
-		printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
+//		printf("PLT Relocation Table Entries (JMPREL) [%x] (%s)\n", jmprel, mainExecutable.getFileName().c_str());
+//		printf("------------------------------\n");
+//		printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 		while (aRead < mainExecutable.getPltrelsz()) {
 			Elf32_Rel reloc;
 
 			bx_mem.read((Bit8u *)&reloc, jmprel, mainExecutable.getRelent());
 
-			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
+//			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
 
 			// scopeMap index for mainExecutable is zero
 			solveRelocation(reloc, 0);
@@ -555,8 +555,6 @@ void ElfLoader::doRelocations() {
 			jmprel	+= mainExecutable.getRelent();
 		}
 	}
-
-
 
 	// check each shared library for relocations that
 	// need to be solved
@@ -584,15 +582,15 @@ void ElfLoader::doRelocations() {
 			// rel indicates an offset inside the shared library code
 			rel = loadedSegments[2*(slIndex + 1)].loadedPos + rel;
 
-			printf("Data Relocation Table Entries (REL) (%x) [%x] (%s)\n", rel - loadedSegments[2*(slIndex + 1)].loadedPos, rel, sharedLibs[slIndex].getFileName().c_str());
-			printf("------------------------------\n");
-			printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
+//			printf("Data Relocation Table Entries (REL) (%x) [%x] (%s)\n", rel - loadedSegments[2*(slIndex + 1)].loadedPos, rel, sharedLibs[slIndex].getFileName().c_str());
+//			printf("------------------------------\n");
+//			printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 			while (aRead < sharedLibs[slIndex].getRelsz()) {
 				Elf32_Rel reloc;
 
 				bx_mem.read((Bit8u *)&reloc, rel, sharedLibs[slIndex].getRelent());
 
-				printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
+//				printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
 
 				// scopeMap index for sharedLibrary is +1 because in
 				// scopeMap there is one entry for mainExecutable
@@ -611,15 +609,15 @@ void ElfLoader::doRelocations() {
 			// rel indicates an offset inside the shared library code
 			jmprel = loadedSegments[2*(slIndex + 1)].loadedPos + jmprel;
 
-			printf("PLT Relocation Table Entries (JMPREL) (%x) [%x] (%s)\n", jmprel - loadedSegments[2*(slIndex + 1)].loadedPos, jmprel, sharedLibs[slIndex].getFileName().c_str());
-			printf("------------------------------\n");
-			printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
+//			printf("PLT Relocation Table Entries (JMPREL) (%x) [%x] (%s)\n", jmprel - loadedSegments[2*(slIndex + 1)].loadedPos, jmprel, sharedLibs[slIndex].getFileName().c_str());
+//			printf("------------------------------\n");
+//			printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 			while (aRead < sharedLibs[slIndex].getPltrelsz()) {
 				Elf32_Rel reloc;
 
 				bx_mem.read((Bit8u *)&reloc, jmprel, sharedLibs[slIndex].getRelent());
 
-				printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
+//				printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
 				// scopeMap index for sharedLibrary is +1 because in
 				// scopeMap there is one entry for mainExecutable
 				solveRelocation(reloc, slIndex+1);
@@ -678,18 +676,23 @@ Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex) {
 	// contains the symbol name
 	Bit8u *symName = NULL;
 
+	// contains the local definition of the symbol we are searching
+	Elf32_Sym symLoc;
+
 	// we first get the symbol name in the symbol table/str table
 	// of the ELF that has the relocation
 	if (scopeIndex == 0) { // main executable
-		symName = symbolNameFromSymbIndex(mainExecutable, symbIndex, -loadedSegments[0].hdr.p_vaddr);
+		symLoc = symbolFromSymbIndex(mainExecutable, symbIndex, -loadedSegments[0].hdr.p_vaddr);
+		symName = symbolNameFromSymbol(mainExecutable, symLoc, -loadedSegments[0].hdr.p_vaddr);
 	}
 	else {	// shared library (-1)
 		Bit32u slIndex = scopeIndex-1;
 
-		symName = symbolNameFromSymbIndex(sharedLibs[slIndex], symbIndex, loadedSegments[2*(slIndex+1)].loadedPos);
+		symLoc = symbolFromSymbIndex(sharedLibs[slIndex], symbIndex, loadedSegments[2*(slIndex+1)].loadedPos);
+		symName = symbolNameFromSymbol(sharedLibs[slIndex], symLoc, loadedSegments[2*(slIndex+1)].loadedPos);
 	}
 
-	printf("Searching symbol: %s\n", symName);
+//	printf("Searching symbol: %s\n", symName);
 //	printf("Scope size: %d\n", scope.size());
 
 	// for each entry in scope
@@ -715,7 +718,7 @@ Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex) {
 			// verifica se o symbol em symbEntry é o procurado
 			if (symbol.st_shndx != SHN_UNDEF) {
 				Bit8u *actSymbName = symbolNameFromSymbol(mainExecutable, symbol, -loadedSegments[0].hdr.p_vaddr);
-				printf("\tTesting symbol %s\n", actSymbName);
+//				printf("\tTesting symbol %s\n", actSymbName);
 				if (strcmp((char *)actSymbName, (char *)symName) == 0) {
 					found = true;
 				}
@@ -736,7 +739,7 @@ Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex) {
 			// verifica se o symbol em symbEntry é o procurado
 			if (symbol.st_shndx != SHN_UNDEF) {
 				Bit8u *actSymbName = symbolNameFromSymbol(sharedLibs[slIndex], symbol, loadedSegments[2*(slIndex+1)].loadedPos);
-				printf("\tTesting symbol %s\n", actSymbName);
+//				printf("\tTesting symbol %s\n", actSymbName);
 				if (strcmp((char *)actSymbName, (char *)symName) == 0) {
 					found = true;
 				}
@@ -803,9 +806,12 @@ Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex) {
 				bx_mem.read((Bit8u *)&symbol, symEntry, sizeof(symbol));
 
 				// verifica se o symbol em symbEntry é o procurado
-				if (symbol.st_shndx != SHN_UNDEF) {
+				if (symbol.st_shndx != SHN_UNDEF &&
+					(ELF32_ST_BIND(symbol.st_info) == STB_GLOBAL ||
+					ELF32_ST_BIND(symbol.st_info) == STB_WEAK)
+				   ) {
 					Bit8u *actSymbName = symbolNameFromSymbol(*elf, symbol, loadedPos);
-//					printf("\tTesting symbol %s\n", actSymbName);
+//					printf("\tTesting symbol %s %d\n", actSymbName, ELF32_ST_BIND(symbol.st_info));
 					if (strcmp((char *)actSymbName, (char *)symName) == 0) {
 						found = true;
 						break;
@@ -818,16 +824,49 @@ Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex) {
 		}
 
 		if (found) {
-			printf("Symbol found.\n");
+//			printf("Symbol found.\n");
 			break;
 		}
 	}
 
+	// check if we found or not the symbol
+	// symbols that are WEAK doesn't need necessarily have an definition
 	if (!found) {
-		printf("Symbol not found.\n");
+		Bit32u symLocType = ELF32_ST_TYPE(symLoc.st_info);
+		Bit32u symLocBind = ELF32_ST_BIND(symLoc.st_info);
+
+		if (symLocBind == STB_WEAK) {
+//			printf("Symbol found.***\n");
+			return 0;
+		}
+		else {
+			printf("Symbol not found: %s %d %d\n", symName, symLocBind, symLocType);
+		}
 	}
 
 	return 0;
+}
+
+/*!
+ * This method return the name of the symb that have index in symbIndex
+ * as tell the symbol table and dynamic string table of ELF file elf.
+ * Care must be taken to pass the correct address in loadedPos
+ * (negative offset for mainExecutable).
+ */
+Elf32_Sym ElfLoader::symbolFromSymbIndex(ElfParser elf, Bit32u symbIndex, Bit32s loadedPos) {
+	// the symbol content
+	Elf32_Sym symbol;
+
+	// symbol table address
+	Elf32_Addr symTableAddr = elf.getDynsym();
+
+	// physical address
+	Elf32_Addr symEntry = loadedPos + symTableAddr + symbIndex*sizeof(symbol);
+
+	// read the symbol definition
+	bx_mem.read((Bit8u *)&symbol, symEntry, sizeof(symbol));
+
+	return symbol;
 }
 
 /*!

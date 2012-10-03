@@ -104,6 +104,8 @@ public:
 
 	Bit8u * symbolNameFromSymbIndex(ElfParser elf, Bit32u symbIndex, Bit32s loadedPos);
 
+	Elf32_Sym symbolFromSymbIndex(ElfParser elf, Bit32u symbIndex, Bit32s loadedPos);
+
 	Bit8u * symbolNameFromSymbol(ElfParser elf, Elf32_Sym symbol, Bit32s loadedPos);
 
 	Bit32u getEntryAddress() const { return mainExecutable.getEntryAddress(); }
