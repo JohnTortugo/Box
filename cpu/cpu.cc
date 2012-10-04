@@ -30,11 +30,12 @@ void BX_CPU_C::cpu_loop(void) {
         d.disasm32((bx_address)ptr, (bx_address)ptr, (const Bit8u *)ptr, disbuf);
         printf("%s\n", disbuf);
 
+        RIP += i->ilen();
+
         // call the interpretation routine
         // memory isn't working yet
         (bx_cpu.*i->execute)(i);
-	
-        RIP += i->ilen();
+
     }
 }
 
