@@ -100,7 +100,7 @@ public:
 
 	void solveRelocation(Elf32_Rel reloc, Bit8u scopeIndex);
 
-	Bit32u symbolLookup(Bit32u symbIndex, Bit8u scopeIndex);
+	Bit32u symbolLookup(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol);
 
 	Bit8u * symbolNameFromSymbIndex(ElfParser elf, Bit32u symbIndex, Bit32s loadedPos);
 
