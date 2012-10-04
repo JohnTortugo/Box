@@ -15,7 +15,8 @@ BX_SYSCALL bx_sys;
 
 void verifyParams(int argc, char **argv);
 void printBanner();
-int run(Bit32u entry);
+void initialize(Bit32u entry);
+int run();
 void bx_load_null_kernel_hack();
 
 int main(int argc, char **argv) {
@@ -33,34 +34,35 @@ int main(int argc, char **argv) {
 	BX_INFO(("Loading ELF."));
   ElfLoader loader(argc, argv, getenv("LD_LIBRARY_PATH"), bx_mem.memory, bx_mem.size);
 
-  // execute init stubs
+  initialize(loader.getEntryAddress());
+
+  //TODO:  execute init stubs
 
   // salta para o interpretador
   BX_INFO(("Running Interpreter."));
-  run(loader.getEntryAddress());
+  run();
 
-  // execute fini stubs
+  //TODO:  execute fini stubs
 
   return 0;
 }
 
-int run(Bit32u entry) {
+void initialize(Bit32u entry)
+{
     bx_cpu.initialize();
     bx_cpu.sanity_checks();
     bx_cpu.register_state();
 
-
     BX_INSTR_INITIALIZE(0);
-
-    BX_DEBUG(("CPU mode: %s", cpu_mode_string(bx_cpu.get_cpu_mode())));
 
     bx_load_null_kernel_hack();
 
-    BX_DEBUG(("CPU mode: %s", cpu_mode_string(bx_cpu.get_cpu_mode())));
-
-    BX_INFO(("Start interpretation at: %08lx",entry));
-
     bx_cpu.gen_reg[BX_32BIT_REG_EIP].dword.erx = (intptr_t) entry;
+    bx_cpu.gen_reg[BX_32BIT_REG_EBP].dword.erx =
+    bx_cpu.gen_reg[BX_32BIT_REG_ESP].dword.erx = (intptr_t) bx_mem.positionToVirtualAddress(0x63FFFFF);
+}
+
+int run() {
 
     bx_cpu.cpu_loop();
 
@@ -71,44 +73,43 @@ void bx_load_null_kernel_hack(void)
 {
   // The RESET function will have been called first.
   // Set CPU and memory features which are assumed at this point.
-  //
-  //bx_load_kernel_image(SIM->get_param_string(BXPN_LOAD32BITOS_PATH)->getptr(), 0x100000);
-
-  // EIP deltas
-  BX_CPU(0)->prev_rip = BX_CPU(0)->gen_reg[BX_32BIT_REG_EIP].dword.erx = 0x100000;
-
 
   // CS deltas
+  BX_CPU(0)->sregs[BX_SEG_REG_CS].cache.valid = 1; 	// Valid segment cache
   BX_CPU(0)->sregs[BX_SEG_REG_CS].cache.p = 1; 	   	   // Segment present
   BX_CPU(0)->sregs[BX_SEG_REG_CS].cache.dpl = 3; 	   // Ring 3
   BX_CPU(0)->sregs[BX_SEG_REG_CS].cache.segment = 1; 	   // Data/Code segment
   BX_CPU(0)->sregs[BX_SEG_REG_CS].cache.u.segment.base = 0x00000000;
-  BX_CPU(0)->sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled = 0x000FFFFF;
-  BX_CPU(0)->sregs[BX_SEG_REG_CS].cache.u.segment.g   = 0; // page granularity
+  BX_CPU(0)->sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled = 0xFFFFFFFF;
+  BX_CPU(0)->sregs[BX_SEG_REG_CS].cache.u.segment.g   = 1; // page granularity
   BX_CPU(0)->sregs[BX_SEG_REG_CS].cache.u.segment.d_b = 1; // 32bit
   BX_CPU(0)->sregs[BX_SEG_REG_CS].selector.index = 1; 	   // First segment
   BX_CPU(0)->sregs[BX_SEG_REG_CS].selector.ti = 0; 	   // GDT
   BX_CPU(0)->sregs[BX_SEG_REG_CS].selector.rpl = 3; 	   // Ring 3 privilege
 
   // DS deltas
+  BX_CPU(0)->sregs[BX_SEG_REG_DS].cache.valid = 1; 	// Valid segment cache
   BX_CPU(0)->sregs[BX_SEG_REG_DS].cache.p = 1; 	   	   // Segment present
   BX_CPU(0)->sregs[BX_SEG_REG_DS].cache.dpl = 3; 	   // Ring 3
+  BX_CPU(0)->sregs[BX_SEG_REG_DS].cache.type = 3; 	   // Type read/write
   BX_CPU(0)->sregs[BX_SEG_REG_DS].cache.segment = 1; 	   // Data/Code segment
-  BX_CPU(0)->sregs[BX_SEG_REG_DS].cache.u.segment.base = 0x00100000;
-  BX_CPU(0)->sregs[BX_SEG_REG_DS].cache.u.segment.limit_scaled = 0x0007FFFF;
-  BX_CPU(0)->sregs[BX_SEG_REG_DS].cache.u.segment.g   = 0; // page granularity
+  BX_CPU(0)->sregs[BX_SEG_REG_DS].cache.u.segment.base = 0x00000000;
+  BX_CPU(0)->sregs[BX_SEG_REG_DS].cache.u.segment.limit_scaled = 0xFFFFFFFF;
+  BX_CPU(0)->sregs[BX_SEG_REG_DS].cache.u.segment.g   = 1; // page granularity
   BX_CPU(0)->sregs[BX_SEG_REG_DS].cache.u.segment.d_b = 1; // 32bit
   BX_CPU(0)->sregs[BX_SEG_REG_DS].selector.index = 2; 	   // Second segment
   BX_CPU(0)->sregs[BX_SEG_REG_DS].selector.ti = 0; 	   // GDT
   BX_CPU(0)->sregs[BX_SEG_REG_DS].selector.rpl = 3; 	   // Ring 3 privilege
 
   // SS deltas
-  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.p = 1; 	   	   // Segment present
-  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.dpl = 3; 	   // Ring 3
+  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.valid = 1; 	// Valid segment cache
+  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.p = 1;				// Segment present
+  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.dpl = 3; 	           // Ring 3
+  //BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.type = 3; 	   // Type read/write
   BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.segment = 1; 	   // Data/Code segment
-  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.u.segment.base = 0x00180000;
-  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.u.segment.limit_scaled = 0x0007FFFF;
-  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.u.segment.g   = 0; // page granularity
+  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.u.segment.base = 0x00000000;
+  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.u.segment.limit_scaled = 0xFFFFFFFF;
+  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.u.segment.g   = 1; // page granularity
   BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.u.segment.d_b = 1; // 32bit
   BX_CPU(0)->sregs[BX_SEG_REG_DS].selector.index = 3; 	   // Third segment
   BX_CPU(0)->sregs[BX_SEG_REG_DS].selector.ti = 0; 	   // GDT

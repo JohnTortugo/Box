@@ -68,7 +68,7 @@ Bit8u BX_MEM_C::read_byte(unsigned s, Bit32u offset)
 {
    Bit32u addr = bx_cpu.get_laddr(s, offset);
    if ( (addr - virtualBase) > this->size )
-      BX_PANIC(("Attempt to read beyond memory size limit. Address: %lx\n",addr));
+      BX_PANIC(("Attempt to read beyond memory size limit. Address: %08lx\n",addr));
    return *(memory+addr-virtualBase);
 }
 
@@ -76,7 +76,7 @@ Bit16u BX_MEM_C::read_word(unsigned s, Bit32u offset)
 {
    Bit32u addr = bx_cpu.get_laddr(s, offset);
    if ( (addr - virtualBase)> this->size )
-      BX_PANIC(("Attempt to read beyond memory size limit. Address: %lx\n",addr));
+	      BX_PANIC(("Attempt to read beyond memory size limit. Address: %08lx\n",addr));
    return *((Bit16u *)(memory+addr-virtualBase));
 }
 
@@ -84,7 +84,7 @@ Bit32u BX_MEM_C::read_dword(unsigned s, Bit32u offset)
 {
    Bit32u addr = bx_cpu.get_laddr(s, offset);
    if ( (addr - virtualBase) > this->size )
-      BX_PANIC(("Attempt to read beyond memory size limit. Address: %lx\n",addr));
+	      BX_PANIC(("Attempt to read beyond memory size limit. Address: %08lx\n",addr));
    return *((Bit32u *)(memory+addr-virtualBase));
 }
 
@@ -92,7 +92,7 @@ Bit64u BX_MEM_C::read_qword(unsigned s, Bit32u offset)
 {
    Bit32u addr = bx_cpu.get_laddr(s, offset);
    if ( (addr - virtualBase) > this->size )
-      BX_PANIC(("Attempt to read beyond memory size limit. Address: %lx\n",addr));
+	      BX_PANIC(("Attempt to read beyond memory size limit. Address: %08lx\n",addr));
    return *((Bit64u *)(memory+addr-virtualBase));
 }
 
@@ -100,7 +100,7 @@ void BX_MEM_C::write_byte(unsigned s, Bit32u offset, Bit8u data)
 {
    Bit32u addr = bx_cpu.get_laddr(s, offset);
    if ( (addr - virtualBase) > this->size )
-      BX_PANIC(("Attempt to write beyond memory size limit. Address: %lx\n",addr));
+	      BX_PANIC(("Attempt to read beyond memory size limit. Address: %08lx\n",addr));
    *(memory+addr-virtualBase) = data;
 }
 
@@ -108,23 +108,24 @@ void BX_MEM_C::write_word(unsigned s, Bit32u offset, Bit16u data)
 {
    Bit32u addr = bx_cpu.get_laddr(s, offset);
    if ( (addr - virtualBase) > this->size )
-      BX_PANIC(("Attempt to write beyond memory size limit. Address: %lx\n",addr));
+	      BX_PANIC(("Attempt to read beyond memory size limit. Address: %08lx\n",addr));
    *((Bit16u *) (memory+addr-virtualBase)) = data;
 }
 
 void BX_MEM_C::write_dword(unsigned s, Bit32u offset, Bit32u data) 
 {
    Bit32u addr = bx_cpu.get_laddr(s, offset);
+
    if ( (addr - virtualBase)> this->size )
-      BX_PANIC(("Attempt to write beyond memory size limit. Address: %lx\n",addr));
-   *((Bit32u *) (memory+ virtualBase - addr)) = data;
+	      BX_PANIC(("Attempt to read beyond memory size limit. Address: %08lx\n",addr));
+   *((Bit32u *) (memory+ addr -  virtualBase)) = data;
 }
 
 void BX_MEM_C::write_qword(unsigned s, Bit32u offset, Bit64u data) 
 {
    Bit32u addr = bx_cpu.get_laddr(s, offset);
    if ( (addr - virtualBase) > this->size )
-      BX_PANIC(("Attempt to write beyond memory size limit. Address: %lx\n",addr));
+	      BX_PANIC(("Attempt to read beyond memory size limit. Address: %08lx\n",addr));
    *((Bit64u *) (memory+addr-virtualBase)) = data;
 }
 

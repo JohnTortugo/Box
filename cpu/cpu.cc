@@ -20,7 +20,7 @@ void BX_CPU_C::cpu_loop(void) {
         // hurray
         ptr = (Bit8u *) bx_mem.VirtualToRealAddress(RIP);
 
-        printf("RIP: 0x%016lx \t", ptr);
+        printf("EIP: 0x%08lx \t", RIP);
         ret = fetchDecode32((Bit8u *) ptr, i, 15);
         printf("iLen: %02d \t Exec1: %0x \t\t", i->ilen(), i->execute);
 
