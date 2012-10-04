@@ -495,7 +495,7 @@ void ElfLoader::dumpAddressSpaceInfo() {
 }
 
 // almost there
-// falta tratar endereços qdo o st_value é do mainExecutable ou shared lib
+// falta tratar endere��os qdo o st_value �� do mainExecutable ou shared lib
 // verificar tipos dos objetos
 void ElfLoader::doRelocations() {
 	// pointer to relocation tables
@@ -792,7 +792,7 @@ Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *sy
 			// read the symbol definition
 			bx_mem.read((Bit8u *)symbol, symEntry, sizeof(Elf32_Sym));
 
-			// verifica se o symbol em symbEntry é o procurado
+			// verifica se o symbol em symbEntry �� o procurado
 			if (symbol->st_shndx != SHN_UNDEF) {
 				Bit8u *actSymbName = symbolNameFromSymbol(mainExecutable, *symbol, -loadedSegments[0].hdr.p_vaddr);
 //				printf("\tTesting symbol %s\n", actSymbName);
@@ -813,7 +813,7 @@ Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *sy
 			// read the symbol definition
 			bx_mem.read((Bit8u *)symbol, symEntry, sizeof(Elf32_Sym));
 
-			// verifica se o symbol em symbEntry é o procurado
+			// verifica se o symbol em symbEntry �� o procurado
 			if (symbol->st_shndx != SHN_UNDEF) {
 				Bit8u *actSymbName = symbolNameFromSymbol(sharedLibs[slIndex], *symbol, loadedSegments[2*(slIndex+1)].loadedPos);
 //				printf("\tTesting symbol %s\n", actSymbName);
@@ -853,6 +853,8 @@ Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *sy
 			}
 
 			// read the number of buckets and the number of chains
+			fprintf(stderr, "Name: %s\n", elf->getFileName().c_str());
+			fprintf(stderr, "hashAddr=%lx\n" ,hashAddr);
 			bx_mem.read((Bit8u *)&nbucket, hashAddr, sizeof(nbucket));
 			bx_mem.read((Bit8u *)&nchain, hashAddr + sizeof(nbucket), sizeof(nchain));
 
@@ -882,7 +884,7 @@ Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *sy
 				// read the symbol definition
 				bx_mem.read((Bit8u *)symbol, symEntry, sizeof(Elf32_Sym));
 
-				// verifica se o symbol em symbEntry é o procurado
+				// verifica se o symbol em symbEntry �� o procurado
 				if (symbol->st_shndx != SHN_UNDEF &&
 					(ELF32_ST_BIND(symbol->st_info) == STB_GLOBAL ||
 					ELF32_ST_BIND(symbol->st_info) == STB_WEAK)

@@ -48,7 +48,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::ADD_EdGdM(bxInstruction_c *i)
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  op1_32 = read_RMW_virtual_dword(i->seg(), eaddr);
+  op1_32 = bx_mem.read_dword(i->seg(),eaddr);  //read_RMW_virtual_dword(i->seg(), eaddr);
   op2_32 = BX_READ_32BIT_REG(i->src());
   sum_32 = op1_32 + op2_32;
   write_RMW_virtual_dword(sum_32);
@@ -98,7 +98,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::ADC_EdGdM(bxInstruction_c *i)
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  op1_32 = read_RMW_virtual_dword(i->seg(), eaddr);
+  op1_32 = bx_mem.read_dword(i->seg(),eaddr);  //read_RMW_virtual_dword(i->seg(), eaddr);
   op2_32 = BX_READ_32BIT_REG(i->src());
   sum_32 = op1_32 + op2_32 + temp_CF;
   write_RMW_virtual_dword(sum_32);
@@ -394,10 +394,11 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::ADD_EdIdM(bxInstruction_c *i)
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  op1_32 = read_RMW_virtual_dword(i->seg(), eaddr);
+  op1_32 = bx_mem.read_dword(i->seg(),eaddr); //read_RMW_virtual_dword(i->seg(), eaddr);
   op2_32 = i->Id();
   sum_32 = op1_32 + op2_32;
-  write_RMW_virtual_dword(sum_32);
+  //write_RMW_virtual_dword(sum_32);
+  bx_mem.write_dword(i->seg(),eaddr,sum_32);
 
   SET_FLAGS_OSZAPC_ADD_32(op1_32, op2_32, sum_32);
 
