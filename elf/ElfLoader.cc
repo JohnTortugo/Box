@@ -585,9 +585,9 @@ void ElfLoader::doRelocations() {
 			// rel indicates an offset inside the shared library code
 			rel = loadedSegments[2*(slIndex + 1)].loadedPos + rel;
 
-//			printf("Data Relocation Table Entries (REL) (%x) [%x] (%s)\n", rel - loadedSegments[2*(slIndex + 1)].loadedPos, rel, sharedLibs[slIndex].getFileName().c_str());
-//			printf("------------------------------\n");
-//			printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
+			printf("Data Relocation Table Entries (REL) (%x) [%x] (%s)\n", rel - loadedSegments[2*(slIndex + 1)].loadedPos, rel, sharedLibs[slIndex].getFileName().c_str());
+			printf("------------------------------\n");
+			printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 			while (aRead < sharedLibs[slIndex].getRelsz()) {
 				Elf32_Rel reloc;
 
@@ -612,9 +612,9 @@ void ElfLoader::doRelocations() {
 			// rel indicates an offset inside the shared library code
 			jmprel = loadedSegments[2*(slIndex + 1)].loadedPos + jmprel;
 
-//			printf("PLT Relocation Table Entries (JMPREL) (%x) [%x] (%s)\n", jmprel - loadedSegments[2*(slIndex + 1)].loadedPos, jmprel, sharedLibs[slIndex].getFileName().c_str());
-//			printf("------------------------------\n");
-//			printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
+			printf("PLT Relocation Table Entries (JMPREL) (%x) [%x] (%s)\n", jmprel - loadedSegments[2*(slIndex + 1)].loadedPos, jmprel, sharedLibs[slIndex].getFileName().c_str());
+			printf("------------------------------\n");
+			printf("%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 			while (aRead < sharedLibs[slIndex].getPltrelsz()) {
 				Elf32_Rel reloc;
 
