@@ -494,7 +494,9 @@ void ElfLoader::dumpAddressSpaceInfo() {
 	}
 }
 
-
+// almost there
+// falta tratar endereços qdo o st_value é do mainExecutable ou shared lib
+// verificar tipos dos objetos
 void ElfLoader::doRelocations() {
 	// pointer to relocation tables
 	// REL and RELA are relocations for data and
@@ -638,6 +640,23 @@ void ElfLoader::solveRelocation(Elf32_Rel reloc, Bit8u scopeIndex) {
 	// offset where relocation apply
 	Elf32_Addr relOff 	= reloc.r_offset;
 
+	Elf32_Word addend 	= 0;
+	Elf32_Word finValue	= 0;
+	Elf32_Addr libBase	= 0;
+	Elf32_Addr gotAddr	= 0;
+
+	if (scopeIndex > 0) {
+		Bit32u slIndex = scopeIndex-1;
+
+		relOff 	= bx_mem.positionToVirtualAddress(loadedSegments[2*(slIndex+1)].loadedPos + relOff);
+		libBase = bx_mem.positionToVirtualAddress(loadedSegments[2*(slIndex+1)].loadedPos);
+		gotAddr	= bx_mem.positionToVirtualAddress(loadedSegments[2*(slIndex+1)].loadedPos + sharedLibs[slIndex].getGotAddr());
+	}
+	else {
+		libBase = bx_mem.positionToVirtualAddress(loadedSegments[0].loadedPos);
+		gotAddr	= mainExecutable.getGotAddr();
+	}
+
 	// for what symbol is the relocation
 	Bit32u symbIndex 	= ELF32_R_SYM(reloc.r_info);
 
@@ -655,38 +674,65 @@ void ElfLoader::solveRelocation(Elf32_Rel reloc, Bit8u scopeIndex) {
 		symbAddr = symbolLookup(symbIndex, scopeIndex, &symbol);
 	}
 
-	#define G (symbol.st_value)
-	#define A (32)
+	bx_mem.read((Bit8u *)&addend, bx_mem.virtualAddressToPosition(relOff), sizeof(Elf32_Word));
+
+	#define G 	(symbol.st_value)
+	#define A 	(addend)
+	#define S 	(symbol.st_value)
+	#define P 	(relOff)
+	#define L 	(symbol.st_value)
+	#define B 	(libBase)
+	#define GOT (gotAddr)
 
 	// identify and solve the relocation
 	switch (relType) {
 		case R_386_NONE:
 			break;
 		case R_386_32:
+			printf("R_386_32: S + A = %x + %x\n", S, A);
+			finValue = S + A;
 			break;
 		case R_386_PC32:
+			printf("R_386_PC32: S + A - P = %x + %x - %x\n", S, A, P);
+			finValue = S + A - P;
 			break;
 		case R_386_GOT32:
-			printf("R_386_GOT32: G + A = %x %x\n", G, A);
+			printf("R_386_GOT32: G + A = %x + %x\n", G, A);
+			finValue = G + A;
 			break;
 		case R_386_PLT32:
+			printf("R_386_PLT32: L + A - P = %x + %x - %x\n", L, A, P);
+			finValue = L + A - P;
 			break;
 		case R_386_COPY:
+			printf("R_386_COPY\n");
 			break;
 		case R_386_GLOB_DAT:
+			printf("R_386_GLOB_DAT: S = %x\n", S);
+			finValue = S;
 			break;
 		case R_386_JMP_SLOT:
+			printf("R_386_JMP_SLOT: S = %x\n", S);
+			finValue = S;
 			break;
 		case R_386_RELATIVE:
+			printf("R_386_RELATIVE: B + A = %x + %x\n", B, A);
+			finValue = B + A;
 			break;
 		case R_386_GOTOFF:
+			printf("R_386_GOTOFF: S + A - GOT = %x + %x - %x\n", S, A, GOT);
+			finValue = S + A - GOT;
 			break;
 		case R_386_GOTPC:
+			printf("R_386_GOTPC: GOT + A - P = %x + %x - %x\n", GOT, A, P);
+			finValue = GOT + A - P;
 			break;
 		default:
-			BX_ERROR(("Relocation type don't identified."));
+			BX_ERROR(("Relocation type don't identified: %x", relType));
 			break;
 	}
+
+	bx_mem.write((Bit8u *)&finValue, bx_mem.virtualAddressToPosition(relOff), sizeof(Elf32_Word));
 }
 
 /*!

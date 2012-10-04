@@ -50,11 +50,12 @@ ElfParser::ElfParser(string elfPath) {
 	//printSecHdrTable();
 
 	extractSectionsHdrTable();
-	//printSectionsHdrTable();
 
 	extractSections();
 
 	parseDynamicEntries();
+
+	//printSectionsHdrTable();
 }
 
 // print the section string table
@@ -85,7 +86,7 @@ void ElfParser::extractSectionsHdrTable() {
 	Elf32_Shdr hdrt = shEntries[hdr.e_shstrndx];
 
 	if (hdrt.sh_type != SHT_STRTAB) {
-		printf("SHSTRNDX does not point to an stringtable.\n");
+		printf("SHSTRNDX does not point to an string table.\n");
 		return ;
 	}
 
@@ -447,4 +448,15 @@ void ElfParser::read(Bit8u *content, Elf32_Off offset, Elf32_Word len) {
 	Elf32_Word len2 = fread(content, 1, len, felf);
 
 	if (len2 != len) BX_PANIC(("%d bytes read, %d was expected.", len2, len));
+}
+
+// print the section string table
+Elf32_Addr ElfParser::getGotAddr() {
+	for (int i=0; i<shEntries.size(); i++) {
+		if (strcmp((char *)&sec_hdr_table[ shEntries[i].sh_name ], ".got") == 0) {
+			return shEntries[i].sh_addr;
+		}
+	}
+
+	return 0;
 }

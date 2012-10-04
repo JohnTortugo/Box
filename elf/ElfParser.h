@@ -64,7 +64,9 @@ private:
 	Elf32_Addr init;			// address of initialization stub
 	Elf32_Addr fini;			// address of finalization stub
 
-	Elf32_Addr pltgot;		// address of Global Offset Table
+	Elf32_Addr pltgot;		// address of first PLT entry in Global Offset Table
+
+	Elf32_Addr gotAddr;		// address of GOT
 
 // public methods
 public:
@@ -109,6 +111,8 @@ public:
 
 	// extract elf header file
 	void extractElfHeader();
+
+	Elf32_Addr getGotAddr();
 
 	// print elf header to console
 	void printElfHeader();

@@ -209,6 +209,15 @@ void BX_MEM_C::read(Bit8u *content, Bit32u offset, Bit32u len) {
 }
 
 /*!
+ * Write len bytes to the memory starting at offset reading them
+ * from the memory pointed by content.
+ */
+void BX_MEM_C::write(Bit8u *content, Bit32u offset, Bit32u len) {
+	// write len bytes to memory
+	memcpy((void *)(memory+offset), (void *)content, len);
+}
+
+/*!
  * Read the content starting at offset until reach an '\0'.
  * Return a pointer to the content just read.
  */
