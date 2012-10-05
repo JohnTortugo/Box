@@ -17,10 +17,10 @@ ElfParser::ElfParser(string elfPath) {
 	this->relent 		= 0;
 	this->rela 			= 0;
 	this->relasz 		= 0;
-	this->relaent 	= 0;
+	this->relaent 		= 0;
 	this->pltrel 		= 0;
 	this->jmprel 		= 0;
-	this->pltrelsz 	= 0;
+	this->pltrelsz 		= 0;
 	this->hash 			= 0;
 	this->dynsym 		= 0;
 	this->syment 		= 0;
@@ -112,6 +112,10 @@ void ElfParser::parseDynamicEntries() {
 				break;
 			case DT_HASH:
 				this->hash = dyn.d_un.d_ptr;
+				break;
+			case DT_GNU_HASH:
+				this->gnuHash = dyn.d_un.d_ptr;
+//				fprintf(stderr,"hash = %x\n", this->gnuHash);
 				break;
 			case DT_SYMTAB:
 				this->dynsym = dyn.d_un.d_ptr;
