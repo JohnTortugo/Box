@@ -27,11 +27,13 @@
 
 #include "config.h"
 
+
 class BX_MEM_C {
 public:
 	Bit64u		 size;
 	Bit8u		*memory;
 	Bit32u		virtualBase;
+	Bit32u      lastAddress;
 
 	BX_MEM_C();
 	~BX_MEM_C();
@@ -46,18 +48,25 @@ public:
 	Bit8u * memStrdup(Bit32u offset);
 	Bit8u * str(Bit32u offset) { return &memory[offset]; };
 
-	Bit8u read_byte(unsigned s, Bit32u offset);
-	Bit16u read_word(unsigned s, Bit32u offset);
-	Bit32u read_dword(unsigned s, Bit32u offset);
-	Bit64u read_qword(unsigned s, Bit32u offset);
+	Bit8u read_byte(Bit32u addr);
+	Bit16u read_word(Bit32u addr);
+	Bit32u read_dword( Bit32u addr);
+	Bit64u read_qword(Bit32u addr);
 
-	void write_byte(unsigned seg, Bit32u offset, Bit8u data);
-	void write_word(unsigned seg, Bit32u offset, Bit16u data);
-	void write_dword(unsigned seg, Bit32u offset, Bit32u data);
-	void write_qword(unsigned seg, Bit32u offset, Bit64u data);
+	void write_byte(Bit32u addr, Bit8u data);
+	void write_word(Bit32u addr, Bit16u data);
+	void write_dword(Bit32u addr, Bit32u data);
+	void write_qword(Bit32u addr, Bit64u data);
 
-	Bit32u VirtualToRealAddress(Bit32u address);
-	Bit32u RealToVirtualAddress(Bit32u address);
+	// Write after read operations
+	void write_byte(Bit8u data) { *((Bit8u *) lastAddress) = data; }
+	void write_word(Bit16u data) {  *((Bit16u *) lastAddress) = data; }
+	void write_dword(Bit32u data){ *((Bit32u *) lastAddress) = data; }
+	void write_qword(Bit64u data){ *((Bit64u *) lastAddress) = data; }
+
+
+    Bit32u VirtualToRealAddress(Bit32u address);
+    Bit32u RealToVirtualAddress(Bit32u address);
 	int loadFile(char * fname, Bit32u addr);
 	int loadData(void * ptr, Bit32u size, Bit32u addr);
 };

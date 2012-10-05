@@ -3029,6 +3029,11 @@ public: // for now...
   bx_bool read_virtual_checks(bx_segment_reg_t *seg, Bit32u offset, unsigned len) BX_CPP_AttrRegparmN(3);
   bx_bool execute_virtual_checks(bx_segment_reg_t *seg, Bit32u offset, unsigned len) BX_CPP_AttrRegparmN(3);
 
+  Bit8u read_virtual_byte_32(unsigned s, Bit32u offset) BX_CPP_AttrRegparmN(2);
+  Bit16u read_virtual_word_32(unsigned s, Bit32u offset) BX_CPP_AttrRegparmN(2);
+  Bit32u read_virtual_dword_32(unsigned s, Bit32u offset) BX_CPP_AttrRegparmN(2);
+  Bit64u read_virtual_qword_32(unsigned s, Bit32u offset) BX_CPP_AttrRegparmN(2);
+
 #if BX_CPU_LEVEL >= 6
   void read_virtual_dqword_32(unsigned seg, Bit32u off, BxPackedXmmRegister *data) BX_CPP_AttrRegparmN(3);
   void read_virtual_dqword_aligned_32(unsigned seg, Bit32u off, BxPackedXmmRegister *data) BX_CPP_AttrRegparmN(3);
@@ -3046,6 +3051,11 @@ public: // for now...
   void write_virtual_dword_vector_aligned_32(unsigned seg, Bit32u off, unsigned elements, const BxPackedAvxRegister *data);
 #endif
 #endif
+
+  void write_virtual_byte_32(unsigned s, Bit32u offset, Bit8u data) BX_CPP_AttrRegparmN(3);
+  void write_virtual_word_32(unsigned s, Bit32u offset, Bit16u data) BX_CPP_AttrRegparmN(3);
+  void write_virtual_dword_32(unsigned s, Bit32u offset, Bit32u data) BX_CPP_AttrRegparmN(3);
+  void write_virtual_qword_32(unsigned s, Bit32u offset, Bit64u data) BX_CPP_AttrRegparmN(3);
 
   Bit8u read_RMW_virtual_byte_32(unsigned seg, Bit32u offset) BX_CPP_AttrRegparmN(2);
   Bit16u read_RMW_virtual_word_32(unsigned seg, Bit32u offset) BX_CPP_AttrRegparmN(2);
@@ -3593,6 +3603,8 @@ BX_CPP_INLINE void BX_CPU_C::prepareXSAVE(void)
 #define RMAddr(i)  (bx_cpu.address_xlation.rm_addr)
 
 #if defined(NEED_CPU_REG_SHORTCUTS)
+
+#include "stack.h"
 
 #define RSP_SPECULATIVE {              \
   bx_cpu.speculative_rsp = 1; \

@@ -22,10 +22,9 @@
 #define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
 #include "cpu.h"
-#include "../debug.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
-BX_INSF_TYPE BX_CPU_C::POP_EdM(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::POP_EdM(bxInstruction_c *i)
 {
   RSP_SPECULATIVE;
 
@@ -36,28 +35,28 @@ BX_INSF_TYPE BX_CPU_C::POP_EdM(bxInstruction_c *i)
   // pop is used to calculate the address.
   Bit32u eaddr = (Bit32u) BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  bx_mem.write_dword(i->seg(), eaddr, val32);
+  write_virtual_dword_32(i->seg(), eaddr, val32);
 
   RSP_COMMIT;
 
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPU_C::PUSH_ERX(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PUSH_ERX(bxInstruction_c *i)
 {
   push_32(BX_READ_32BIT_REG(i->dst()));
 
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPU_C::POP_ERX(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::POP_ERX(bxInstruction_c *i)
 {
   BX_WRITE_32BIT_REGZ(i->dst(), pop_32());
 
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPU_C::PUSH32_Sw(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PUSH32_Sw(bxInstruction_c *i)
 {
   Bit16u val_16 = BX_CPU_THIS_PTR sregs[i->src()].selector.value;
 
@@ -74,7 +73,7 @@ BX_INSF_TYPE BX_CPU_C::PUSH32_Sw(bxInstruction_c *i)
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPU_C::POP32_Sw(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::POP32_Sw(bxInstruction_c *i)
 {
   Bit16u selector;
 
@@ -94,32 +93,31 @@ BX_INSF_TYPE BX_CPU_C::POP32_Sw(bxInstruction_c *i)
     // trap exceptions until the execution boundary following the
     // next instruction is reached.
     // Same code as MOV_SwEw()
-    BX_INFO(("inhibit_interrupts disabled!!!"));
-//inhibit_interrupts(BX_INHIBIT_INTERRUPTS_BY_MOVSS);
+    //inhibit_interrupts(BX_INHIBIT_INTERRUPTS_BY_MOVSS);
   }
 
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPU_C::PUSH_Id(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PUSH_Id(bxInstruction_c *i)
 {
   push_32(i->Id());
 
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPU_C::PUSH_EdM(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PUSH_EdM(bxInstruction_c *i)
 {
   Bit32u eaddr = (Bit32u) BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit32u op1_32 = bx_mem.read_dword(i->seg(), eaddr);
+  Bit32u op1_32 = read_virtual_dword_32(i->seg(), eaddr);
 
   push_32(op1_32);
 
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPU_C::PUSHAD32(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PUSHAD32(bxInstruction_c *i)
 {
   Bit32u temp_ESP = ESP;
   Bit16u temp_SP  = SP;
@@ -152,7 +150,7 @@ BX_INSF_TYPE BX_CPU_C::PUSHAD32(bxInstruction_c *i)
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPU_C::POPAD32(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::POPAD32(bxInstruction_c *i)
 {
   Bit32u edi, esi, ebp, ebx, edx, ecx, eax;
 
@@ -194,7 +192,7 @@ BX_INSF_TYPE BX_CPU_C::POPAD32(bxInstruction_c *i)
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPU_C::ENTER32_IwIb(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::ENTER32_IwIb(bxInstruction_c *i)
 {
   Bit16u imm16 = i->Iw();
   Bit8u level = i->Ib2();
@@ -225,7 +223,7 @@ BX_INSF_TYPE BX_CPU_C::ENTER32_IwIb(bxInstruction_c *i)
     // ENTER finishes with memory write check on the final stack pointer
     // the memory is touched but no write actually occurs
     // emulate it by doing RMW read access from SS:ESP
-    bx_mem.read_dword(BX_SEG_REG_SS, ESP);
+    read_RMW_virtual_dword_32(BX_SEG_REG_SS, ESP);
   }
   else {
     Bit16u bp = BP;
@@ -247,7 +245,7 @@ BX_INSF_TYPE BX_CPU_C::ENTER32_IwIb(bxInstruction_c *i)
     // ENTER finishes with memory write check on the final stack pointer
     // the memory is touched but no write actually occurs
     // emulate it by doing RMW read access from SS:SP
-    bx_mem.read_dword(BX_SEG_REG_SS, SP);
+    read_RMW_virtual_dword_32(BX_SEG_REG_SS, SP);
   }
 
   EBP = frame_ptr32;
@@ -257,7 +255,7 @@ BX_INSF_TYPE BX_CPU_C::ENTER32_IwIb(bxInstruction_c *i)
   BX_NEXT_INSTR(i);
 }
 
-BX_INSF_TYPE BX_CPU_C::LEAVE32(bxInstruction_c *i)
+BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LEAVE32(bxInstruction_c *i)
 {
   BX_ASSERT(BX_CPU_THIS_PTR cpu_mode != BX_MODE_LONG_64);
 

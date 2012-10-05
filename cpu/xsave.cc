@@ -35,13 +35,13 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XSAVE(bxInstruction_c *i)
 
   BX_CPU_THIS_PTR prepareXSAVE();
 
-  printf("XSAVE: save processor state XCR0=0x%08x", BX_CPU_THIS_PTR xcr0.get32());
+  BX_DEBUG(("XSAVE: save processor state XCR0=0x%08x", BX_CPU_THIS_PTR xcr0.get32()));
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
   bx_address laddr = get_laddr(i->seg(), eaddr);
 
   if (laddr & 0x3f) {
-    printf("XSAVE: access not aligned to 64-byte");
+    BX_ERROR(("XSAVE: access not aligned to 64-byte"));
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -51,7 +51,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XSAVE(bxInstruction_c *i)
   // We will go feature-by-feature and not run over all XCR0 bits
   //
 
-  Bit64u header1 = bx_mem.read_qword(i->seg(), (eaddr + 512) & asize_mask);
+  Bit64u header1 = read_virtual_qword(i->seg(), (eaddr + 512) & asize_mask);
 
   Bit32u features_save_enable_mask = BX_CPU_THIS_PTR xcr0.get32() & EAX;
 
@@ -101,13 +101,13 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XSAVE(bxInstruction_c *i)
      */
 #if BX_SUPPORT_X86_64
     if (i->os64L()) {
-    	bx_mem.write_qword(i->seg(), (eaddr + 16) & asize_mask, BX_CPU_THIS_PTR the_i387.fdp);
+      write_virtual_qword(i->seg(), (eaddr + 16) & asize_mask, BX_CPU_THIS_PTR the_i387.fdp);
     }
     else
 #endif
     {
-    	bx_mem.write_dword(i->seg(), (eaddr + 16) & asize_mask, (Bit32u) BX_CPU_THIS_PTR the_i387.fdp);
-    	bx_mem.write_dword(i->seg(), (eaddr + 20) & asize_mask, (Bit32u) BX_CPU_THIS_PTR the_i387.fds);
+      write_virtual_dword(i->seg(), (eaddr + 16) & asize_mask, (Bit32u) BX_CPU_THIS_PTR the_i387.fdp);
+      write_virtual_dword(i->seg(), (eaddr + 20) & asize_mask, (Bit32u) BX_CPU_THIS_PTR the_i387.fds);
     }
     /* do not touch MXCSR state */
 
@@ -130,8 +130,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XSAVE(bxInstruction_c *i)
   if ((features_save_enable_mask & (BX_XCR0_SSE_MASK | BX_XCR0_AVX_MASK)) != 0)
   {
     // store MXCSR
-	  bx_mem.write_dword(i->seg(), (eaddr + 24) & asize_mask, BX_MXCSR_REGISTER);
-	  bx_mem.write_dword(i->seg(), (eaddr + 28) & asize_mask, MXCSR_MASK);
+    write_virtual_dword(i->seg(), (eaddr + 24) & asize_mask, BX_MXCSR_REGISTER);
+    write_virtual_dword(i->seg(), (eaddr + 28) & asize_mask, MXCSR_MASK);
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -169,7 +169,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XSAVE(bxInstruction_c *i)
 #endif
 
   // always update header to 'dirty' state
-  bx_mem.write_qword(i->seg(), (eaddr + 512) & asize_mask, header1);
+  write_virtual_qword(i->seg(), (eaddr + 512) & asize_mask, header1);
 #endif
 
   BX_NEXT_INSTR(i);
@@ -184,29 +184,29 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XRSTOR(bxInstruction_c *i)
 
   BX_CPU_THIS_PTR prepareXSAVE();
 
-  printf("XRSTOR: restore processor state XCR0=0x%08x", BX_CPU_THIS_PTR xcr0.get32());
+  BX_DEBUG(("XRSTOR: restore processor state XCR0=0x%08x", BX_CPU_THIS_PTR xcr0.get32()));
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
   bx_address laddr = get_laddr(i->seg(), eaddr);
 
   if (laddr & 0x3f) {
-    printf("XRSTOR: access not aligned to 64-byte");
+    BX_ERROR(("XRSTOR: access not aligned to 64-byte"));
     exception(BX_GP_EXCEPTION, 0);
   }
 
   bx_address asize_mask = i->asize_mask();
 
-  Bit64u header1 = bx_mem.read_qword(i->seg(), (eaddr + 512) & asize_mask);
-  Bit64u header2 = bx_mem.read_qword(i->seg(), (eaddr + 520) & asize_mask);
-  Bit64u header3 = bx_mem.read_qword(i->seg(), (eaddr + 528) & asize_mask);
+  Bit64u header1 = read_virtual_qword(i->seg(), (eaddr + 512) & asize_mask);
+  Bit64u header2 = read_virtual_qword(i->seg(), (eaddr + 520) & asize_mask);
+  Bit64u header3 = read_virtual_qword(i->seg(), (eaddr + 528) & asize_mask);
 
   if ((~BX_CPU_THIS_PTR xcr0.get32() & header1) != 0) {
-    printf("XRSTOR: Broken header state");
+    BX_ERROR(("XRSTOR: Broken header state"));
     exception(BX_GP_EXCEPTION, 0);
   }
 
   if (header2 != 0 || header3 != 0) {
-    printf("XRSTOR: Reserved header state is not '0");
+    BX_ERROR(("XRSTOR: Reserved header state is not '0"));
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -269,8 +269,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XRSTOR(bxInstruction_c *i)
       for(index=0; index < 8; index++)
       {
         floatx80 reg;
-        reg.fraction = bx_mem.read_qword(i->seg(), (eaddr+index*16+32) & asize_mask);
-        reg.exp      = bx_mem.read_word(i->seg(), (eaddr+index*16+40) & asize_mask);
+        reg.fraction = read_virtual_qword(i->seg(), (eaddr+index*16+32) & asize_mask);
+        reg.exp      = read_virtual_word (i->seg(), (eaddr+index*16+40) & asize_mask);
 
         // update tag only if it is not empty
         BX_WRITE_FPU_REGISTER_AND_TAG(reg,
@@ -304,7 +304,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XRSTOR(bxInstruction_c *i)
   /////////////////////////////////////////////////////////////////////////////
   if ((features_load_enable_mask & (BX_XCR0_SSE_MASK | BX_XCR0_AVX_MASK)) != 0)
   {
-    Bit32u new_mxcsr = bx_mem.read_dword(i->seg(), (eaddr + 24) & asize_mask);
+    Bit32u new_mxcsr = read_virtual_dword(i->seg(), (eaddr + 24) & asize_mask);
     if(new_mxcsr & ~MXCSR_MASK)
        exception(BX_GP_EXCEPTION, 0);
     BX_MXCSR_REGISTER = new_mxcsr;
@@ -373,14 +373,14 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XGETBV(bxInstruction_c *i)
 {
 #if BX_CPU_LEVEL >= 6
   if(! BX_CPU_THIS_PTR cr4.get_OSXSAVE()) {
-    printf("XGETBV: OSXSAVE feature is not enabled in CR4!");
+    BX_ERROR(("XGETBV: OSXSAVE feature is not enabled in CR4!"));
     exception(BX_UD_EXCEPTION, 0);
   }
 
   // For now hardcoded handle only XCR0 register, it should take a few
   // years until extension will be required
   if (ECX != 0) {
-    printf("XGETBV: Invalid XCR register %d", ECX);
+    BX_ERROR(("XGETBV: Invalid XCR register %d", ECX));
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -396,13 +396,13 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XSETBV(bxInstruction_c *i)
 {
 #if BX_CPU_LEVEL >= 6
   if(! BX_CPU_THIS_PTR cr4.get_OSXSAVE()) {
-    printf("XSETBV: OSXSAVE feature is not enabled in CR4!");
+    BX_ERROR(("XSETBV: OSXSAVE feature is not enabled in CR4!"));
     exception(BX_UD_EXCEPTION, 0);
   }
 
 #if BX_SUPPORT_VMX
   if (BX_CPU_THIS_PTR in_vmx_guest) {
-    printf("VMEXIT: XSETBV in VMX non-root operation");
+    BX_ERROR(("VMEXIT: XSETBV in VMX non-root operation"));
     VMexit(VMX_VMEXIT_XSETBV, 0);
   }
 #endif
@@ -415,25 +415,25 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XSETBV(bxInstruction_c *i)
 
   // CPL is always 3 in vm8086 mode
   if (/* v8086_mode() || */ CPL != 0) {
-    printf("XSETBV: The current priveledge level is not 0");
+    BX_ERROR(("XSETBV: The current priveledge level is not 0"));
     exception(BX_GP_EXCEPTION, 0);
   }
 
   // For now hardcoded handle only XCR0 register, it should take a few
   // years until extension will be required
   if (ECX != 0) {
-    printf("XSETBV: Invalid XCR register %d", ECX);
+    BX_ERROR(("XSETBV: Invalid XCR register %d", ECX));
     exception(BX_GP_EXCEPTION, 0);
   }
 
   if (EDX != 0 || (EAX & ~BX_CPU_THIS_PTR xcr0_suppmask) != 0 || (EAX & 1) == 0) {
-    printf("XSETBV: Attempting to change reserved bits!");
+    BX_ERROR(("XSETBV: Attempting to change reserved bits!"));
     exception(BX_GP_EXCEPTION, 0);
   }
 
 #if BX_SUPPORT_AVX
   if ((EAX & (BX_XCR0_AVX_BIT | BX_XCR0_SSE_BIT)) == BX_XCR0_AVX_BIT) {
-    printf("XSETBV: Attempting to set AVX without SSE!");
+    BX_ERROR(("XSETBV: Attempting to set AVX without SSE!"));
     exception(BX_GP_EXCEPTION, 0);
   }
 #endif

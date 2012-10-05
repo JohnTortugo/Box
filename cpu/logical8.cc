@@ -61,7 +61,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XOR_GbEbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   op1 = BX_READ_8BIT_REGx(i->dst(), i->extend8bitL());
-  op2 = bx_mem.read_byte(i->seg(), eaddr);
+  op2 = read_virtual_byte(i->seg(), eaddr);
   op1 ^= op2;
   BX_WRITE_8BIT_REGx(i->dst(), i->extend8bitL(), op1);
 
@@ -183,7 +183,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::OR_GbEbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   op1 = BX_READ_8BIT_REGx(i->dst(), i->extend8bitL());
-  op2 = bx_mem.read_byte(i->seg(), eaddr);
+  op2 = read_virtual_byte(i->seg(), eaddr);
   op1 |= op2;
   BX_WRITE_8BIT_REGx(i->dst(), i->extend8bitL(), op1);
 
@@ -229,7 +229,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::AND_GbEbM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   op1 = BX_READ_8BIT_REGx(i->dst(), i->extend8bitL());
-  op2 = bx_mem.read_byte(i->seg(), eaddr);
+  op2 = read_virtual_byte(i->seg(), eaddr);
   op1 &= op2;
   BX_WRITE_8BIT_REGx(i->dst(), i->extend8bitL(), op1);
 
@@ -285,7 +285,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::TEST_EbGbM(bxInstruction_c *i)
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  op1 = bx_mem.read_byte(i->seg(), eaddr);
+  op1 = read_virtual_byte(i->seg(), eaddr);
   op2 = BX_READ_8BIT_REGx(i->src(), i->extend8bitL());
   op1 &= op2;
 
@@ -307,7 +307,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::TEST_EbIbM(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit8u op1 = bx_mem.read_byte(i->seg(), eaddr);
+  Bit8u op1 = read_virtual_byte(i->seg(), eaddr);
   op1 &= i->Ib();
   SET_FLAGS_OSZAPC_LOGIC_8(op1);
 

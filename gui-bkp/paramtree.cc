@@ -22,7 +22,6 @@
 
 #include "bochs.h"
 #include "paramtree.h"
-#include "../debug.h"
 
 /////////////////////////////////////////////////////////////////////////
 // define methods of bx_param_* and family
