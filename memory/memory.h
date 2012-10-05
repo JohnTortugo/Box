@@ -46,6 +46,7 @@ public:
 	void read(Bit8u *content, Bit32u offset, Bit32u len);
 	void write(Bit8u *content, Bit32u offset, Bit32u len);
 	Bit8u * memStrdup(Bit32u offset);
+	Bit8u * str(Bit32u offset) { return &memory[offset]; };
 
 	Bit8u read_byte(Bit32u addr);
 	Bit16u read_word(Bit32u addr);

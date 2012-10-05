@@ -102,6 +102,13 @@ public:
 
 	Bit32u symbolLookup(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol);
 
+	Bit32u symbolLookupElfHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol);
+
+	Bit32u symbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol);
+	Elf32_Addr findSymbolGnuHash(GnuHashInfo os, const char *symname, Elf32_Sym *symbol);
+
+	Bit32u versionedSymbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol);
+
 	Bit8u * symbolNameFromSymbIndex(ElfParser elf, Bit32u symbIndex, Bit32s loadedPos);
 
 	Elf32_Sym symbolFromSymbIndex(ElfParser elf, Bit32u symbIndex, Bit32s loadedPos);
@@ -121,6 +128,15 @@ public:
 		}
 
 		return h;
+	}
+
+	uint_fast32_t gnuSymHash(const char *s) {
+		uint_fast32_t h = 5381;
+
+		for (unsigned char c = *s; c != '\0'; c = *++s)
+				h = h * 33 + c;
+
+		return h & 0xffffffff;
 	}
 
 };
