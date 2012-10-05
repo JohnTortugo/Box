@@ -47,7 +47,7 @@ ElfLoader::ElfLoader(int p_argc, char **p_argv, char *ldLibPath, Bit8u *p_memory
 	// create the process address space
 	BX_INFO(("Mounting process address space."));
 	createAddressSpace();
-	//dumpAddressSpaceInfo();
+	dumpAddressSpaceInfo();
 	BX_INFO(("Address space mounted."));
 
 	// Doing relocations
@@ -495,7 +495,7 @@ void ElfLoader::dumpAddressSpaceInfo() {
 }
 
 // almost there
-// falta tratar endere��os qdo o st_value �� do mainExecutable ou shared lib
+// falta tratar enderecos qdo o st_value eh do mainExecutable ou shared lib
 // verificar tipos dos objetos
 void ElfLoader::doRelocations() {
 	// pointer to relocation tables
@@ -516,9 +516,9 @@ void ElfLoader::doRelocations() {
 
 		rel = bx_mem.virtualAddressToPosition(rel);
 
-		fprintf(stderr, "Data Relocation Table Entries (REL) [%x] (%s)\n", rel, mainExecutable.getFileName().c_str());
-		fprintf(stderr, "------------------------------\n");
-		fprintf(stderr, "%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
+//		fprintf(stderr, "Data Relocation Table Entries (REL) [%x] (%s)\n", rel, mainExecutable.getFileName().c_str());
+//		fprintf(stderr, "------------------------------\n");
+//		fprintf(stderr, "%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 		while (aRead < mainExecutable.getRelsz()) {
 			Elf32_Rel reloc;
 
@@ -541,9 +541,9 @@ void ElfLoader::doRelocations() {
 
 		jmprel = bx_mem.virtualAddressToPosition(jmprel);
 
-		fprintf(stderr, "PLT Relocation Table Entries (JMPREL) [%x] (%s)\n", jmprel, mainExecutable.getFileName().c_str());
-		fprintf(stderr, "------------------------------\n");
-		fprintf(stderr, "%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
+//		fprintf(stderr, "PLT Relocation Table Entries (JMPREL) [%x] (%s)\n", jmprel, mainExecutable.getFileName().c_str());
+//		fprintf(stderr, "------------------------------\n");
+//		fprintf(stderr, "%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 		while (aRead < mainExecutable.getPltrelsz()) {
 			Elf32_Rel reloc;
 
@@ -585,9 +585,9 @@ void ElfLoader::doRelocations() {
 			// rel indicates an offset inside the shared library code
 			rel = loadedSegments[2*(slIndex + 1)].loadedPos + rel;
 
-			fprintf(stderr, "Data Relocation Table Entries (REL) (%x) [%x] (%s)\n", rel - loadedSegments[2*(slIndex + 1)].loadedPos, rel, sharedLibs[slIndex].getFileName().c_str());
-			fprintf(stderr, "------------------------------\n");
-			fprintf(stderr, "%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
+//			fprintf(stderr, "Data Relocation Table Entries (REL) (%x) [%x] (%s)\n", rel - loadedSegments[2*(slIndex + 1)].loadedPos, rel, sharedLibs[slIndex].getFileName().c_str());
+//			fprintf(stderr, "------------------------------\n");
+//			fprintf(stderr, "%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 			while (aRead < sharedLibs[slIndex].getRelsz()) {
 				Elf32_Rel reloc;
 
@@ -612,9 +612,9 @@ void ElfLoader::doRelocations() {
 			// rel indicates an offset inside the shared library code
 			jmprel = loadedSegments[2*(slIndex + 1)].loadedPos + jmprel;
 
-			fprintf(stderr, "PLT Relocation Table Entries (JMPREL) (%x) [%x] (%s)\n", jmprel - loadedSegments[2*(slIndex + 1)].loadedPos, jmprel, sharedLibs[slIndex].getFileName().c_str());
-			fprintf(stderr, "------------------------------\n");
-			fprintf(stderr, "%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
+//			fprintf(stderr, "PLT Relocation Table Entries (JMPREL) (%x) [%x] (%s)\n", jmprel - loadedSegments[2*(slIndex + 1)].loadedPos, jmprel, sharedLibs[slIndex].getFileName().c_str());
+//			fprintf(stderr, "------------------------------\n");
+//			fprintf(stderr, "%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 			while (aRead < sharedLibs[slIndex].getPltrelsz()) {
 				Elf32_Rel reloc;
 
@@ -689,42 +689,42 @@ void ElfLoader::solveRelocation(Elf32_Rel reloc, Bit8u scopeIndex) {
 		case R_386_NONE:
 			break;
 		case R_386_32:
-			printf("R_386_32: S + A = %x + %x\n", S, A);
+			//printf("R_386_32: S + A = %x + %x\n", S, A);
 			finValue = S + A;
 			break;
 		case R_386_PC32:
-			printf("R_386_PC32: S + A - P = %x + %x - %x\n", S, A, P);
+			//printf("R_386_PC32: S + A - P = %x + %x - %x\n", S, A, P);
 			finValue = S + A - P;
 			break;
 		case R_386_GOT32:
-			printf("R_386_GOT32: G + A = %x + %x\n", G, A);
+			//printf("R_386_GOT32: G + A = %x + %x\n", G, A);
 			finValue = G + A;
 			break;
 		case R_386_PLT32:
-			printf("R_386_PLT32: L + A - P = %x + %x - %x\n", L, A, P);
+			//printf("R_386_PLT32: L + A - P = %x + %x - %x\n", L, A, P);
 			finValue = L + A - P;
 			break;
 		case R_386_COPY:
 			printf("R_386_COPY\n");
 			break;
 		case R_386_GLOB_DAT:
-			printf("R_386_GLOB_DAT: S = %x\n", S);
+			//printf("R_386_GLOB_DAT: S = %x\n", S);
 			finValue = S;
 			break;
 		case R_386_JMP_SLOT:
-			printf("R_386_JMP_SLOT: S = %x\n", S);
+			//printf("R_386_JMP_SLOT: S = %x\n", S);
 			finValue = S;
 			break;
 		case R_386_RELATIVE:
-			printf("R_386_RELATIVE: B + A = %x + %x\n", B, A);
+			//printf("R_386_RELATIVE: B + A = %x + %x\n", B, A);
 			finValue = B + A;
 			break;
 		case R_386_GOTOFF:
-			printf("R_386_GOTOFF: S + A - GOT = %x + %x - %x\n", S, A, GOT);
+			//printf("R_386_GOTOFF: S + A - GOT = %x + %x - %x\n", S, A, GOT);
 			finValue = S + A - GOT;
 			break;
 		case R_386_GOTPC:
-			printf("R_386_GOTPC: GOT + A - P = %x + %x - %x\n", GOT, A, P);
+			//printf("R_386_GOTPC: GOT + A - P = %x + %x - %x\n", GOT, A, P);
 			finValue = GOT + A - P;
 			break;
 		default:
@@ -734,7 +734,6 @@ void ElfLoader::solveRelocation(Elf32_Rel reloc, Bit8u scopeIndex) {
 
 	bx_mem.write((Bit8u *)&finValue, bx_mem.virtualAddressToPosition(relOff), sizeof(Elf32_Word));
 }
-
 
 Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol) {
 	Elf32_Addr hashAddr = 0, gnuHashAddr = 0;
@@ -751,16 +750,16 @@ Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *sy
 	}
 
 	// identify the best type of hash to use
-//	if (gnuHashAddr != 0) {
-//		return symbolLookupGnuHash(symbIndex, scopeIndex, symbol);
-//	}
-//	else if (hashAddr != 0) {
+	if (gnuHashAddr != 0) {
+		return symbolLookupGnuHash(symbIndex, scopeIndex, symbol);
+	}
+	else if (hashAddr != 0) {
 		return symbolLookupElfHash(symbIndex, scopeIndex, symbol);
-//	}
-//	else {
-//		BX_ERROR(("Object doesn't have an HASH or GNU_HASH section."));
-//		return 0;
-//	}
+	}
+	else {
+		BX_ERROR(("Object doesn't have an HASH or GNU_HASH section."));
+		return 0;
+	}
 }
 
 /*!
@@ -881,8 +880,8 @@ Bit32u ElfLoader::symbolLookupElfHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_
 			}
 
 			// read the number of buckets and the number of chains
-			fprintf(stderr, "Name: %s\n", elf->getFileName().c_str());
-			fprintf(stderr, "hashAddr=%lx\n" ,hashAddr);
+			//fprintf(stderr, "Name: %s\n", elf->getFileName().c_str());
+			//fprintf(stderr, "hashAddr=%lx\n" ,hashAddr);
 			bx_mem.read((Bit8u *)&nbucket, hashAddr, sizeof(nbucket));
 			bx_mem.read((Bit8u *)&nchain, hashAddr + sizeof(nbucket), sizeof(nchain));
 
@@ -1042,41 +1041,19 @@ Bit32u ElfLoader::symbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_
 		else {	// symbol search by name hash
 			// the current object scope is the mainExecutable or is a shared lib?
 			if (scEntry == -1) {
-				GnuHashInfo ghi = mainExecutable.getGnuHashInfo();
-
-				fprintf(stderr, "*gnuhash = %x\n", ghi.os_bloom);
-
-				ghi.os_dynstr 	= bx_mem.virtualAddressToPosition(ghi.os_dynstr);
-				ghi.os_dynsym 	= bx_mem.virtualAddressToPosition(ghi.os_dynsym);
-				ghi.os_bloom	= bx_mem.virtualAddressToPosition(ghi.os_bloom);
-				ghi.os_buckets	= bx_mem.virtualAddressToPosition(ghi.os_buckets);
-				ghi.os_hashval 	= bx_mem.virtualAddressToPosition(ghi.os_hashval);
-				ghi.os_maskwords_bm = ghi.os_maskwords_bm - 1;
-
-				fprintf(stderr, "*gnuhash = %x\n", ghi.os_bloom);
+				GnuHashInfo ghi = createGnuHashInfo(&mainExecutable, -bx_mem.virtualBase);
 
 				findSymbolGnuHash(ghi, (const char *)symName, symbol);
 			}
 			else {
-				GnuHashInfo ghi = sharedLibs[scEntry].getGnuHashInfo();
-
-				fprintf(stderr, "**gnuhash = %x\n", ghi.os_bloom);
-
-				ghi.os_dynstr 	= loadedSegments[2*(scEntry+1)].loadedPos + ghi.os_dynstr;
-				ghi.os_dynsym 	= loadedSegments[2*(scEntry+1)].loadedPos + ghi.os_dynsym;
-				ghi.os_bloom	= loadedSegments[2*(scEntry+1)].loadedPos + ghi.os_bloom;
-				ghi.os_buckets	= loadedSegments[2*(scEntry+1)].loadedPos + ghi.os_buckets;
-				ghi.os_hashval 	= loadedSegments[2*(scEntry+1)].loadedPos + ghi.os_hashval;
-				ghi.os_maskwords_bm = ghi.os_maskwords_bm - 1;
-
-				fprintf(stderr, "**gnuhash = %x\n", ghi.os_bloom);
+				GnuHashInfo ghi = createGnuHashInfo(&sharedLibs[scEntry], loadedSegments[2*(scEntry+1)].loadedPos);
 
 				findSymbolGnuHash(ghi, (const char *)symName, symbol);
 			}
 
 			// return the symbol address
 			if (symbol != NULL) {
-
+			    return 323;
 			}
 		}
 	}
@@ -1121,68 +1098,67 @@ Elf32_Addr ElfLoader::findSymbolGnuHash(GnuHashInfo os, const char *symname, Elf
 	c = sizeof (Elf32_Word) * 8;
 	n = (h1 / c) & os.os_maskwords_bm;
 	bitmask = (1 << (h1 % c)) | (1 << (h2 % c));
-	fprintf(stderr, "%x\n", os.os_bloom + n*sizeof(Elf32_Word));
 	bx_mem.read((Bit8u *)&bloom, os.os_bloom + n*sizeof(Elf32_Word), sizeof(Elf32_Word)); // os->os_bloom[n];
 	if ((bloom & bitmask) != bitmask)
 		return (NULL);
 
-//	/* Locate the hash chain, and corresponding hash value element */
-//	bx_mem.read((Bit8u *)&bucket, os.os_buckets + (h1 % os.os_nbuckets)*sizeof(Elf32_Word), sizeof(Elf32_Word));
-//	n = bucket; //os.os_buckets[h1 % os.os_nbuckets];
-//	if (n == 0)    /* Empty hash chain, symbol not present */
-//		return (NULL);
-//
-//	Elf32_Word idx_sym = n;
-//	Elf32_Word idx_has = n - os.os_symndx;
+	/* Locate the hash chain, and corresponding hash value element */
+	bx_mem.read((Bit8u *)&bucket, os.os_buckets + (h1 % os.os_nbuckets)*sizeof(Elf32_Word), sizeof(Elf32_Word));
+	n = bucket; //os.os_buckets[h1 % os.os_nbuckets];
+	if (n == 0)    /* Empty hash chain, symbol not present */
+		return (NULL);
 
-//	bx_mem.read((Bit8u *)symbol, 	os.os_dynsym  + idx_sym*sizeof(Elf32_Sym), sizeof(Elf32_Sym)); // symbol 	= &os.os_dynsym[n];
-//	bx_mem.read((Bit8u *)&hashval, 	os.os_hashval + idx_has*sizeof(Elf32_Word), sizeof(Elf32_Word)); // hashval = &os.os_hashval[n - os.os_symndx];
+	Elf32_Word idx_sym = n;
+	Elf32_Word idx_has = n - os.os_symndx;
+
+	bx_mem.read((Bit8u *)symbol, 	os.os_dynsym  + idx_sym*sizeof(Elf32_Sym), sizeof(Elf32_Sym)); // symbol 	= &os.os_dynsym[n];
+	bx_mem.read((Bit8u *)&hashval, 	os.os_hashval + idx_has*sizeof(Elf32_Word), sizeof(Elf32_Word)); // hashval = &os.os_hashval[n - os.os_symndx];
 
 	/*
 	 * Walk the chain until the symbol is found or
 	 * the chain is exhausted.
 	 */
-//	for (h1 &= ~1; 1; symbol++) {
-//	h1 &= ~1;
-//	while (true) {
-//		h2 = hashval;
-//
-//		// this is hashvall++ originally
-//		idx_has++;
-//		bx_mem.read((Bit8u *)&hashval, os.os_hashval + idx_has*sizeof(Elf32_Word), sizeof(Elf32_Word));
-//
-//		/*
-//		 * Compare the strings to verify match. Note that
-//		 * a given hash chain can contain different hash
-//		 * values. We'd get the right result by comparing every
-//		 * string, but comparing the hash values first lets us
-//		 * screen obvious mismatches at very low cost and avoid
-//		 * the relatively expensive string compare.
-//		 *
-//		 * We are intentionally glossing over some things here:
-//		 *
-//		 *    -  We could test sym->st_name for 0, which indicates
-//		 *	 a NULL string, and avoid a strcmp() in that case.
-//		 *
-//		 *    - The real runtime linker must also take symbol
-//		 * 	versioning into account. This is an orthogonal
-//		 *	issue to hashing, and is left out of this
-//		 *	example for simplicity.
-//		 *
-//		 * A real implementation might test (h1 == (h2 & ~1), and then
-//		 * call a (possibly inline) function to validate the rest.
-//		 */
-//		if ((h1 == (h2 & ~1)) &&
-//			!strcmp((char *)symname, (char *)bx_mem.str(os.os_dynstr + symbol->st_name)))
-//				return os.os_dynsym  + idx_sym*sizeof(Elf32_Sym);
-//
-//		/* Done if at end of chain */
-//		if (h2 & 1)
-//			break;
-//
-//		idx_sym++;
-//		bx_mem.read((Bit8u *)symbol, os.os_dynsym + idx_sym*sizeof(Elf32_Sym), sizeof(Elf32_Sym));
-//	}
+	//for (h1 &= ~1; 1; symbol++) {
+	h1 &= ~1;
+	while (true) {
+		h2 = hashval;
+
+		// this is hashvall++ originally
+		idx_has++;
+		bx_mem.read((Bit8u *)&hashval, os.os_hashval + idx_has*sizeof(Elf32_Word), sizeof(Elf32_Word));
+
+		/*
+		 * Compare the strings to verify match. Note that
+		 * a given hash chain can contain different hash
+		 * values. We'd get the right result by comparing every
+		 * string, but comparing the hash values first lets us
+		 * screen obvious mismatches at very low cost and avoid
+		 * the relatively expensive string compare.
+		 *
+		 * We are intentionally glossing over some things here:
+		 *
+		 *    -  We could test sym->st_name for 0, which indicates
+		 *	 a NULL string, and avoid a strcmp() in that case.
+		 *
+		 *    - The real runtime linker must also take symbol
+		 * 	versioning into account. This is an orthogonal
+		 *	issue to hashing, and is left out of this
+		 *	example for simplicity.
+		 *
+		 * A real implementation might test (h1 == (h2 & ~1), and then
+		 * call a (possibly inline) function to validate the rest.
+		 */
+		if ((h1 == (h2 & ~1)) &&
+			!strcmp((char *)symname, (char *)bx_mem.str(os.os_dynstr + symbol->st_name)))
+				return os.os_dynsym  + idx_sym*sizeof(Elf32_Sym);
+
+		/* Done if at end of chain */
+		if (h2 & 1)
+			break;
+
+		idx_sym++;
+		bx_mem.read((Bit8u *)symbol, os.os_dynsym + idx_sym*sizeof(Elf32_Sym), sizeof(Elf32_Sym));
+	}
 
 	/* This object does not have the desired symbol */
 	return (NULL);
@@ -1292,4 +1268,47 @@ void ElfLoader::parseLdCache() {
 	}
 
 	pclose(pipe);
+}
+
+GnuHashInfo ElfLoader::createGnuHashInfo(ElfParser *elf, Bit32s loadedPos) {
+    GnuHashInfo ghi;
+
+//    fprintf(stderr, "GNU HASH INFO\n");
+//    fprintf(stderr, "gnu hash addr: %x\n", elf->getGnuHash());
+//    fprintf(stderr, "lib base addr: %x\n", loadedPos);
+//    fprintf(stderr, "gnu hash addr adjusted: %x\n", loadedPos + elf->getGnuHash());
+
+    // address of dynamic string table
+    ghi.os_dynstr = loadedPos + elf->getStrtab();
+
+    // address of dynsym
+    ghi.os_dynsym = loadedPos + elf->getDynsym();
+
+    // read nbuckets
+    //fprintf(stderr, "reading buckets from: %x\n", loadedPos + elf->getGnuHash());
+    bx_mem.read((Bit8u *)&ghi.os_nbuckets, loadedPos + elf->getGnuHash(), sizeof(Elf32_Word));
+    //fprintf(stderr, "num buckets: %x\n", ghi.os_nbuckets);
+
+    // read symndx
+    bx_mem.read((Bit8u *)&ghi.os_symndx, loadedPos + elf->getGnuHash() + 1*sizeof(Elf32_Word), sizeof(Elf32_Word));
+
+    // read maskwords
+    bx_mem.read((Bit8u *)&ghi.os_maskwords_bm, loadedPos + elf->getGnuHash() + 2*sizeof(Elf32_Word), sizeof(Elf32_Word));
+
+    // read shift2
+    bx_mem.read((Bit8u *)&ghi.os_shift2, loadedPos + elf->getGnuHash() + 3*sizeof(Elf32_Word), sizeof(Elf32_Word));
+
+    // start 4*(32) bits after the gnuHash
+    ghi.os_bloom        = loadedPos + elf->getGnuHash() + 4*sizeof(Elf32_Word);
+
+    // start after the header and bloom filter
+    ghi.os_buckets      = loadedPos + elf->getGnuHash() + (4 + ghi.os_maskwords_bm)*sizeof(Elf32_Word);
+
+    // start after the header, bloom filter and buckets
+    ghi.os_hashval      = loadedPos + elf->getGnuHash() + (4 + ghi.os_maskwords_bm + ghi.os_nbuckets)*sizeof(Elf32_Word);
+
+    // this is the number of entries in the bloom filter minus one
+    ghi.os_maskwords_bm = ghi.os_maskwords_bm - 1;
+
+    return ghi;
 }

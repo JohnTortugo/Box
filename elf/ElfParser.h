@@ -9,17 +9,6 @@
 #include <cstring>
 using namespace std;
 
-struct GnuHashInfo {
-    Elf32_Addr	os_dynstr;       /* Dynamic string table 			*/
-    Elf32_Addr  os_dynsym;       /* Dynamic symbol table 			*/
-    Elf32_Word  os_nbuckets;     /* # hash buckets 					*/
-    Elf32_Word  os_symndx;       /* Index of 1st dynsym in hash 	*/
-    Elf32_Word  os_maskwords_bm; /* # Bloom filter words, minus 1 	*/
-    Elf32_Word	os_shift2;       /* Bloom filter hash shift 		*/
-    Elf32_Addr	os_bloom;        /* Bloom filter words 				*/
-    Elf32_Addr	os_buckets;      /* Hash buckets 					*/
-    Elf32_Addr	os_hashval;      /* Hash value array 				*/
-};
 
 class ElfParser {
 // private fields
@@ -226,43 +215,6 @@ public:
 
 	Elf32_Ehdr getHdr() const {
 		return hdr;
-	}
-
-	GnuHashInfo getGnuHashInfo() {
-		GnuHashInfo ghi;
-
-		// address of dynamic string table
-		ghi.os_dynstr = strtab;
-
-		// address of dynsym
-		ghi.os_dynsym = dynsym;
-
-		// read nbuckets
-		fseek(felf, gnuHash, SEEK_SET);
-		fread(&ghi.os_nbuckets, sizeof(Elf32_Word), 1, felf);
-
-		// read symndx
-		fseek(felf, gnuHash + 1*sizeof(Elf32_Word), SEEK_SET);
-		fread(&ghi.os_symndx, sizeof(Elf32_Word), 1, felf);
-
-		// read maskwords
-		fseek(felf, gnuHash + 2*sizeof(Elf32_Word), SEEK_SET);
-		fread(&ghi.os_maskwords_bm, sizeof(Elf32_Word), 1, felf);
-
-		// read shift2
-		fseek(felf, gnuHash + 3*sizeof(Elf32_Word), SEEK_SET);
-		fread(&ghi.os_shift2, sizeof(Elf32_Word), 1, felf);
-
-		// start 4*(32) bits after the gnuHash
-		ghi.os_bloom 		= gnuHash + 4*sizeof(Elf32_Word);
-
-		// start after the header and bloom filter
-		ghi.os_buckets 		= gnuHash + (4 + ghi.os_maskwords_bm)*sizeof(Elf32_Word);
-
-		// start after the header, bloom filter and buckets
-		ghi.os_hashval 		= gnuHash + (4 + ghi.os_maskwords_bm + ghi.os_nbuckets)*sizeof(Elf32_Word);
-
-		return ghi;
 	}
 };
 

@@ -31,6 +31,22 @@ public:
 	Bit32u loadedPos;
 };
 
+/*!
+ * This class describe information needed to lookup a symbol in a
+ * GNU_HASH section.
+ */
+struct GnuHashInfo {
+    Elf32_Addr  os_dynstr;       /* Dynamic string table            */
+    Elf32_Addr  os_dynsym;       /* Dynamic symbol table            */
+    Elf32_Word  os_nbuckets;     /* # hash buckets                  */
+    Elf32_Word  os_symndx;       /* Index of 1st dynsym in hash     */
+    Elf32_Word  os_maskwords_bm; /* # Bloom filter words, minus 1   */
+    Elf32_Word  os_shift2;       /* Bloom filter hash shift         */
+    Elf32_Addr  os_bloom;        /* Bloom filter words              */
+    Elf32_Addr  os_buckets;      /* Hash buckets                    */
+    Elf32_Addr  os_hashval;      /* Hash value array                */
+};
+
 class ElfLoader {
 private:
 	string executablePath;
@@ -114,6 +130,8 @@ public:
 	Elf32_Sym symbolFromSymbIndex(ElfParser elf, Bit32u symbIndex, Bit32s loadedPos);
 
 	Bit8u * symbolNameFromSymbol(ElfParser elf, Elf32_Sym symbol, Bit32s loadedPos);
+
+	GnuHashInfo createGnuHashInfo(ElfParser *elf, Bit32s loadedPos);
 
 	Bit32u getEntryAddress() const { return mainExecutable.getEntryAddress(); }
 
