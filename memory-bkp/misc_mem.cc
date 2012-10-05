@@ -25,7 +25,6 @@
 #include "bochs.h"
 #include "param_names.h"
 #include "cpu/cpu.h"
-#include "../debug.h"
 #define LOG_THIS BX_MEM(0)->
 
 // alignment of memory vector, must be a power of 2

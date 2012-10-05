@@ -22,7 +22,6 @@
 
 #include "bochs.h"
 #include "cpu/cpu.h"
-#include "../debug.h"
 //#define LOG_THIS BX_MEM_THIS
 
 //

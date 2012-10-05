@@ -22,7 +22,6 @@
 #define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
 #include "cpu.h"
-#include "../debug.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
 #if BX_CPU_LEVEL >= 3
@@ -88,8 +87,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::RETnear32(bxInstruction_c *i)
   RSP_SPECULATIVE;
 
   Bit32u return_EIP = pop_32();
-
-  printf("RETnear32: return_EIP: %08lx\n",return_EIP);
 
   if (return_EIP > BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled)
   {
@@ -160,9 +157,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CALL_Jd(bxInstruction_c *i)
   Bit32u new_EIP = EIP + i->Id();
 
   RSP_SPECULATIVE;
-
-  printf("CALL_Jd: EIP: %08lx\n",EIP);
-  printf("CALL_Jd: new_EIP: %08lx\n",new_EIP);
 
   /* push 32 bit EA of next instruction */
   push_32(EIP);
