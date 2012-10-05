@@ -22,6 +22,7 @@
 #define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
 #include "cpu.h"
+#include "../debug.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XOR_EwGwM(bxInstruction_c *i)
@@ -61,7 +62,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XOR_GwEwM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   op1_16 = BX_READ_16BIT_REG(i->dst());
-  op2_16 = bx_mem.read_word(i->seg(), eaddr);
+  op2_16 = read_virtual_word(i->seg(), eaddr);
   op1_16 ^= op2_16;
   BX_WRITE_16BIT_REG(i->dst(), op1_16);
 
@@ -179,7 +180,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::OR_GwEwM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   op1_16 = BX_READ_16BIT_REG(i->dst());
-  op2_16 = bx_mem.read_word(i->seg(), eaddr);
+  op2_16 = read_virtual_word(i->seg(), eaddr);
   op1_16 |= op2_16;
   BX_WRITE_16BIT_REG(i->dst(), op1_16);
 
@@ -225,7 +226,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::AND_GwEwM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   op1_16 = BX_READ_16BIT_REG(i->dst());
-  op2_16 = bx_mem.read_word(i->seg(), eaddr);
+  op2_16 = read_virtual_word(i->seg(), eaddr);
   op1_16 &= op2_16;
   BX_WRITE_16BIT_REG(i->dst(), op1_16);
 
@@ -278,7 +279,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::TEST_EwGwM(bxInstruction_c *i)
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  op1_16 = bx_mem.read_word(i->seg(), eaddr);
+  op1_16 = read_virtual_word(i->seg(), eaddr);
   op2_16 = BX_READ_16BIT_REG(i->src());
   op1_16 &= op2_16;
   SET_FLAGS_OSZAPC_LOGIC_16(op1_16);
@@ -299,7 +300,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::TEST_EwIwM(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit16u op1_16 = bx_mem.read_word(i->seg(), eaddr);
+  Bit16u op1_16 = read_virtual_word(i->seg(), eaddr);
   op1_16 &= i->Iw();
   SET_FLAGS_OSZAPC_LOGIC_16(op1_16);
 

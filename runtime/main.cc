@@ -105,7 +105,7 @@ void bx_load_null_kernel_hack(void)
   BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.valid = 1; 	// Valid segment cache
   BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.p = 1;				// Segment present
   BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.dpl = 3; 	           // Ring 3
-  //BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.type = 3; 	   // Type read/write
+  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.type = 3; 	   // Type read/write
   BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.segment = 1; 	   // Data/Code segment
   BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.u.segment.base = 0x00000000;
   BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.u.segment.limit_scaled = 0xFFFFFFFF;

@@ -86,7 +86,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::BT_EwGwM(bxInstruction_c *i)
   op1_addr = eaddr + 2 * displacement32;
 
   /* pointer, segment address pair */
-  op1_16 = bx_mem.read_word(i->seg(), op1_addr & i->asize_mask());
+  op1_16 = read_virtual_word(i->seg(), op1_addr & i->asize_mask());
 
   set_CF((op1_16 >> index) & 0x01);
 
@@ -232,7 +232,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::BT_EwIbM(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit16u op1_16 = bx_mem.read_word(i->seg(), eaddr);
+  Bit16u op1_16 = read_virtual_word(i->seg(), eaddr);
   Bit8u  op2_8  = i->Ib() & 0xf;
 
   set_CF((op1_16 >> op2_8) & 0x01);

@@ -86,7 +86,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LAR_GvEw(bxInstruction_c *i)
   else {
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
     /* pointer, segment address pair */
-    raw_selector = bx_mem.read_word(i->seg(), eaddr);
+    raw_selector = read_virtual_word(i->seg(), eaddr);
   }
 
   /* if selector null, clear ZF and done */
@@ -199,7 +199,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LSL_GvEw(bxInstruction_c *i)
   else {
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
     /* pointer, segment address pair */
-    raw_selector = bx_mem.read_word(i->seg(), eaddr);
+    raw_selector = read_virtual_word(i->seg(), eaddr);
   }
 
   /* if selector null, clear ZF and done */
@@ -305,7 +305,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SLDT_Ew(bxInstruction_c *i)
   else {
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
     /* pointer, segment address pair */
-    bx_mem.write_word(i->seg(), eaddr, val16);
+    write_virtual_word(i->seg(), eaddr, val16);
   }
 
   BX_NEXT_INSTR(i);
@@ -336,7 +336,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::STR_Ew(bxInstruction_c *i)
   else {
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
     /* pointer, segment address pair */
-    bx_mem.write_word(i->seg(), eaddr, val16);
+    write_virtual_word(i->seg(), eaddr, val16);
   }
 
   BX_NEXT_INSTR(i);
@@ -375,7 +375,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LLDT_Ew(bxInstruction_c *i)
   else {
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
     /* pointer, segment address pair */
-    raw_selector = bx_mem.read_word(i->seg(), eaddr);
+    raw_selector = read_virtual_word(i->seg(), eaddr);
   }
 
   /* if selector is NULL, invalidate and done */
@@ -472,7 +472,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LTR_Ew(bxInstruction_c *i)
   else {
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
     /* pointer, segment address pair */
-    raw_selector = bx_mem.read_word(i->seg(), eaddr);
+    raw_selector = read_virtual_word(i->seg(), eaddr);
   }
 
   /* if selector is NULL, invalidate and done */
@@ -572,7 +572,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::VERR_Ew(bxInstruction_c *i)
   else {
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
     /* pointer, segment address pair */
-    raw_selector = bx_mem.read_word(i->seg(), eaddr);
+    raw_selector = read_virtual_word(i->seg(), eaddr);
   }
 
   /* if selector null, clear ZF and done */
@@ -664,7 +664,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::VERW_Ew(bxInstruction_c *i)
   else {
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
     /* pointer, segment address pair */
-    raw_selector = bx_mem.read_word(i->seg(), eaddr);
+    raw_selector = read_virtual_word(i->seg(), eaddr);
   }
 
   /* if selector null, clear ZF and done */
@@ -740,8 +740,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SGDT_Ms(bxInstruction_c *i)
 
   Bit32u eaddr = (Bit32u) BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  bx_mem.write_word(i->seg(), eaddr, limit_16);
-  bx_mem.write_dword(i->seg(), (eaddr+2) & i->asize_mask(), base_32);
+  write_virtual_word_32(i->seg(), eaddr, limit_16);
+  write_virtual_dword_32(i->seg(), (eaddr+2) & i->asize_mask(), base_32);
 
   BX_NEXT_INSTR(i);
 }
@@ -767,8 +767,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::SIDT_Ms(bxInstruction_c *i)
 
   Bit32u eaddr = (Bit32u) BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  bx_mem.write_word(i->seg(), eaddr, limit_16);
-  bx_mem.write_dword(i->seg(), (eaddr+2) & i->asize_mask(), base_32);
+  write_virtual_word_32(i->seg(), eaddr, limit_16);
+  write_virtual_dword_32(i->seg(), (eaddr+2) & i->asize_mask(), base_32);
 
   BX_NEXT_INSTR(i);
 }
@@ -797,8 +797,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LGDT_Ms(bxInstruction_c *i)
 
   Bit32u eaddr = (Bit32u) BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit16u limit_16 = bx_mem.read_word(i->seg(), eaddr);
-  Bit32u base_32 = bx_mem.read_dword(i->seg(), (eaddr + 2) & i->asize_mask());
+  Bit16u limit_16 = read_virtual_word_32(i->seg(), eaddr);
+  Bit32u base_32 = read_virtual_dword_32(i->seg(), (eaddr + 2) & i->asize_mask());
 
   if (i->os32L() == 0) base_32 &= 0x00ffffff; /* ignore upper 8 bits */
 
@@ -832,8 +832,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LIDT_Ms(bxInstruction_c *i)
 
   Bit32u eaddr = (Bit32u) BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit16u limit_16 = bx_mem.read_word(i->seg(), eaddr);
-  Bit32u base_32 = bx_mem.read_dword(i->seg(), (eaddr + 2) & i->asize_mask());
+  Bit16u limit_16 = read_virtual_word_32(i->seg(), eaddr);
+  Bit32u base_32 = read_virtual_dword_32(i->seg(), (eaddr + 2) & i->asize_mask());
 
   if (i->os32L() == 0) base_32 &= 0x00ffffff; /* ignore upper 8 bits */
 

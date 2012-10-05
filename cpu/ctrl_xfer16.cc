@@ -22,7 +22,7 @@
 #define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
 #include "cpu.h"
-#include "debug.h"
+#include "../debug.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
 BX_CPP_INLINE void BX_CPP_AttrRegparmN(1) BX_CPU_C::branch_near16(Bit16u new_IP)
@@ -129,7 +129,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::RETfar16_Iw(bxInstruction_c *i)
 
   // CS.LIMIT can't change when in real/v8086 mode
   if (ip > BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled) {
-	  BX_ERROR(("RETfar16_Iw: instruction pointer not within code segment limits"));
+    BX_ERROR(("RETfar16_Iw: instruction pointer not within code segment limits"));
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -197,7 +197,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CALL16_Ap(bxInstruction_c *i)
 
   // CS.LIMIT can't change when in real/v8086 mode
   if (disp16 > BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled) {
-	  BX_ERROR(("CALL16_Ap: instruction pointer not within code segment limits"));
+    BX_ERROR(("CALL16_Ap: instruction pointer not within code segment limits"));
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -248,8 +248,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CALL16_Ep(bxInstruction_c *i)
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  op1_16 = bx_mem.read_word(i->seg(), eaddr);
-  cs_raw = bx_mem.read_word(i->seg(), (eaddr+2) & i->asize_mask());
+  op1_16 = read_virtual_word(i->seg(), eaddr);
+  cs_raw = read_virtual_word(i->seg(), (eaddr+2) & i->asize_mask());
 
   RSP_SPECULATIVE;
 
@@ -263,7 +263,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CALL16_Ep(bxInstruction_c *i)
 
   // CS.LIMIT can't change when in real/v8086 mode
   if (op1_16 > BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled) {
-	  BX_ERROR(("CALL16_Ep: instruction pointer not within code segment limits"));
+    BX_ERROR(("CALL16_Ep: instruction pointer not within code segment limits"));
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -515,8 +515,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JMP16_Ep(bxInstruction_c *i)
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  op1_16 = bx_mem.read_word(i->seg(), eaddr);
-  cs_raw = bx_mem.read_word(i->seg(), (eaddr+2) & i->asize_mask());
+  op1_16 = read_virtual_word(i->seg(), eaddr);
+  cs_raw = read_virtual_word(i->seg(), (eaddr+2) & i->asize_mask());
 
   // jump_protected doesn't affect RSP so it is RSP safe
   if (protected_mode()) {
@@ -526,7 +526,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::JMP16_Ep(bxInstruction_c *i)
 
   // CS.LIMIT can't change when in real/v8086 mode
   if (op1_16 > BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled) {
-	  BX_ERROR(("JMP16_Ep: instruction pointer not within code segment limits"));
+    BX_ERROR(("JMP16_Ep: instruction pointer not within code segment limits"));
     exception(BX_GP_EXCEPTION, 0);
   }
 
@@ -572,7 +572,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::IRET16(bxInstruction_c *i)
 
     // CS.LIMIT can't change when in real/v8086 mode
     if(ip > BX_CPU_THIS_PTR sregs[BX_SEG_REG_CS].cache.u.segment.limit_scaled) {
-    	BX_ERROR(("IRET16: instruction pointer not within code segment limits"));
+      BX_ERROR(("IRET16: instruction pointer not within code segment limits"));
       exception(BX_GP_EXCEPTION, 0);
     }
 

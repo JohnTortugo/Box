@@ -32,11 +32,11 @@
 
 void BX_CPU_C::print_state_SSE(void)
 {
-  printf("MXCSR: 0x%08x\n", BX_MXCSR_REGISTER);
+  BX_DEBUG(("MXCSR: 0x%08x\n", BX_MXCSR_REGISTER));
   for(unsigned n=0;n<BX_XMM_REGISTERS;n++) {
     BxPackedXmmRegister xmm = BX_READ_XMM_REG(n);
-    printf("XMM%02u: %08x%08x:%08x%08x\n", n,
-       xmm.xmm32u(3), xmm.xmm32u(2), xmm.xmm32u(1), xmm.xmm32u(0));
+    BX_DEBUG(("XMM%02u: %08x%08x:%08x%08x\n", n,
+       xmm.xmm32u(3), xmm.xmm32u(2), xmm.xmm32u(1), xmm.xmm32u(0)));
   }
 }
 
@@ -128,7 +128,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::LDMXCSR(bxInstruction_c *i)
 #if BX_CPU_LEVEL >= 6
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit32u new_mxcsr = bx_mem.read_dword(i->seg(), eaddr);
+  Bit32u new_mxcsr = read_virtual_dword(i->seg(), eaddr);
   if(new_mxcsr & ~MXCSR_MASK)
       exception(BX_GP_EXCEPTION, 0);
 
@@ -146,7 +146,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::STMXCSR(bxInstruction_c *i)
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  bx_mem.write_dword(i->seg(), eaddr, mxcsr);
+  write_virtual_dword(i->seg(), eaddr, mxcsr);
 #endif
 
   BX_NEXT_INSTR(i);
@@ -159,7 +159,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FXSAVE(bxInstruction_c *i)
   unsigned index;
   BxPackedXmmRegister xmm;
 
-  printf("FXSAVE: save FPU/MMX/SSE state");
+  BX_DEBUG(("FXSAVE: save FPU/MMX/SSE state"));
 
   if (BX_CPU_THIS_PTR cr0.get_EM() || BX_CPU_THIS_PTR cr0.get_TS())
     exception(BX_NM_EXCEPTION, 0);
@@ -277,7 +277,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FXRSTOR(bxInstruction_c *i)
   BxPackedXmmRegister xmm;
   unsigned index;
 
-  printf("FXRSTOR: restore FPU/MMX/SSE state");
+  BX_DEBUG(("FXRSTOR: restore FPU/MMX/SSE state"));
 
   if (BX_CPU_THIS_PTR cr0.get_EM() || BX_CPU_THIS_PTR cr0.get_TS())
     exception(BX_NM_EXCEPTION, 0);
@@ -343,8 +343,8 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::FXRSTOR(bxInstruction_c *i)
   for(index=0; index < 8; index++)
   {
     floatx80 reg;
-    reg.fraction = bx_mem.read_qword(i->seg(), (eaddr+index*16+32) & asize_mask);
-    reg.exp      = bx_mem.read_word(i->seg(), (eaddr+index*16+40) & asize_mask);
+    reg.fraction = read_virtual_qword(i->seg(), (eaddr+index*16+32) & asize_mask);
+    reg.exp      = read_virtual_word (i->seg(), (eaddr+index*16+40) & asize_mask);
 
     // update tag only if it is not empty
     BX_WRITE_FPU_REGISTER_AND_TAG(reg,
@@ -476,7 +476,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVSS_VssWssM(bxInstruction_c *i)
 
   /* If the source operand is a memory location, the high-order
           96 bits of the destination XMM register are cleared to 0s */
-  op.xmm64u(0) = (Bit64u) bx_mem.read_dword(i->seg(), eaddr);
+  op.xmm64u(0) = (Bit64u) read_virtual_dword(i->seg(), eaddr);
   op.xmm64u(1) = 0;
 
   BX_WRITE_XMM_REGZ(i->dst(), op, i->getVL());
@@ -490,7 +490,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVSS_WssVssM(bxInstruction_c *i)
 {
 #if BX_CPU_LEVEL >= 6
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  bx_mem.write_dword(i->seg(), eaddr, BX_READ_XMM_REG_LO_DWORD(i->src()));
+  write_virtual_dword(i->seg(), eaddr, BX_READ_XMM_REG_LO_DWORD(i->src()));
 #endif
 
   BX_NEXT_INSTR(i);
@@ -502,7 +502,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVSD_WsdVsdM(bxInstruction_c *i)
 {
 #if BX_CPU_LEVEL >= 6
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  bx_mem.write_qword(i->seg(), eaddr, BX_XMM_REG_LO_QWORD(i->src()));
+  write_virtual_qword(i->seg(), eaddr, BX_XMM_REG_LO_QWORD(i->src()));
 #endif
 
   BX_NEXT_INSTR(i);
@@ -537,7 +537,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVLPS_VpsMq(bxInstruction_c *i)
 #if BX_CPU_LEVEL >= 6
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
   /* pointer, segment address pair */
-  Bit64u val64 = bx_mem.read_qword(i->seg(), eaddr);
+  Bit64u val64 = read_virtual_qword(i->seg(), eaddr);
 
   BX_WRITE_XMM_REG_LO_QWORD(i->dst(), val64);
 #endif
@@ -602,7 +602,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVHPS_VpsMq(bxInstruction_c *i)
 #if BX_CPU_LEVEL >= 6
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
   /* pointer, segment address pair */
-  Bit64u val64 = bx_mem.read_qword(i->seg(), eaddr);
+  Bit64u val64 = read_virtual_qword(i->seg(), eaddr);
 
   BX_WRITE_XMM_REG_HI_QWORD(i->dst(), val64);
 #endif
@@ -616,7 +616,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVHPS_MqVps(bxInstruction_c *i)
 {
 #if BX_CPU_LEVEL >= 6
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  bx_mem.write_qword(i->seg(), eaddr, BX_XMM_REG_HI_QWORD(i->src()));
+  write_virtual_qword(i->seg(), eaddr, BX_XMM_REG_HI_QWORD(i->src()));
 #endif
 
   BX_NEXT_INSTR(i);
@@ -646,7 +646,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MASKMOVDQU_VdqUdq(bxInstruction_c 
   // and write result back to the memory
   write_RMW_virtual_qword(temp.xmm64u(1));
   // write permissions already checked by read_RMW_virtual_qword_64
-  bx_mem.write_qword(i->seg(), rdi, temp.xmm64u(0));
+  write_virtual_qword(i->seg(), rdi, temp.xmm64u(0));
 #endif
 
   BX_NEXT_INSTR(i);
@@ -746,7 +746,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVQ_VqWqM(bxInstruction_c *i)
 #if BX_CPU_LEVEL >= 6
   BxPackedXmmRegister op;
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  op.xmm64u(0) = bx_mem.read_qword(i->seg(), eaddr);
+  op.xmm64u(0) = read_virtual_qword(i->seg(), eaddr);
   op.xmm64u(1) = 0; /* zero-extension to 128 bit */
 
   BX_WRITE_XMM_REGZ(i->dst(), op, i->getVL());

@@ -31,8 +31,8 @@ BX_INSF_TYPE BX_CPU_C::BOUND_GwMa(bxInstruction_c *i)
 
   Bit32u eaddr = (Bit32u) BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit16s bound_min = (Bit16s) bx_mem.read_word(i->seg(), eaddr);
-  Bit16s bound_max = (Bit16s) bx_mem.read_word(i->seg(), (eaddr+2) & i->asize_mask());
+  Bit16s bound_min = (Bit16s) read_virtual_word_32(i->seg(), eaddr);
+  Bit16s bound_max = (Bit16s) read_virtual_word_32(i->seg(), (eaddr+2) & i->asize_mask());
 
   if (op1_16 < bound_min || op1_16 > bound_max) {
     printf("BOUND_GdMa: fails bounds test");
@@ -48,8 +48,8 @@ BX_INSF_TYPE BX_CPU_C::BOUND_GdMa(bxInstruction_c *i)
 
   Bit32u eaddr = (Bit32u) BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit32s bound_min = (Bit32s) bx_mem.read_dword(i->seg(), eaddr);
-  Bit32s bound_max = (Bit32s) bx_mem.read_dword(i->seg(), (eaddr+4) & i->asize_mask());
+  Bit32s bound_min = (Bit32s) read_virtual_dword_32(i->seg(), eaddr);
+  Bit32s bound_max = (Bit32s) read_virtual_dword_32(i->seg(), (eaddr+4) & i->asize_mask());
 
   if (op1_32 < bound_min || op1_32 > bound_max) {
     printf("BOUND_GdMa: fails bounds test");

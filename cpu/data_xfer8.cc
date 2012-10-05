@@ -42,7 +42,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_EbGbM(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  bx_mem.write_byte(i->seg(), eaddr, BX_READ_8BIT_REGx(i->src(), i->extend8bitL()));
+  write_virtual_byte(i->seg(), eaddr, BX_READ_8BIT_REGx(i->src(), i->extend8bitL()));
 
   BX_NEXT_INSTR(i);
 }
@@ -51,7 +51,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_GbEbM(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit8u val8 = bx_mem.read_byte(i->seg(), eaddr);
+  Bit8u val8 = read_virtual_byte(i->seg(), eaddr);
   BX_WRITE_8BIT_REGx(i->dst(), i->extend8bitL(), val8);
 
   BX_NEXT_INSTR(i);
@@ -67,14 +67,14 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_GbEbR(bxInstruction_c *i)
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_ALOd(bxInstruction_c *i)
 {
-  AL = bx_mem.read_byte(i->seg(), i->Id());
+  AL = read_virtual_byte_32(i->seg(), i->Id());
 
   BX_NEXT_INSTR(i);
 }
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_OdAL(bxInstruction_c *i)
 {
-	bx_mem.write_byte(i->seg(), i->Id(), AL);
+  write_virtual_byte_32(i->seg(), i->Id(), AL);
 
   BX_NEXT_INSTR(i);
 }
@@ -83,7 +83,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::MOV_EbIbM(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  bx_mem.write_byte(i->seg(), eaddr, i->Ib());
+  write_virtual_byte(i->seg(), eaddr, i->Ib());
 
   BX_NEXT_INSTR(i);
 }
@@ -97,10 +97,10 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XLAT(bxInstruction_c *i)
   else
 #endif
   if (i->as32L()) {
-    AL = bx_mem.read_byte(i->seg(), (Bit32u) (EBX + AL));
+    AL = read_virtual_byte(i->seg(), (Bit32u) (EBX + AL));
   }
   else {
-    AL = bx_mem.read_byte(i->seg(), (Bit16u) (BX + AL));
+    AL = read_virtual_byte_32(i->seg(), (Bit16u) (BX + AL));
   }
 
   BX_NEXT_INSTR(i);

@@ -24,6 +24,7 @@
 #define NEED_CPU_REG_SHORTCUTS 1
 #include "bochs.h"
 #include "cpu.h"
+#include "../debug.h"
 #define LOG_THIS BX_CPU_THIS_PTR
 
 /* ********************************************** */
@@ -277,7 +278,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PEXTRB_EbdVdqIbM(bxInstruction_c *
   Bit8u result = op.xmmubyte(i->Ib() & 0xF);
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  bx_mem.write_byte(i->seg(), eaddr, result);
+  write_virtual_byte(i->seg(), eaddr, result);
 
   BX_NEXT_INSTR(i);
 }
@@ -297,7 +298,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PEXTRW_EwdVdqIbM(bxInstruction_c *
   Bit16u result = op.xmm16u(i->Ib() & 7);
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  bx_mem.write_word(i->seg(), eaddr, result);
+  write_virtual_word(i->seg(), eaddr, result);
 
   BX_NEXT_INSTR(i);
 }
@@ -338,7 +339,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PEXTRD_EdVdqIbM(bxInstruction_c *i
 #endif
 {
      Bit32u result = op.xmm32u(i->Ib() & 3);
-     bx_mem.write_dword(i->seg(), eaddr, result);
+     write_virtual_dword(i->seg(), eaddr, result);
   }
 
   BX_NEXT_INSTR(i);
@@ -359,7 +360,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::EXTRACTPS_EdVpsIbM(bxInstruction_c
   Bit32u result = op.xmm32u(i->Ib() & 3);
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-  bx_mem.write_dword(i->seg(), eaddr, result);
+  write_virtual_dword(i->seg(), eaddr, result);
 
   BX_NEXT_INSTR(i);
 }
@@ -383,7 +384,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PINSRB_VdqHdqEbIbM(bxInstruction_c
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  op1.xmmubyte(i->Ib() & 0xF) = bx_mem.read_byte(i->seg(), eaddr);
+  op1.xmmubyte(i->Ib() & 0xF) = read_virtual_byte(i->seg(), eaddr);
 
   BX_WRITE_XMM_REGZ(i->dst(), op1, i->getVL());
 
@@ -403,7 +404,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::INSERTPS_VpsHpsWssIb(bxInstruction
   }
   else {
     bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
-    op2 = bx_mem.read_dword(i->seg(), eaddr);
+    op2 = read_virtual_dword(i->seg(), eaddr);
   }
 
   op1.xmm32u((control >> 4) & 3) = op2;
@@ -451,7 +452,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PINSRD_VdqHdqEdIbM(bxInstruction_c
   else
 #endif
   {
-    Bit32u op2 = bx_mem.read_dword(i->seg(), eaddr);
+    Bit32u op2 = read_virtual_dword(i->seg(), eaddr);
     op1.xmm32u(i->Ib() & 3) = op2;
   }
 

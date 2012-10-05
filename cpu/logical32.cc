@@ -61,7 +61,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::XOR_GdEdM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   op1_32 = BX_READ_32BIT_REG(i->dst());
-  op2_32 = bx_mem.read_dword(i->seg(), eaddr);
+  op2_32 = read_virtual_dword(i->seg(), eaddr);
   op1_32 ^= op2_32;
   BX_WRITE_32BIT_REGZ(i->dst(), op1_32);
 
@@ -179,7 +179,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::OR_GdEdM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   op1_32 = BX_READ_32BIT_REG(i->dst());
-  op2_32 = bx_mem.read_dword(i->seg(), eaddr);
+  op2_32 = read_virtual_dword(i->seg(), eaddr);
   op1_32 |= op2_32;
   BX_WRITE_32BIT_REGZ(i->dst(), op1_32);
 
@@ -225,7 +225,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::AND_GdEdM(bxInstruction_c *i)
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
   op1_32 = BX_READ_32BIT_REG(i->dst());
-  op2_32 = bx_mem.read_dword(i->seg(), eaddr);
+  op2_32 = read_virtual_dword(i->seg(), eaddr);
   op1_32 &= op2_32;
   BX_WRITE_32BIT_REGZ(i->dst(), op1_32);
 
@@ -279,7 +279,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::TEST_EdGdM(bxInstruction_c *i)
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  op1_32 = bx_mem.read_dword(i->seg(), eaddr);
+  op1_32 = read_virtual_dword(i->seg(), eaddr);
   op2_32 = BX_READ_32BIT_REG(i->src());
   op1_32 &= op2_32;
 
@@ -301,7 +301,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::TEST_EdIdM(bxInstruction_c *i)
 {
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  Bit32u op1_32 = bx_mem.read_dword(i->seg(), eaddr);
+  Bit32u op1_32 = read_virtual_dword(i->seg(), eaddr);
   op1_32 &= i->Id();
   SET_FLAGS_OSZAPC_LOGIC_32(op1_32);
 

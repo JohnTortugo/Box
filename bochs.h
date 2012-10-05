@@ -228,6 +228,7 @@ extern "C" {
 #define SAFE_GET_GENLOG() \
   ((genlog==NULL)? (genlog=new logfunc_t(SAFE_GET_IOFUNC())) : genlog)
 
+#include "debug.h"
 //#define BX_INFO(x)  (LOG_THIS info) x
 //#define BX_DEBUG(x) (LOG_THIS ldebug) x
 //#define BX_ERROR(x) (LOG_THIS error) x
