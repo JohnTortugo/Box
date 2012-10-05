@@ -45,6 +45,7 @@ public:
 	Bit32u positionToVirtualAddress(Bit32u pos);
 	void read(Bit8u *content, Bit32u offset, Bit32u len);
 	void write(Bit8u *content, Bit32u offset, Bit32u len);
+	void copy(Bit32u offsetFrom, Bit32u offsetTo, Bit32u len);
 	Bit8u * memStrdup(Bit32u offset);
 	Bit8u * str(Bit32u offset) { return &memory[offset]; };
 

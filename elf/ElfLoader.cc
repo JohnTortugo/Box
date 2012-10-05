@@ -41,13 +41,13 @@ ElfLoader::ElfLoader(int p_argc, char **p_argv, char *ldLibPath, Bit8u *p_memory
 	loadSharedLibs();
 	BX_INFO(("Expanding symbol lookup scope."));
 	expandSymbolScopeMap();
-	dumpSymbolScopeMap();
+	//dumpSymbolScopeMap();
 	BX_INFO(("%d libraries loaded.", sharedLibs.size()));
 
 	// create the process address space
 	BX_INFO(("Mounting process address space."));
 	createAddressSpace();
-	dumpAddressSpaceInfo();
+	//dumpAddressSpaceInfo();
 	BX_INFO(("Address space mounted."));
 
 	// Doing relocations
@@ -663,15 +663,16 @@ void ElfLoader::solveRelocation(Elf32_Rel reloc, Bit8u scopeIndex) {
 	// what type of relocation is to be made
 	Bit32u relType 		= ELF32_R_TYPE(reloc.r_info);
 
-	// get the virtual address where the symbol is defined
-	Bit32u symbAddr		= 0;
-
 	// the symbol being relocated
 	Elf32_Sym symbol;
 
 	// if the relocation need a symbol solve it address now
 	if (relType == 1 || relType == 2 || relType == 6 || relType == 7 || relType == 9) {
-		symbAddr = symbolLookup(symbIndex, scopeIndex, &symbol);
+		bool symbFound = symbolLookup(symbIndex, scopeIndex, &symbol);
+
+		if (!symbFound) {
+		    BX_ERROR(("Symbol not found!"));
+		}
 	}
 
 	bx_mem.read((Bit8u *)&addend, bx_mem.virtualAddressToPosition(relOff), sizeof(Elf32_Word));
@@ -705,8 +706,9 @@ void ElfLoader::solveRelocation(Elf32_Rel reloc, Bit8u scopeIndex) {
 			finValue = L + A - P;
 			break;
 		case R_386_COPY:
-			printf("R_386_COPY\n");
-			break;
+			//printf("R_386_COPY\n");
+			bx_mem.copy(bx_mem.virtualAddressToPosition(symbol.st_value), bx_mem.virtualAddressToPosition(relOff), symbol.st_size);
+			return ;
 		case R_386_GLOB_DAT:
 			//printf("R_386_GLOB_DAT: S = %x\n", S);
 			finValue = S;
@@ -727,6 +729,38 @@ void ElfLoader::solveRelocation(Elf32_Rel reloc, Bit8u scopeIndex) {
 			//printf("R_386_GOTPC: GOT + A - P = %x + %x - %x\n", GOT, A, P);
 			finValue = GOT + A - P;
 			break;
+		case R_386_32PLT:
+		    /* not supported */
+		case R_386_TLS_TPOFF:
+		case R_386_TLS_IE:
+        case R_386_TLS_GOTIE:
+        case R_386_TLS_LE:
+        case R_386_TLS_GD:
+        case R_386_TLS_LDM:
+        case R_386_16:
+        case R_386_PC16:
+        case R_386_8:
+        case R_386_PC8:
+        case R_386_TLS_GD_32:
+        case R_386_TLS_GD_PUSH:
+        case R_386_TLS_GD_CALL:
+        case R_386_TLS_GD_POP:
+        case R_386_TLS_LDM_32:
+        case R_386_TLS_LDM_PUSH:
+        case R_386_TLS_LDM_CALL:
+        case R_386_TLS_LDM_POP:
+        case R_386_TLS_LDO_32:
+        case R_386_TLS_IE_32:
+        case R_386_TLS_LE_32:
+        case R_386_TLS_DTPMOD32:
+        case R_386_TLS_DTPOFF32:
+        case R_386_TLS_TPOFF32:
+        case R_386_TLS_GOTDESC:
+        case R_386_TLS_DESC_CALL:
+        case R_386_TLS_DESC:
+        case R_386_IRELATIVE:
+        case R_386_NUM:
+            break;
 		default:
 			BX_ERROR(("Relocation type don't identified: %x", relType));
 			break;
@@ -735,7 +769,7 @@ void ElfLoader::solveRelocation(Elf32_Rel reloc, Bit8u scopeIndex) {
 	bx_mem.write((Bit8u *)&finValue, bx_mem.virtualAddressToPosition(relOff), sizeof(Elf32_Word));
 }
 
-Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol) {
+bool ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol) {
 	Elf32_Addr hashAddr = 0, gnuHashAddr = 0;
 
 	if (scopeIndex == 0) { // main executable
@@ -758,7 +792,7 @@ Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *sy
 	}
 	else {
 		BX_ERROR(("Object doesn't have an HASH or GNU_HASH section."));
-		return 0;
+		return false;
 	}
 }
 
@@ -767,7 +801,7 @@ Bit32u ElfLoader::symbolLookup(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *sy
  * across the symbolScopeMap. Return the virtual address where
  * the symbol where loaded.
  */
-Bit32u ElfLoader::symbolLookupElfHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol) {
+bool ElfLoader::symbolLookupElfHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol) {
 	// Check if the symbol index is valid
 	if (symbIndex == 0) {
 		BX_ERROR(("Symbol with index zero passed to lookup."));
@@ -819,12 +853,12 @@ Bit32u ElfLoader::symbolLookupElfHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_
 			// read the symbol definition
 			bx_mem.read((Bit8u *)symbol, symEntry, sizeof(Elf32_Sym));
 
-			// verifica se o symbol em symbEntry �� o procurado
+			// verifica se o symbol em symbEntry eh o procurado
 			if (symbol->st_shndx != SHN_UNDEF) {
 				Bit8u *actSymbName = symbolNameFromSymbol(mainExecutable, *symbol, -loadedSegments[0].hdr.p_vaddr);
 //				printf("\tTesting symbol %s\n", actSymbName);
 				if (strcmp((char *)actSymbName, (char *)symName) == 0) {
-					return bx_mem.positionToVirtualAddress(symEntry);
+					return true;
 				}
 			}
 		}
@@ -840,12 +874,13 @@ Bit32u ElfLoader::symbolLookupElfHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_
 			// read the symbol definition
 			bx_mem.read((Bit8u *)symbol, symEntry, sizeof(Elf32_Sym));
 
-			// verifica se o symbol em symbEntry �� o procurado
+			// verifica se o symbol em symbEntry eh o procurado
 			if (symbol->st_shndx != SHN_UNDEF) {
 				Bit8u *actSymbName = symbolNameFromSymbol(sharedLibs[slIndex], *symbol, loadedSegments[2*(slIndex+1)].loadedPos);
 //				printf("\tTesting symbol %s\n", actSymbName);
 				if (strcmp((char *)actSymbName, (char *)symName) == 0) {
-					return bx_mem.positionToVirtualAddress(symEntry);
+				    symbol->st_value = bx_mem.positionToVirtualAddress(loadedSegments[2*(slIndex+1)].loadedPos + symbol->st_value);
+					return true;
 				}
 			}
 		}
@@ -911,7 +946,7 @@ Bit32u ElfLoader::symbolLookupElfHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_
 				// read the symbol definition
 				bx_mem.read((Bit8u *)symbol, symEntry, sizeof(Elf32_Sym));
 
-				// verifica se o symbol em symbEntry �� o procurado
+				// verifica se o symbol em symbEntry eh o procurado
 				if (symbol->st_shndx != SHN_UNDEF &&
 					(ELF32_ST_BIND(symbol->st_info) == STB_GLOBAL ||
 					ELF32_ST_BIND(symbol->st_info) == STB_WEAK)
@@ -919,7 +954,10 @@ Bit32u ElfLoader::symbolLookupElfHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_
 					Bit8u *actSymbName = symbolNameFromSymbol(*elf, *symbol, loadedPos);
 //					printf("\tTesting symbol %s %d\n", actSymbName, ELF32_ST_BIND(symbol.st_info));
 					if (strcmp((char *)actSymbName, (char *)symName) == 0) {
-						return bx_mem.positionToVirtualAddress(symEntry);
+					    if (scEntry != -1)
+					        symbol->st_value = bx_mem.positionToVirtualAddress(loadedPos + symbol->st_value);
+
+						return true;
 					}
 				}
 
@@ -942,12 +980,12 @@ Bit32u ElfLoader::symbolLookupElfHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_
 	symbol->st_shndx = 0;
 
 	if (symLocBind == STB_WEAK) {
-		return 0;
+		return true;
 	}
 
 	BX_ERROR(("Symbol not found: %s %d %d\n", symName, symLocBind, symLocType));
 
-	return 0;
+	return false;
 }
 
 
@@ -956,7 +994,7 @@ Bit32u ElfLoader::symbolLookupElfHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_
  * across the symbolScopeMap. Return the virtual address where
  * the symbol where loaded.
  */
-Bit32u ElfLoader::symbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol) {
+bool ElfLoader::symbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol) {
 	// Check if the symbol index is valid
 	if (symbIndex == 0) {
 		BX_ERROR(("Symbol with index zero passed to lookup."));
@@ -1034,6 +1072,8 @@ Bit32u ElfLoader::symbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_
 				Bit8u *actSymbName = symbolNameFromSymbol(sharedLibs[slIndex], *symbol, loadedSegments[2*(slIndex+1)].loadedPos);
 //				printf("\tTesting symbol %s\n", actSymbName);
 				if (strcmp((char *)actSymbName, (char *)symName) == 0) {
+				    // adjust the symbol value virtual address
+				    symbol->st_value = bx_mem.positionToVirtualAddress(loadedSegments[2*(slIndex+1)].loadedPos + symbol->st_value);
 					return bx_mem.positionToVirtualAddress(symEntry);
 				}
 			}
@@ -1044,16 +1084,20 @@ Bit32u ElfLoader::symbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_
 				GnuHashInfo ghi = createGnuHashInfo(&mainExecutable, -bx_mem.virtualBase);
 
 				findSymbolGnuHash(ghi, (const char *)symName, symbol);
+
+				if (symbol != NULL) {
+				    return true;
+				}
 			}
 			else {
 				GnuHashInfo ghi = createGnuHashInfo(&sharedLibs[scEntry], loadedSegments[2*(scEntry+1)].loadedPos);
 
 				findSymbolGnuHash(ghi, (const char *)symName, symbol);
-			}
 
-			// return the symbol address
-			if (symbol != NULL) {
-			    return 323;
+				if (symbol != NULL) {
+				    symbol->st_value = bx_mem.positionToVirtualAddress(loadedSegments[2*(scEntry+1)].loadedPos + symbol->st_value);
+				    return true;
+				}
 			}
 		}
 	}
@@ -1071,15 +1115,15 @@ Bit32u ElfLoader::symbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_
 	symbol->st_shndx = 0;
 
 	if (symLocBind == STB_WEAK) {
-		return 0;
+		return true;
 	}
 
 	BX_ERROR(("Symbol not found: %s %d %d\n", symName, symLocBind, symLocType));
 
-	return 0;
+	return false;
 }
 
-Elf32_Addr ElfLoader::findSymbolGnuHash(GnuHashInfo os, const char *symname, Elf32_Sym *symbol) {
+bool ElfLoader::findSymbolGnuHash(GnuHashInfo os, const char *symname, Elf32_Sym *symbol) {
 	Elf32_Word  c;
 	Elf32_Word  h1, h2;
 	Elf32_Word  n;
@@ -1150,7 +1194,7 @@ Elf32_Addr ElfLoader::findSymbolGnuHash(GnuHashInfo os, const char *symname, Elf
 		 */
 		if ((h1 == (h2 & ~1)) &&
 			!strcmp((char *)symname, (char *)bx_mem.str(os.os_dynstr + symbol->st_name)))
-				return os.os_dynsym  + idx_sym*sizeof(Elf32_Sym);
+				return true;
 
 		/* Done if at end of chain */
 		if (h2 & 1)
@@ -1161,7 +1205,7 @@ Elf32_Addr ElfLoader::findSymbolGnuHash(GnuHashInfo os, const char *symname, Elf
 	}
 
 	/* This object does not have the desired symbol */
-	return (NULL);
+	return false;
 }
 
 

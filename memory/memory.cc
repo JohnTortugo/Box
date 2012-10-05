@@ -199,13 +199,7 @@ int BX_MEM_C::loadData(void * ptr, Bit32u size, Bit32u addr)
  * in the memory pointed by content.
  */
 void BX_MEM_C::read(Bit8u *content, Bit32u offset, Bit32u len) {
-	// read len bytes from memory
 	memcpy((void *) content,(void *) (memory+offset),len);
-/*
-	for (int i=0; i<len; i++) {
-		content[i] = this->memory[offset++];
-	}
-*/
 }
 
 /*!
@@ -213,9 +207,19 @@ void BX_MEM_C::read(Bit8u *content, Bit32u offset, Bit32u len) {
  * from the memory pointed by content.
  */
 void BX_MEM_C::write(Bit8u *content, Bit32u offset, Bit32u len) {
-	// write len bytes to memory
-	memcpy((void *)(memory+offset), (void *)content, len);
+    memcpy((void *)(memory+offset), (void *)content, len);
 }
+
+/*!
+ * Make a copy from two different regions from the memory.
+ * Copies len bytes starting at offsetFrom to the location starting
+ * at offsetTo
+ */
+void BX_MEM_C::copy(Bit32u offsetFrom, Bit32u offsetTo, Bit32u len) {
+    memcpy((void *)(memory+offsetTo), (void *)(memory+offsetFrom), len);
+}
+
+
 
 /*!
  * Read the content starting at offset until reach an '\0'.

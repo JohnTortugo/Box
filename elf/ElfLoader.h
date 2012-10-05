@@ -116,14 +116,14 @@ public:
 
 	void solveRelocation(Elf32_Rel reloc, Bit8u scopeIndex);
 
-	Bit32u symbolLookup(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol);
+	bool symbolLookup(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol);
 
-	Bit32u symbolLookupElfHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol);
+	bool symbolLookupElfHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol);
 
-	Bit32u symbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol);
-	Elf32_Addr findSymbolGnuHash(GnuHashInfo os, const char *symname, Elf32_Sym *symbol);
+	bool symbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol);
+	bool findSymbolGnuHash(GnuHashInfo os, const char *symname, Elf32_Sym *symbol);
 
-	Bit32u versionedSymbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol);
+	bool versionedSymbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sym *symbol);
 
 	Bit8u * symbolNameFromSymbIndex(ElfParser elf, Bit32u symbIndex, Bit32s loadedPos);
 
