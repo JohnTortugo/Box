@@ -1,17 +1,68 @@
 #include<stdlib.h>
+#include <string.h>
 #include "bochs.h"
 #include "config.h"
 #include "runtime.h"
 
 extern char **environ;
 
-void setup_start_environment(int argc, char *argv[], Bit32u memsize, Bit32u entry)
+void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
 {
-    bx_cpu.gen_reg[BX_32BIT_REG_EIP].dword.erx = (intptr_t) entry;
-    bx_cpu.gen_reg[BX_32BIT_REG_EBP].dword.erx =
-    bx_cpu.gen_reg[BX_32BIT_REG_ESP].dword.erx = (intptr_t) bx_mem.positionToVirtualAddress(memsize-1);
+	int i=0,size;
+	Bit32u stackaddr=bx_mem.RealToVirtualAddress((Bit32u)  bx_mem.memory + bx_mem.size -1);
+	vector<Bit32u> envs;
+    vector<Bit32u> args;
+    vector<Bit32u>::iterator it;
 
+	stackaddr &= 0xFFFFFFF0; //Stack align;
 
+    bx_cpu.gen_reg[BX_32BIT_REG_EIP].dword.erx = (intptr_t) loader->getEntryAddress();
+    bx_cpu.gen_reg[BX_32BIT_REG_EBP].dword.erx = (intptr_t) stackaddr;
+
+    //Copy environment variables to stack
+    while (environ[i] != '\0' ) {
+    	size= strlen(environ[i])+1;
+    	printf("Env[%d] Addr: %08lx Size: %d: %s\n",i , stackaddr, size, environ[i]);
+    	envs.push_back(stackaddr);
+    	bx_mem.write((Bit8u *) environ[i++],bx_mem.virtualAddressToPosition(stackaddr), size);
+    	stackaddr -= size;
+    }
+
+    //Copy command line arguments to stack
+    for(i=1;i<argc;i++) {
+    	size= strlen(argv[i])+1;
+    	printf("Arg[%d] Addr: %08lx Size: %d: %s\n",i-1, stackaddr, size, argv[i]);
+    	args.push_back(stackaddr);
+    	bx_mem.write((Bit8u *) argv[i],bx_mem.virtualAddressToPosition(stackaddr), size);
+    	stackaddr -= size;
+    }
+
+	stackaddr &= 0xFFFFFFF0; //Stack align;
+    bx_cpu.gen_reg[BX_32BIT_REG_ESP].dword.erx = (intptr_t) stackaddr+4;
+
+    // Auxiliary vector NULL entry (2 dwords)
+    bx_cpu.push_32(0);
+    bx_cpu.push_32(0);
+
+    // Null delimiter
+    bx_cpu.push_32(0);
+
+    //Environment variables pointers
+    for ( it=envs.begin() ; it < envs.end(); it++ )
+          bx_cpu.push_32(*it);
+
+    // Null delimiter
+    bx_cpu.push_32(0);
+
+    //Command line arguments
+    for ( it=args.begin() ; it < args.end(); it++ )
+          bx_cpu.push_32(*it);
+
+    //Argument count
+    bx_cpu.push_32(argc-1);
+
+    // Set exit function pointer (_fini ?)
+    bx_cpu.gen_reg[BX_32BIT_REG_EDX].dword.erx = 0; // loader->getFiniAddress();
 }
 
 void switchTo32bitsMode(void)

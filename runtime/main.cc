@@ -4,7 +4,6 @@
 #include "config.h"
 #include "runtime.h"
 #include "syscall/syscall.h"
-#include "elf/ElfLoader.h"
 
 BX_CPU_C bx_cpu;
 BX_MEM_C bx_mem;
@@ -32,8 +31,7 @@ int main(int argc, char **argv) {
   initialize();
 
   // Setup start environment (stack and registers)
-  setup_start_environment(argc, argv, memsize,
-		                                  loader.getEntryAddress());
+  setup_start_environment(argc, argv, &loader);
 
   //TODO:  execute init stubs
 

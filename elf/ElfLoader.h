@@ -135,6 +135,8 @@ public:
 
 	Bit32u getEntryAddress() const { return mainExecutable.getEntryAddress(); }
 
+	Bit32u getFiniAddress() const { return mainExecutable.getFini(); }
+
 	Bit32u elfHash(const unsigned char *name) {
 		Bit32u h = 0, g;
 		while (*name) {
