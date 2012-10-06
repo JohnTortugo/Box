@@ -42,6 +42,7 @@ BX_INCDIRS = -I.. -I$(srcdir)/.. -I../elfparser -I$(srcdir)/../elfparser \
 BX_OBJS = \
 	main.o \
 	config.o \
+	startup.o \
 	logio.o
 
 BX_INCLUDES = ../bochs.h ../config.h
@@ -67,4 +68,5 @@ dist-clean: clean
 box.o: box.@CPP_SUFFIX@ 
 main.o: box.@CPP_SUFFIX@ 
 logio.o: logio.@CPP_SUFFIX@ 
+startup.o: startup.@CPP_SUFFIX@ 
 config.o: config.@CPP_SUFFIX@ 
