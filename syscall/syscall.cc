@@ -91,24 +91,12 @@ void BX_SYSCALL::handle()
 			printf("getdents\n");
 			break;
 
-		case __NR_getdents:
-			printf("getdents64\n");
-			break;
-
 		case __NR_getegid:
 			printf("getegid.\n");
 			break;
 
-		case __NR_getegid16:
-			printf("getegid16.\n");
-			break;
-
 		case __NR_getgid:
 			printf("getgid.\n");
-			break;
-
-		case __NR_getgid16:
-			printf("getgid16.\n");
 			break;
 
 		case __NR_getpid:
@@ -123,10 +111,6 @@ void BX_SYSCALL::handle()
 			printf("getuid.\n");
 			break;
 
-		case __NR_getuid16:
-			printf("getuid16.\n");
-			break;
-
 		case __NR_getrlimit:
 			printf("getrlimit.\n");
 			break;
@@ -137,10 +121,6 @@ void BX_SYSCALL::handle()
 
 		case __NR_link:
 			printf("link.\n");
-			break;
-
-		case __NR_llseek:
-			printf("llseek.\n");
 			break;
 
 		case __NR_kill:
@@ -189,14 +169,6 @@ void BX_SYSCALL::handle()
 
 		case __NR_nanosleep:
 			printf("nanosleep.\n");
-			break;
-
-		case __NR_newuname:
-			printf("newuname.\n");
-			break;
-
-		case __NR_newlstat:
-			printf("newlstat.\n");
 			break;
 
 		case __NR_open:
