@@ -47,7 +47,7 @@ ElfLoader::ElfLoader(int p_argc, char **p_argv, char *ldLibPath, Bit8u *p_memory
 	// create the process address space
 	BX_INFO(("Mounting process address space."));
 	createAddressSpace();
-	//dumpAddressSpaceInfo();
+	dumpAddressSpaceInfo();
 	BX_INFO(("Address space mounted."));
 
 	// Doing relocations
@@ -505,7 +505,7 @@ void ElfLoader::doRelocations() {
 	Elf32_Addr jmprel	= mainExecutable.getJmprel();
 	Elf32_Addr rela 	= mainExecutable.getRela();
 
-	if (rel == 0 && rela == 0) BX_DEBUG(("REL and RELA equals zero for mainExecutable."));
+	if (rel == 0 && jmprel == 0  && rela == 0) BX_DEBUG(("REL and RELA equals zero for mainExecutable."));
 
 	// Data Relocations
 	// check if there are any relocation (implicit) for the
@@ -541,15 +541,15 @@ void ElfLoader::doRelocations() {
 
 		jmprel = bx_mem.virtualAddressToPosition(jmprel);
 
-//		fprintf(stderr, "PLT Relocation Table Entries (JMPREL) [%x] (%s)\n", jmprel, mainExecutable.getFileName().c_str());
-//		fprintf(stderr, "------------------------------\n");
-//		fprintf(stderr, "%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
+		fprintf(stderr, "PLT Relocation Table Entries (JMPREL) [%x] (%s)\n", jmprel, mainExecutable.getFileName().c_str());
+		fprintf(stderr, "------------------------------\n");
+		fprintf(stderr, "%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 		while (aRead < mainExecutable.getPltrelsz()) {
 			Elf32_Rel reloc;
 
 			bx_mem.read((Bit8u *)&reloc, jmprel, mainExecutable.getRelent());
 
-//			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
+			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
 
 			// scopeMap index for mainExecutable is zero
 			solveRelocation(reloc, 0);
@@ -573,7 +573,7 @@ void ElfLoader::doRelocations() {
 		jmprel	= sharedLibs[slIndex].getJmprel();
 		rela 	= sharedLibs[slIndex].getRela();
 
-		if (rel == 0 && rela == 0) BX_DEBUG(("REL and RELA equals zero for SharedLib[%d].", slIndex));
+		if (rel == 0  && jmprel == 0 && rela == 0) BX_DEBUG(("REL and RELA equals zero for SharedLib[%d].", slIndex));
 
 		// Data Relocations
 		// check if there are any relocation (implicit) for the
@@ -694,7 +694,7 @@ void ElfLoader::solveRelocation(Elf32_Rel reloc, Bit8u scopeIndex) {
 			finValue = S + A;
 			break;
 		case R_386_PC32:
-			//printf("R_386_PC32: S + A - P = %x + %x - %x\n", S, A, P);
+			//printf("R_386_PC32: S + A - P = %x + %x - %x = %x\n", S, A, P, S + A - P);
 			finValue = S + A - P;
 			break;
 		case R_386_GOT32:
@@ -1022,7 +1022,7 @@ bool ElfLoader::symbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sy
 		symLoc = symbolFromSymbIndex(sharedLibs[slIndex], symbIndex, loadedSegments[2*(slIndex+1)].loadedPos);
 		symName = symbolNameFromSymbol(sharedLibs[slIndex], symLoc, loadedSegments[2*(slIndex+1)].loadedPos);
 	}
-
+//
 //	printf("Searching symbol: %s\n", symName);
 //	printf("Scope size: %d\n", scope.size());
 
@@ -1030,7 +1030,7 @@ bool ElfLoader::symbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sy
 	for (int sI=0; sI<scope.size(); sI++) {
 		Bit8s scEntry 	= scope[sI];
 
-//		printf("In sI = %d, scEntry = %d\n", sI, scEntry);
+//		printf("In scopeIndex = %d, sI = %d, scEntry = %d\n", scopeIndex, sI, scEntry);
 
 		// these first two case cope with the case where we need
 		// to search the symbol directly in the dynsym table, the
@@ -1083,18 +1083,18 @@ bool ElfLoader::symbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sy
 			if (scEntry == -1) {
 				GnuHashInfo ghi = createGnuHashInfo(&mainExecutable, -bx_mem.virtualBase);
 
-				findSymbolGnuHash(ghi, (const char *)symName, symbol);
+				bool fnd = findSymbolGnuHash(ghi, (const char *)symName, symbol);
 
-				if (symbol != NULL) {
+				if (fnd) {
 				    return true;
 				}
 			}
 			else {
 				GnuHashInfo ghi = createGnuHashInfo(&sharedLibs[scEntry], loadedSegments[2*(scEntry+1)].loadedPos);
 
-				findSymbolGnuHash(ghi, (const char *)symName, symbol);
+				bool fnd = findSymbolGnuHash(ghi, (const char *)symName, symbol);
 
-				if (symbol != NULL) {
+				if (fnd) {
 				    symbol->st_value = bx_mem.positionToVirtualAddress(loadedSegments[2*(scEntry+1)].loadedPos + symbol->st_value);
 				    return true;
 				}
@@ -1115,6 +1115,7 @@ bool ElfLoader::symbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sy
 	symbol->st_shndx = 0;
 
 	if (symLocBind == STB_WEAK) {
+		printf("weak definition...\n");
 		return true;
 	}
 
@@ -1144,13 +1145,13 @@ bool ElfLoader::findSymbolGnuHash(GnuHashInfo os, const char *symname, Elf32_Sym
 	bitmask = (1 << (h1 % c)) | (1 << (h2 % c));
 	bx_mem.read((Bit8u *)&bloom, os.os_bloom + n*sizeof(Elf32_Word), sizeof(Elf32_Word)); // os->os_bloom[n];
 	if ((bloom & bitmask) != bitmask)
-		return (NULL);
+		return false;
 
 	/* Locate the hash chain, and corresponding hash value element */
 	bx_mem.read((Bit8u *)&bucket, os.os_buckets + (h1 % os.os_nbuckets)*sizeof(Elf32_Word), sizeof(Elf32_Word));
 	n = bucket; //os.os_buckets[h1 % os.os_nbuckets];
 	if (n == 0)    /* Empty hash chain, symbol not present */
-		return (NULL);
+		return false;
 
 	Elf32_Word idx_sym = n;
 	Elf32_Word idx_has = n - os.os_symndx;
@@ -1192,6 +1193,7 @@ bool ElfLoader::findSymbolGnuHash(GnuHashInfo os, const char *symname, Elf32_Sym
 		 * A real implementation might test (h1 == (h2 & ~1), and then
 		 * call a (possibly inline) function to validate the rest.
 		 */
+//		printf("Testing symbol %s\n", (char *)bx_mem.str(os.os_dynstr + symbol->st_name) );
 		if ((h1 == (h2 & ~1)) &&
 			!strcmp((char *)symname, (char *)bx_mem.str(os.os_dynstr + symbol->st_name)))
 				return true;

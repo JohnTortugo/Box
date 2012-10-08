@@ -279,6 +279,6 @@ void BX_SYSCALL::handle()
 			break;
 
 		default:
-			BX_PANIC(("Unknow system call: EAX: %08x",EAX));
+			BX_PANIC(("Unknow system call: EAX: 0x%08x",EAX));
 	}
 }

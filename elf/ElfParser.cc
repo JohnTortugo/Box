@@ -14,10 +14,10 @@ ElfParser::ElfParser(string elfPath) {
 	this->rela 			= 0;
 	this->rel 			= 0;
 	this->relsz 		= 0;
-	this->relent 		= 0;
+	this->relent 		= 8;
 	this->rela 			= 0;
 	this->relasz 		= 0;
-	this->relaent 		= 0;
+	this->relaent 		= 8;
 	this->pltrel 		= 0;
 	this->jmprel 		= 0;
 	this->pltrelsz 		= 0;
