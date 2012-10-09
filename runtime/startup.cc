@@ -6,10 +6,12 @@
 
 extern char **environ;
 
+#define GS_SEG_SIZE 256
+
 void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
 {
 	int i=0,size;
-	Bit32u stackaddr=bx_mem.RealToVirtualAddress((Bit32u)  bx_mem.memory + bx_mem.size -1);
+	Bit32u stackaddr=bx_mem.RealToVirtualAddress((Bit32u)  bx_mem.memory + bx_mem.size -2 - GS_SEG_SIZE);
 	vector<Bit32u> envs;
     vector<Bit32u> args;
     vector<Bit32u>::iterator it;
@@ -22,7 +24,7 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
     //Copy environment variables to stack
     while (environ[i] != '\0' ) {
     	size= strlen(environ[i])+1;
-    	printf("Env[%d] Addr: %08lx Size: %d: %s\n",i , stackaddr, size, environ[i]);
+//    	printf("Env[%d] Addr: %08lx Size: %d: %s\n",i , stackaddr, size, environ[i]);
     	envs.push_back(stackaddr);
     	bx_mem.write((Bit8u *) environ[i++],bx_mem.virtualAddressToPosition(stackaddr), size);
     	stackaddr -= size;
@@ -31,7 +33,7 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
     //Copy command line arguments to stack
     for(i=1;i<argc;i++) {
     	size= strlen(argv[i])+1;
-    	printf("Arg[%d] Addr: %08lx Size: %d: %s\n",i-1, stackaddr, size, argv[i]);
+//    	printf("Arg[%d] Addr: %08lx Size: %d: %s\n",i-1, stackaddr, size, argv[i]);
     	args.push_back(stackaddr);
     	bx_mem.write((Bit8u *) argv[i],bx_mem.virtualAddressToPosition(stackaddr), size);
     	stackaddr -= size;
@@ -65,7 +67,7 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
     bx_cpu.gen_reg[BX_32BIT_REG_EDX].dword.erx = 0; // loader->getFiniAddress();
 }
 
-void switchTo32bitsMode(void)
+void switchTo32bitsMode()
 {
   // The RESET function will have been called first.
   // Set CPU and memory features which are assumed at this point.
@@ -97,6 +99,20 @@ void switchTo32bitsMode(void)
   BX_CPU(0)->sregs[BX_SEG_REG_DS].selector.ti = 0; 	   // GDT
   BX_CPU(0)->sregs[BX_SEG_REG_DS].selector.rpl = 3; 	   // Ring 3 privilege
 
+  // GS deltas
+  BX_CPU(0)->sregs[BX_SEG_REG_GS].cache.valid = 1; 	// Valid segment cache
+  BX_CPU(0)->sregs[BX_SEG_REG_GS].cache.p = 1; 	   	   // Segment present
+  BX_CPU(0)->sregs[BX_SEG_REG_GS].cache.dpl = 3; 	   // Ring 3
+  BX_CPU(0)->sregs[BX_SEG_REG_GS].cache.type = 3; 	   // Type read/write
+  BX_CPU(0)->sregs[BX_SEG_REG_GS].cache.segment = 1; 	   // Data/Code segment
+  BX_CPU(0)->sregs[BX_SEG_REG_GS].cache.u.segment.base = bx_mem.positionToVirtualAddress(bx_mem.size - GS_SEG_SIZE -1);
+  BX_CPU(0)->sregs[BX_SEG_REG_GS].cache.u.segment.limit_scaled = 0xFFFFFFFF;
+  BX_CPU(0)->sregs[BX_SEG_REG_GS].cache.u.segment.g   = 0; // page granularity
+  BX_CPU(0)->sregs[BX_SEG_REG_GS].cache.u.segment.d_b = 1; // 32bit
+  BX_CPU(0)->sregs[BX_SEG_REG_GS].selector.index = 3; 	   // Second segment
+  BX_CPU(0)->sregs[BX_SEG_REG_GS].selector.ti = 0; 	   // GDT
+  BX_CPU(0)->sregs[BX_SEG_REG_GS].selector.rpl = 3; 	   // Ring 3 privilege
+
   // SS deltas
   BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.valid = 1; 	// Valid segment cache
   BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.p = 1;				// Segment present
@@ -107,9 +123,10 @@ void switchTo32bitsMode(void)
   BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.u.segment.limit_scaled = 0xFFFFFFFF;
   BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.u.segment.g   = 1; // page granularity
   BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.u.segment.d_b = 1; // 32bit
-  BX_CPU(0)->sregs[BX_SEG_REG_DS].selector.index = 3; 	   // Third segment
+  BX_CPU(0)->sregs[BX_SEG_REG_DS].selector.index = 4; 	   // Third segment
   BX_CPU(0)->sregs[BX_SEG_REG_DS].selector.ti = 0; 	   // GDT
   BX_CPU(0)->sregs[BX_SEG_REG_DS].selector.rpl = 3; 	   // Ring 3 privilege
+
 
   // CR0 deltas
   BX_CPU(0)->cr0.set_PG(0); // paging disabled

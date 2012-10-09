@@ -29,6 +29,9 @@
 
 
 class BX_MEM_C {
+private:
+	BX_CPP_INLINE void  check_memory_limit(Bit32u addr);
+
 public:
 	Bit64u		 size;
 	Bit8u		*memory;
@@ -41,8 +44,6 @@ public:
 	void allocate(Bit64u size);
 
 	void setVirtualMemBase(Bit32u vBase);
-	Bit32u virtualAddressToPosition(Bit32u vir);
-	Bit32u positionToVirtualAddress(Bit32u pos);
 	void read(Bit8u *content, Bit32u offset, Bit32u len);
 	void write(Bit8u *content, Bit32u offset, Bit32u len);
 	void copy(Bit32u offsetFrom, Bit32u offsetTo, Bit32u len);
@@ -65,11 +66,13 @@ public:
 	void write_dword(Bit32u data){ *((Bit32u *) lastAddress) = data; }
 	void write_qword(Bit64u data){ *((Bit64u *) lastAddress) = data; }
 
+    // Memory offset <-> Virtual Address conversion
+	Bit32u virtualAddressToPosition(Bit32u vir);
+	Bit32u positionToVirtualAddress(Bit32u pos);
 
-    Bit32u VirtualToRealAddress(Bit32u address);
+	// Real Address <-> Virtual Address conversion
+	Bit32u VirtualToRealAddress(Bit32u address);
     Bit32u RealToVirtualAddress(Bit32u address);
-	int loadFile(char * fname, Bit32u addr);
-	int loadData(void * ptr, Bit32u size, Bit32u addr);
 };
 
 #endif

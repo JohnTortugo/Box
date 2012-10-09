@@ -38,6 +38,14 @@ void BX_MEM_C::allocate(Bit64u size) {
   this->size = size;
 }
 
+BX_CPP_INLINE void  BX_MEM_C::check_memory_limit(Bit32u addr)
+{
+   if ( addr < virtualBase || (addr - virtualBase > this->size-1) )
+	   BX_PANIC(("Attempt to access a memory position out of memory space.\n\t"
+			          " Requested address: 0x%08lx \n\t"
+			          " Memory space: 0x%08lx - 0x%08lx ", addr, virtualBase, (virtualBase + size -1)));
+}
+
 /*!
  * Set the (emulated) virtual base address which the main executable
  * was loaded.
@@ -64,32 +72,28 @@ Bit32u BX_MEM_C::positionToVirtualAddress(Bit32u pos) {
 
 Bit8u BX_MEM_C::read_byte( Bit32u addr)
 {
-   if ( (addr - virtualBase) > this->size )
-      BX_PANIC(("Attempt to read beyond memory size limit. Address: %08lx\n",addr));
+   check_memory_limit(addr);
    lastAddress = ADDR_VIRTUAL_TO_REAL(addr);
    return *((Bit8u *) lastAddress);
 }
 
-Bit16u BX_MEM_C::read_word( Bit32u addr)
+Bit16u BX_MEM_C::read_word(Bit32u addr)
 {
-   if ( (addr - virtualBase)> this->size )
-	      BX_PANIC(("Attempt to read beyond memory size limit. Address: %08lx\n",addr));
+   check_memory_limit(addr);
    lastAddress = ADDR_VIRTUAL_TO_REAL(addr);
    return *((Bit16u *) lastAddress);
 }
 
 Bit32u BX_MEM_C::read_dword( Bit32u addr)
 {
-   if ( (addr - virtualBase) > this->size )
-	      BX_PANIC(("Attempt to read beyond memory size limit. Address: %08lx\n",addr));
+   check_memory_limit(addr);
    lastAddress = ADDR_VIRTUAL_TO_REAL(addr);
    return *((Bit32u *) lastAddress);
 }
 
 Bit64u BX_MEM_C::read_qword( Bit32u addr)
 {
-   if ( (addr - virtualBase) > this->size )
-	      BX_PANIC(("Attempt to read beyond memory size limit. Address: %08lx\n",addr));
+   check_memory_limit(addr);
    lastAddress = ADDR_VIRTUAL_TO_REAL(addr);
    return *((Bit64u *) lastAddress);
 }
@@ -98,8 +102,7 @@ void BX_MEM_C::write_byte( Bit32u addr, Bit8u data)
 {
    Bit8u *ptr = (Bit8u *) ADDR_VIRTUAL_TO_REAL(addr);
 
-   if ( (addr - virtualBase) > this->size )
-	      BX_PANIC(("Attempt to read beyond memory size limit. Address: %08lx\n",addr));
+   check_memory_limit(addr);
    *ptr = data;
 }
 
@@ -107,24 +110,21 @@ void BX_MEM_C::write_word( Bit32u addr, Bit16u data)
 {
    Bit16u *ptr = (Bit16u *) ADDR_VIRTUAL_TO_REAL(addr);
 
-   if ( (addr - virtualBase) > this->size )
-	      BX_PANIC(("Attempt to read beyond memory size limit. Address: %08lx\n",addr));
+   check_memory_limit(addr);
    *ptr = data;
 }
 
 void BX_MEM_C::write_dword( Bit32u addr, Bit32u data)
 {
   Bit32u *ptr = (Bit32u *) ADDR_VIRTUAL_TO_REAL(addr);
-  if ( (addr - virtualBase)> this->size )
-	      BX_PANIC(("Attempt to read beyond memory size limit. Address: %08lx\n",addr));
-   *ptr = data;
+  check_memory_limit(addr);
+  *ptr = data;
 }
 
 void BX_MEM_C::write_qword( Bit32u addr, Bit64u data)
 {
    Bit64u *ptr = (Bit64u *) ADDR_VIRTUAL_TO_REAL(addr);
-   if ( (addr - virtualBase) > this->size )
-	      BX_PANIC(("Attempt to read beyond memory size limit. Address: %08lx\n",addr));
+   check_memory_limit(addr);
    *ptr = data;
 }
 
@@ -136,62 +136,6 @@ void BX_MEM_C::write_qword( Bit32u addr, Bit64u data)
  Bit32u BX_MEM_C::RealToVirtualAddress(Bit32u address)
 {
   return ADDR_REAL_TO_VIRTUAL(address);
-}
-
-int BX_MEM_C::loadFile(char * fname, Bit32u addr)
-{
-//  struct stat stat_buf;
-//  int fd, ret;
-//  unsigned long size, offset;
-//
-//  if ( addr > this->size )
-//     BX_PANIC(("Attempt to write beyond memory size limit. Address: %lx\n",addr));
-//
-//  // read file
-//  fd = open(fname, O_RDONLY);
-//
-//  if (fd < 0)
-//     BX_PANIC(("loadFile: couldn't open image file '%s'.", fname));
-//
-//  ret = fstat(fd, &stat_buf);
-//
-//  if (ret)
-//     BX_PANIC(("loadFile: couldn't stat image file '%s'.", fname));
-//
-//
-//  size = (unsigned long) stat_buf.st_size;
-//
-//  if ((addr + size) > this->size)
-//     BX_PANIC(("loadFile: address range > physical memsize!"));
-//
-//  offset = 0;
-//
-//  while (size > 0) {
-//     ret = read(fd, (bx_ptr_t) (this->memory+offset), size);
-//
-//     if (ret <= 0)
-//        BX_PANIC(("loadFile: read failed on image"));
-//
-//     size -= ret;
-//     offset += ret;
-//  }
-//
-//  close(fd);
-//
-//  BX_INFO(("loadFile: '%s', size=%u read into memory at %08x",
-//           fname, (unsigned) stat_buf.st_size, (unsigned) addr));
-//
-//  return stat_buf.st_size;
-}
-
-int BX_MEM_C::loadData(void * ptr, Bit32u size, Bit32u addr)
-{
-//  if ((addr + size) > this->size)
-//     BX_PANIC(("loadData: address range > physical memsize!"));
-//
-//  memcpy((void *) memory+addr, ptr, size);
-//
-	return 0;
 }
 
 /*!
