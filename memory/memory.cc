@@ -24,6 +24,8 @@
 #include "cpu/cpu.h"
 #include "debug.h"
 
+#include <unistd.h>
+
 #include <string.h>
 
 #define ADDR_VIRTUAL_TO_REAL(x) ((Bit32u) ((x-virtualBase)+memory))
@@ -175,4 +177,18 @@ Bit8u * BX_MEM_C::memStrdup(Bit32u offset) {
 	if (ptr == NULL) BX_ERROR(("memStrdup returning NULL."));
 
 	return ptr;
+}
+
+void BX_MEM_C::dump(char *filename)
+{
+  FILE *fd;
+  Bit32u offset;
+
+  fd = fopen(filename,"wb" );
+
+  offset = size;
+
+  fwrite(memory,offset,1,fd);
+
+  fclose(fd);
 }

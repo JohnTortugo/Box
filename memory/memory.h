@@ -73,6 +73,8 @@ public:
 	// Real Address <-> Virtual Address conversion
 	Bit32u VirtualToRealAddress(Bit32u address);
     Bit32u RealToVirtualAddress(Bit32u address);
+
+    void dump(char *filename);
 };
 
 #endif

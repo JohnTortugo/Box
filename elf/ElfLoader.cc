@@ -541,15 +541,15 @@ void ElfLoader::doRelocations() {
 
 		jmprel = bx_mem.virtualAddressToPosition(jmprel);
 
-		fprintf(stderr, "PLT Relocation Table Entries (JMPREL) [%x] (%s)\n", jmprel, mainExecutable.getFileName().c_str());
-		fprintf(stderr, "------------------------------\n");
-		fprintf(stderr, "%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
+//		fprintf(stderr, "PLT Relocation Table Entries (JMPREL) [%x] (%s)\n", jmprel, mainExecutable.getFileName().c_str());
+//		fprintf(stderr, "------------------------------\n");
+//		fprintf(stderr, "%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 		while (aRead < mainExecutable.getPltrelsz()) {
 			Elf32_Rel reloc;
 
 			bx_mem.read((Bit8u *)&reloc, jmprel, mainExecutable.getRelent());
 
-			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
+//			printf("0x%08x 0x%08x 0x%08x 0x%08x\n", reloc.r_offset, reloc.r_info, ELF32_R_SYM(reloc.r_info), ELF32_R_TYPE(reloc.r_info));
 
 			// scopeMap index for mainExecutable is zero
 			solveRelocation(reloc, 0);
