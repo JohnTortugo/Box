@@ -1,5 +1,7 @@
 #include "syscall.h"
 
+#include "sys/utsname.h"
+
 extern BX_MEM_C bx_mem;
 
 
@@ -266,19 +268,24 @@ void BX_SYSCALL::handle()
 			printf("wait4.\n");
 			break;
 
-		case __NR_write:
-			{
-				Bit32u ptr;
-				ptr = bx_mem.VirtualToRealAddress(ECX);
-				EAX = write(EBX, (const void *) ptr , EDX);
-			}
+		case __NR_uname: {
+			Bit32u ptr;
+			ptr = bx_mem.VirtualToRealAddress(EBX);
+			EAX = uname((struct utsname *) ptr);
 			break;
-
+		}
+		case __NR_write: {
+			Bit32u ptr;
+			ptr = bx_mem.VirtualToRealAddress(ECX);
+			EAX = write(EBX, (const void *) ptr , EDX);
+			break;
+		}
 		case __NR_writev:
 			printf("writev.\n");
 			break;
 
 		default:
-			BX_PANIC(("Unknow system call: EAX: 0x%08x",EAX));
+			BX_PANIC(("Unknow system call: EAX: 0x%08x", EAX));
+			break;
 	}
 }
