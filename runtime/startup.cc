@@ -30,14 +30,16 @@ char init_prog[] = {
 
 #define GS_SEG_SIZE 4096 //4K page
 
-Bit32u build_vsyscall_page(Bit32u end);
+Bit32u build_vdso_page(Bit32u end);
 Bit32u build_init_table(ElfLoader *loader);
+void save_auxiliary_vectors(Bit32u execfn, Bit32u vsyscall, ElfLoader * loader);
 void setInitProgArgs(Bit32u initAddr, int argc, Bit32u argv, Bit32u env);
 
 void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
 {
 	int i=0,size;
 	Bit32u inits, vsyscall, stackaddr, addrArgv, addrEnv;
+	Bit32u av_EXECFN;
 	vector<Bit32u> envs;
     vector<Bit32u> args;
     vector<Bit32u>::iterator it;
@@ -47,7 +49,7 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
 
 	stackaddr = (inits - 2) & 0xFFFFFFF0;
 
-	vsyscall = build_vsyscall_page(stackaddr);
+	vsyscall = build_vdso_page(stackaddr);
 	BX_INFO(("vsyscall page address: 0x%08lx", vsyscall));
 
 	stackaddr= (vsyscall - 2) & 0xFFFFFFF0;
@@ -60,8 +62,8 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
     while (environ[i] != '\0' ) {
     	size= strlen(environ[i])+1;
 //    	printf("Env[%d] Addr: %08lx Size: %d: %s\n",i , stackaddr, size, environ[i]);
-    	envs.push_back(stackaddr);
-    	bx_mem.write((Bit8u *) environ[i++],bx_mem.virtualAddressToPosition(stackaddr-size), size);
+    	envs.push_back(stackaddr-size+1);
+    	bx_mem.write((Bit8u *) environ[i++],bx_mem.virtualAddressToPosition(stackaddr-size+1), size);
     	stackaddr -= size;
     }
 
@@ -69,10 +71,16 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
     for(i=1;i<argc;i++) {
     	size= strlen(argv[i])+1;
 //    	printf("Arg[%d] Addr: %08lx Size: %d: %s\n",i-1, stackaddr, size, argv[i]);
-    	args.push_back(stackaddr);
-    	bx_mem.write((Bit8u *) argv[i],bx_mem.virtualAddressToPosition(stackaddr-size), size);
+    	args.push_back(stackaddr-size+1);
+    	bx_mem.write((Bit8u *) argv[i],bx_mem.virtualAddressToPosition(stackaddr-size+1), size);
     	stackaddr -= size;
     }
+
+    //Auxiliary vector data (AT_EXECFN)
+	size= strlen(argv[1])+1;
+	args.push_back(stackaddr-size+1);
+	bx_mem.write((Bit8u *) argv[1],bx_mem.virtualAddressToPosition(stackaddr-size+1), size);
+	stackaddr -= size;
 
 	stackaddr &= 0xFFFFFFF0; //Stack align;
 
@@ -81,6 +89,8 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
     // Auxiliary vector NULL entry (2 dwords)
     bx_cpu.push_32(0);
     bx_cpu.push_32(0);
+
+    save_auxiliary_vectors(av_EXECFN, vsyscall, loader);
 
     // Null delimiter
     bx_cpu.push_32(0);
@@ -182,7 +192,7 @@ void switchTo32bitsMode()
   BX_CPU(0)->handleCpuModeChange();
 }
 
-Bit32u build_vsyscall_page(Bit32u end)
+Bit32u build_vdso_page(Bit32u end)
 {
   char instr[] = {
 		   0xcd, 0x80,  // int 80h
@@ -243,6 +253,37 @@ Bit32u build_init_table(ElfLoader *loader)
     bx_mem.write((Bit8u *) init_prog,offset,sizeof(init_prog));
 
     return bx_mem.positionToVirtualAddress(offset);
+}
+
+void save_auxiliary_vectors(Bit32u execfn, Bit32u vsyscall, ElfLoader * loader)
+{
+	Elf32_Ehdr hdr = loader->getMainExecutable()->getHdr();
+
+	bx_cpu.push_32(AT_PAGESZ);
+	bx_cpu.push_32(4096);
+
+	bx_cpu.push_32(AT_EXECFN);
+	bx_cpu.push_32(execfn);
+
+	bx_cpu.push_32(AT_CLKTCK);
+	bx_cpu.push_32(100);
+
+	bx_cpu.push_32(AT_ENTRY);
+	bx_cpu.push_32(loader->getEntryAddress());
+
+	bx_cpu.push_32(AT_SYSINFO_EHDR);
+	bx_cpu.push_32(vsyscall);
+
+	bx_cpu.push_32(AT_PHDR);
+	bx_cpu.push_32(hdr.e_phoff);
+
+	bx_cpu.push_32(AT_PHENT);
+	bx_cpu.push_32(hdr.e_phentsize);
+
+	bx_cpu.push_32(AT_PHNUM);
+	bx_cpu.push_32(hdr.e_phnum);
+
+
 }
 
 void setInitProgArgs(Bit32u initAddr, int argc, Bit32u argv, Bit32u env)
