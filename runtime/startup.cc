@@ -155,6 +155,9 @@ void switchTo32bitsMode()
   BX_CPU(0)->sregs[BX_SEG_REG_DS].selector.ti = 0; 	   // GDT
   BX_CPU(0)->sregs[BX_SEG_REG_DS].selector.rpl = 3; 	   // Ring 3 privilege
 
+  // ES and SS points to the same segment of DS
+  BX_CPU(0)->sregs[BX_SEG_REG_SS] =  BX_CPU(0)->sregs[BX_SEG_REG_ES] =  BX_CPU(0)->sregs[BX_SEG_REG_DS];
+
   // GS deltas - sysenter
   BX_CPU(0)->sregs[BX_SEG_REG_GS].cache.valid = 1; 	// Valid segment cache
   BX_CPU(0)->sregs[BX_SEG_REG_GS].cache.p = 1; 	   	   // Segment present
@@ -169,21 +172,6 @@ void switchTo32bitsMode()
   BX_CPU(0)->sregs[BX_SEG_REG_GS].selector.index = 3; 	   // Second segment
   BX_CPU(0)->sregs[BX_SEG_REG_GS].selector.ti = 1; 	   // GDT
   BX_CPU(0)->sregs[BX_SEG_REG_GS].selector.rpl = 3; 	   // Ring 3 privilege
-
-  // SS deltas
-  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.valid = 1; 	// Valid segment cache
-  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.p = 1;				// Segment present
-  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.dpl = 3; 	           // Ring 3
-  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.type = 3; 	   // Type read/write
-  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.segment = 1; 	   // Data/Code segment
-  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.u.segment.base = 0x00000000;
-  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.u.segment.limit_scaled = 0xFFFFFFFF;
-  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.u.segment.g   = 1; // page granularity
-  BX_CPU(0)->sregs[BX_SEG_REG_SS].cache.u.segment.d_b = 1; // 32bit
-  BX_CPU(0)->sregs[BX_SEG_REG_DS].selector.index = 4; 	   // Third segment
-  BX_CPU(0)->sregs[BX_SEG_REG_DS].selector.ti = 0; 	   // GDT
-  BX_CPU(0)->sregs[BX_SEG_REG_DS].selector.rpl = 3; 	   // Ring 3 privilege
-
 
   // CR0 deltas
   BX_CPU(0)->cr0.set_PG(0); // paging disabled
@@ -206,7 +194,6 @@ Bit32u build_vdso_page(Bit32u end)
 
   return start;
 }
-
 
 Bit32u build_init_table(ElfLoader *loader)
 {
@@ -235,11 +222,7 @@ Bit32u build_init_table(ElfLoader *loader)
 
     	 // Search for the segment load position
     	 for(i=0;i< loadedSegments.size();i++ ) {
-//           printf("Lib %s Flag %d Position %08lx\n",
-//        		       loadedSegments[i].fileName.c_str(),
-//        		       loadedSegments[i].hdr.p_flags & PF_X,
-//        		       loadedSegments[i].loadedPos);
-           if ( loadedSegments[i].fileName == it->getFileName() &&
+          if ( loadedSegments[i].fileName == it->getFileName() &&
        		   (loadedSegments[i].hdr.p_flags & PF_X) ) break;
     	 }
     	 addr += loadedSegments[i].loadedPos;
@@ -275,7 +258,7 @@ void save_auxiliary_vectors(Bit32u execfn, Bit32u vsyscall, ElfLoader * loader)
 	bx_cpu.push_32(vsyscall);
 
 	bx_cpu.push_32(AT_PHDR);
-	bx_cpu.push_32(hdr.e_phoff);
+	bx_cpu.push_32(hdr.e_phoff + loader->getLoadedSegments()[0].loadedPos);
 
 	bx_cpu.push_32(AT_PHENT);
 	bx_cpu.push_32(hdr.e_phentsize);
