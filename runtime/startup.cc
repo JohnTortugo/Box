@@ -45,23 +45,22 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
     vector<Bit32u>::reverse_iterator it;
 
 	inits = build_init_table(loader);
-	BX_INFO(("init table address: 0x%08lx", inits));
+//	BX_INFO(("init table address: 0x%08lx", inits));
 
 	stackaddr = (inits - 2) & 0xFFFFFFF0;
 
 	vsyscall = build_vdso_page(stackaddr);
-	BX_INFO(("vsyscall page address: 0x%08lx", vsyscall));
+//	BX_INFO(("vsyscall page address: 0x%08lx", vsyscall));
 
 	stackaddr = (vsyscall - 2) & 0xFFFFFFF0;
-	BX_INFO(("stack start address: 0x%08lx", stackaddr));
-
+//	BX_INFO(("stack start address: 0x%08lx", stackaddr));
 
     bx_cpu.gen_reg[BX_32BIT_REG_EBP].dword.erx = (intptr_t) stackaddr;
 
     //Copy environment variables to stack
     while (environ[i] != '\0' ) {
     	size= strlen(environ[i])+1;
-    	printf("Env[%d] Addr: %08lx Size: %d: %s\n",i , stackaddr, size, environ[i]);
+//    	printf("Env[%d] Addr: %08lx Size: %d: %s\n",i , stackaddr, size, environ[i]);
     	envs.push_back(stackaddr-size+1);
     	bx_mem.write((Bit8u *) environ[i++],bx_mem.virtualAddressToPosition(stackaddr-size+1), size);
     	stackaddr -= size;
@@ -70,7 +69,7 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
     //Copy command line arguments to stack
     for(i=1;i<argc;i++) {
     	size= strlen(argv[i])+1;
-    	printf("Arg[%d] Addr: %08lx Size: %d: %s\n",i-1, stackaddr, size, argv[i]);
+//    	printf("Arg[%d] Addr: %08lx Size: %d: %s\n",i-1, stackaddr, size, argv[i]);
     	args.push_back(stackaddr-size+1);
     	bx_mem.write((Bit8u *) argv[i],bx_mem.virtualAddressToPosition(stackaddr-size+1), size);
     	stackaddr -= size;

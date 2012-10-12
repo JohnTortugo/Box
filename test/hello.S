@@ -1,19 +1,18 @@
-section	.text
-    global _start
+.section	.text
+
+.global _start
 
 _start:		
+	mov	$14, %edx
+	mov	$msg, %ecx	
+	mov	$1, %ebx
+	mov	$4, %eax
+	int	$0x80       
 
-	mov	edx,len	
-	mov	ecx,msg	
-	mov	ebx,1	
-	mov	eax,4	
-	int	0x80       ; sys_write
+	mov	$1, %eax	
+	xor	%ebx, %ebx
+	int	$0x80
 
-	mov	eax,1	
-	int	0x80       ; sys_exit	
-
-section	.data
-
-msg	db	'Hello, world!',0xa	
-len	equ	$ - msg			
-
+.section	.data
+msg:
+	.ascii "hello, world!\12\0"
