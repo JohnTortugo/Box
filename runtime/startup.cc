@@ -61,7 +61,7 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
     //Copy environment variables to stack
     while (environ[i] != '\0' ) {
     	size= strlen(environ[i])+1;
-//    	printf("Env[%d] Addr: %08lx Size: %d: %s\n",i , stackaddr, size, environ[i]);
+    	printf("Env[%d] Addr: %08lx Size: %d: %s\n",i , stackaddr, size, environ[i]);
     	envs.push_back(stackaddr-size+1);
     	bx_mem.write((Bit8u *) environ[i++],bx_mem.virtualAddressToPosition(stackaddr-size+1), size);
     	stackaddr -= size;
@@ -70,7 +70,7 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
     //Copy command line arguments to stack
     for(i=1;i<argc;i++) {
     	size= strlen(argv[i])+1;
-//    	printf("Arg[%d] Addr: %08lx Size: %d: %s\n",i-1, stackaddr, size, argv[i]);
+    	printf("Arg[%d] Addr: %08lx Size: %d: %s\n",i-1, stackaddr, size, argv[i]);
     	args.push_back(stackaddr-size+1);
     	bx_mem.write((Bit8u *) argv[i],bx_mem.virtualAddressToPosition(stackaddr-size+1), size);
     	stackaddr -= size;
@@ -86,10 +86,7 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
 
     bx_cpu.gen_reg[BX_32BIT_REG_ESP].dword.erx = (intptr_t) stackaddr+4;
 
-    // Auxiliary vector NULL entry (2 dwords)
-    bx_cpu.push_32(0);
-    bx_cpu.push_32(0);
-
+    // Auxiliary vectors
     save_auxiliary_vectors(av_EXECFN, vsyscall, loader);
 
     // Null delimiter
@@ -243,6 +240,9 @@ Bit32u build_init_table(ElfLoader *loader)
 void save_auxiliary_vectors(Bit32u execfn, Bit32u vsyscall, ElfLoader * loader)
 {
 	Elf32_Ehdr hdr = loader->getMainExecutable()->getHdr();
+
+	bx_cpu.push_32(AT_NULL);
+	bx_cpu.push_32(0);
 
 	bx_cpu.push_32(AT_PAGESZ);
 	bx_cpu.push_32(4096);
