@@ -2,11 +2,15 @@
 
 extern BX_MEM_C bx_mem;
 
-
 void BX_SYSCALL::handle()
 {
 	switch (EAX) {
 		case __NR_access:
+			{
+				Bit32u ptr;
+				ptr = bx_mem.VirtualToRealAddress(EBX);
+				EAX = access((const char *)ptr, ECX);
+			}
 			printf("access.\n");
 			break;
 
@@ -19,6 +23,11 @@ void BX_SYSCALL::handle()
 		  break;
 
 		case __NR_chmod:
+			{
+				Bit32u ptr;
+				ptr = bx_mem.VirtualToRealAddress(EBX);
+				EAX = chmod((const char *)ptr, ECX);
+			}
 			printf("chmod\n");
 			break;
 
@@ -28,18 +37,32 @@ void BX_SYSCALL::handle()
 			break;
 
 		case __NR_creat:
+			{
+				Bit32u ptr;
+				ptr = bx_mem.VirtualToRealAddress(EBX);
+				EAX = creat((const char *)ptr, ECX);
+			}
 			printf("creat\n");
 			break;
 
 		case __NR_dup:
+			EAX = dup(EBX);
 			printf("dup.\n");
 			break;
 
 		case __NR_dup2:
+			EAX = dup2(EBX, ECX);
 			printf("dup2.\n");
 			break;
 
 		case __NR_execve:
+			{
+				Bit32u filename, argv, envp;
+				filename = bx_mem.VirtualToRealAddress(EBX);
+				argv = bx_mem.VirtualToRealAddress(ECX);
+				envp = bx_mem.VirtualToRealAddress(EDX);
+				EAX = execve((const char *)filename, (char *const *) argv, (char *const *) envp);
+			}
 			printf("execve.\n");
 			break;
 
@@ -48,10 +71,12 @@ void BX_SYSCALL::handle()
 			break;
 
 		case __NR_fchmod:
+			EAX = fchmod(EBX, ECX);
 			printf("fchmod.\n");
 			break;
 
 		case __NR_fchown:
+			EAX = fchown(EBX, ECX, EDX);
 			printf("fchown.\n");
 			break;
 
@@ -64,6 +89,7 @@ void BX_SYSCALL::handle()
 			break;
 
 		case __NR_flock:
+			EAX = flock(EBX, ECX);
 			printf("flock\n");
 			break;
 
@@ -72,38 +98,64 @@ void BX_SYSCALL::handle()
 			break;
 
 		case __NR_fstat64:
+			{
+				Bit32u ptr;
+				ptr = bx_mem.VirtualToRealAddress(ECX);
+				EAX = fstat(EBX, (struct stat *)ptr);
+			}
 			printf("fstat64.\n");
 			break;
 
 		case __NR_fsync:
+			EAX = fsync(EBX);
 			printf("fsync\n");
 			break;
 
 		case __NR_ftruncate:
+			EAX = ftruncate(EBX, ECX);
 			printf("ftruncate\n");
 			break;
 
 		case __NR_getcwd:
+			{
+				Bit32u ptr;
+				ptr = bx_mem.VirtualToRealAddress(EBX);
+				EAX = bx_mem.RealToVirtualAddress((Bit32u)getcwd((char *)ptr, ECX));
+			}
 			printf("getcwd.\n");
 			break;
 
 		case __NR_getdents:
+			{
+				Bit32u ptr;
+				ptr = bx_mem.VirtualToRealAddress(ECX);
+				//EAX = getdents(EBX, (struct linux_dirent *)ptr, EDX);
+			}
 			printf("getdents\n");
 			break;
 
 		case __NR_getegid:
+			EAX = getegid();
 			printf("getegid.\n");
 			break;
 
 		case __NR_getgid:
+			EAX = getgid();
 			printf("getgid.\n");
 			break;
 
 		case __NR_getpid:
+			EAX = getpid();
 			printf("getpid.\n");
 			break;
 
 		case __NR_gettimeofday:
+			{
+			  Bit32u tv, tz;
+				tv = bx_mem.VirtualToRealAddress(EBX);
+				tz = bx_mem.VirtualToRealAddress(ECX);
+				EAX = gettimeofday((struct timeval *)tv, (struct timezone *)tz);
+			}
 			printf("gettimeofday.\n");
 			break;
 
@@ -279,6 +331,6 @@ void BX_SYSCALL::handle()
 			break;
 
 		default:
-			BX_PANIC(("Unknow system call: EAX: 0x%08x",EAX));
+			BX_PANIC(("Unimplemented system call: EAX: 0x%08x",EAX));
 	}
 }
