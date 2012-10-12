@@ -27,11 +27,14 @@ int main(int argc, char **argv) {
   ElfLoader loader(argc, argv, getenv("LD_LIBRARY_PATH"),
 		                    bx_mem.memory,memsize);
 
+
   // Initialize Virtual CPU
   initialize();
 
   // Setup start environment (stack and registers)
   setup_start_environment(argc, argv, &loader);
+
+  bx_mem.dump("/tmp/memory.dump");
 
   //TODO:  execute init stubs
 

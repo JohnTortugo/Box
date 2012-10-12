@@ -16,6 +16,6 @@ public:
 
 #include "cpu/cpu.h"
 #include <sys/file.h>
-
+#include "sys/utsname.h"
 
 #endif

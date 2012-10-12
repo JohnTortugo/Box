@@ -265,6 +265,7 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::TEST_EdGdR(bxInstruction_c *i)
   Bit32u op1_32, op2_32;
 
   op1_32 = BX_READ_32BIT_REG(i->dst());
+//  printf("TEST: 0x%08lx\n",op1_32);
   op2_32 = BX_READ_32BIT_REG(i->src());
   op1_32 &= op2_32;
 

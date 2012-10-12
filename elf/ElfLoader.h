@@ -137,6 +137,12 @@ public:
 
 	Bit32u getFiniAddress() const { return mainExecutable.getFini(); }
 
+	ElfParser * getMainExecutable() { return &mainExecutable; }
+
+	vector<LoadedSegment> getLoadedSegments() const { return loadedSegments; }
+
+	vector<ElfParser> getSharedLibs() const { return sharedLibs; }
+
 	Bit32u elfHash(const unsigned char *name) {
 		Bit32u h = 0, g;
 		while (*name) {
