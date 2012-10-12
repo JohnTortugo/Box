@@ -44,6 +44,10 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::POP_EdM(bxInstruction_c *i)
 
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PUSH_ERX(bxInstruction_c *i)
 {
+
+  if ( EIP == 0x0e447fce)
+	printf("PUSH %08lx\n", BX_READ_32BIT_REG(i->dst()));
+
   push_32(BX_READ_32BIT_REG(i->dst()));
 
   BX_NEXT_INSTR(i);
@@ -52,6 +56,9 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::PUSH_ERX(bxInstruction_c *i)
 BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::POP_ERX(bxInstruction_c *i)
 {
   BX_WRITE_32BIT_REGZ(i->dst(), pop_32());
+
+  if ( EIP == 0x0e447fe0)
+	printf("POP %08lx\n", BX_READ_32BIT_REG(i->dst()));
 
   BX_NEXT_INSTR(i);
 }

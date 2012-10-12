@@ -25,7 +25,7 @@ char init_prog[] = {
 		0x8b, 0x03,								// mov    (%ebx), %eax
 		0xff, 0xe0,								// jmp    *%eax
 		0x8b, 0x1c, 0x24,						// mov	 (%esp), %ebx
-		0xc3									// ret
+		0xc3									        // ret
 };
 
 #define GS_SEG_SIZE 4096 //4K page
