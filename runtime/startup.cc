@@ -266,15 +266,13 @@ void save_auxiliary_vectors(Bit32u execfn, Bit32u vsyscall, ElfLoader * loader)
 
 	bx_cpu.push_32(AT_PHNUM);
 	bx_cpu.push_32(hdr.e_phnum);
-
-
 }
 
 void setInitProgArgs(Bit32u initAddr, int argc, Bit32u argv, Bit32u env)
 {
   Bit8u * mem = (Bit8u *) (bx_mem.memory +bx_mem.virtualAddressToPosition(initAddr));
 
-  * ((Bit32u *)(mem+16)) = argc;
+  * ((Bit32u *)(mem+16)) = env;
   * ((Bit32u *)(mem+21)) = argv;
-  * ((Bit32u *)(mem+26)) = env;
+  * ((Bit32u *)(mem+26)) = argc;
 }

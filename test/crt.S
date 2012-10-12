@@ -6,7 +6,6 @@ _start:
 	xor    %ebp,%ebp
 	mov    %esp,%eax
 	and    $0xfffffff0,%esp
-// 	add    $0x8,%eax 	/* Stack pointer */
  	mov    (%eax),%ebx      /* argc */
  	mov    %eax, %ecx
        	add    $0x4,%ecx        /* argv[] */
