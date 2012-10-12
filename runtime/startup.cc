@@ -42,7 +42,7 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
 	Bit32u av_EXECFN;
 	vector<Bit32u> envs;
     vector<Bit32u> args;
-    vector<Bit32u>::iterator it;
+    vector<Bit32u>::reverse_iterator it;
 
 	inits = build_init_table(loader);
 	BX_INFO(("init table address: 0x%08lx", inits));
@@ -78,7 +78,7 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
 
     //Auxiliary vector data (AT_EXECFN)
 	size= strlen(argv[1])+1;
-	args.push_back(stackaddr-size+1);
+	av_EXECFN = stackaddr-size+1;
 	bx_mem.write((Bit8u *) argv[1],bx_mem.virtualAddressToPosition(stackaddr-size+1), size);
 	stackaddr -= size;
 
@@ -93,7 +93,7 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
     bx_cpu.push_32(0);
 
     //Environment variables pointers
-    for ( it=envs.begin() ; it < envs.end(); it++ )
+    for ( it=envs.rbegin() ; it < envs.rend(); it++ )
           bx_cpu.push_32(*it);
 
     addrEnv = bx_cpu.gen_reg[BX_32BIT_REG_ESP].dword.erx;
@@ -102,7 +102,7 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
     bx_cpu.push_32(0);
 
     //Command line arguments
-    for ( it=args.begin() ; it < args.end(); it++ )
+    for ( it=args.rbegin() ; it < args.rend(); it++ )
           bx_cpu.push_32(*it);
 
     addrArgv = bx_cpu.gen_reg[BX_32BIT_REG_ESP].dword.erx;
