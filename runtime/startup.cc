@@ -8,24 +8,24 @@
 extern char **environ;
 
 char init_prog[] = {
-		0xe8, 0x28, 0x00, 0x00, 0x00,	// call   2d <get_pos>
-		0x83, 0xc3, 0x2c,						// add    $0x2c,%ebx
-		0x8b, 0x03,								// mov    (%ebx),%eax
-		0x85, 0xc0,								// test   %eax,%eax
+		0xe8, 0x28, 0x00, 0x00, 0x00,			// call   2d <get_pos>
+		0x83, 0xc3, 0x2c,						// add    $0x2c, %ebx
+		0x8b, 0x03,								// mov    (%ebx), %eax
+		0x85, 0xc0,								// test   %eax, %eax
 		0x74, 0x18,								// je     26 <end>
-		0x53,										// push   %ebx
-		0x68, 0xff, 0x00, 0xff, 0x00,		// push   $0xff00ff       ; argc
-		0x68, 0x00, 0xff, 0x00, 0xff,		// push   $0xff00ff00   ; argv (ptr)
-		0x68, 0xff, 0x00, 0xff, 0x00,		// push   $0xff00ff       ; env (ptr)
+		0x53,									// push   %ebx
+		0x68, 0xff, 0x00, 0xff, 0x00,			// push   $0x00ff00ff       	; argc
+		0x68, 0x00, 0xff, 0x00, 0xff,			// push   $0xff00ff00   		; argv (ptr)
+		0x68, 0xff, 0x00, 0xff, 0x00,			// push   $0x00ff00ff       	; env (ptr)
 		0xff, 0xd0,								// call   *%eax
-		0x5b,										// pop    %ebx
-		0x83, 0xc3, 0x04,						// add    $0x4,%ebx
+		0x5b,									// pop    %ebx
+		0x83, 0xc3, 0x04,						// add    $0x4, %ebx
 		0xeb, 0xe2,								// jmp    8 <test>
-		0x83, 0xc3, 0x04,						// add    $0x4,%ebx
-		0x8b, 0x03,								// mov    (%ebx),%eax
+		0x83, 0xc3, 0x04,						// add    $0x4, %ebx
+		0x8b, 0x03,								// mov    (%ebx), %eax
 		0xff, 0xe0,								// jmp    *%eax
 		0x8b, 0x1c, 0x24,						// mov	 (%esp), %ebx
-		0xc3											// ret
+		0xc3									// ret
 };
 
 #define GS_SEG_SIZE 4096 //4K page
@@ -52,7 +52,7 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
 	vsyscall = build_vdso_page(stackaddr);
 	BX_INFO(("vsyscall page address: 0x%08lx", vsyscall));
 
-	stackaddr= (vsyscall - 2) & 0xFFFFFFF0;
+	stackaddr = (vsyscall - 2) & 0xFFFFFFF0;
 	BX_INFO(("stack start address: 0x%08lx", stackaddr));
 
 
@@ -210,6 +210,7 @@ Bit32u build_init_table(ElfLoader *loader)
     offset -= 4;
 
 	*(Bit32u *) (mem+offset)  = loader->getEntryAddress();
+	printf("Init at: %x\n", loader->getEntryAddress());
 
     offset -= 4;
 
@@ -228,12 +229,13 @@ Bit32u build_init_table(ElfLoader *loader)
     	 addr += loadedSegments[i].loadedPos;
 
     	 *(Bit32u *) (mem+offset)  = (Bit32u) bx_mem.positionToVirtualAddress(addr);
+    	 printf("Init at: %x\n", bx_mem.positionToVirtualAddress(addr));
       }
     }
 
     offset-= sizeof(init_prog);
 
-    bx_mem.write((Bit8u *) init_prog,offset,sizeof(init_prog));
+    bx_mem.write((Bit8u *) init_prog, offset, sizeof(init_prog));
 
     return bx_mem.positionToVirtualAddress(offset);
 }
