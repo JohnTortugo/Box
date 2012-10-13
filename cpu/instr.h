@@ -73,7 +73,13 @@ typedef void BX_INSF_TYPE;
 #else // BX_SUPPORT_HANDLERS_CHAINING_SPEEDUPS
 
 #define BX_NEXT_TRACE(i) { return; }
-#define BX_NEXT_INSTR(i) { return; }
+//#define BX_NEXT_INSTR(i) { return; }
+
+#define BX_NEXT_INSTR(i) { \
+ printf("\tEAX: 0x%08x EBX: 0x%08x ECX: 0x%08x EDX: 0x%08x\n", EAX, EBX, ECX, EDX); \
+ printf("\tESI: 0x%08x EDI: 0x%08x EBP: 0x%08x ESP: 0x%08x \n", ESI, EDI, EBP, ESP); \
+}
+
 #define BX_LINK_TRACE(i) { return; }
 
 #define BX_SYNC_TIME_IF_SINGLE_PROCESSOR(allowed_delta) \
