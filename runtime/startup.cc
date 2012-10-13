@@ -206,7 +206,6 @@ Bit32u build_init_table(ElfLoader *loader)
     offset -= 4;
 
 	*(Bit32u *) (mem+offset)  = loader->getEntryAddress();
-	printf("Init at: %x\n", loader->getEntryAddress());
 
     offset -= 4;
 

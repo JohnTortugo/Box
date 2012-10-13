@@ -18,6 +18,9 @@ void BX_CPU_C::cpu_loop(void) {
         // objdump -dC box | grep exec1 
         // and it indeed is pointing to the right function =DDD
         // hurray
+
+    	BX_CPU_THIS_PTR prev_rip = RIP;
+
         ptr = (Bit8u *) bx_mem.VirtualToRealAddress(RIP);
 
         printf("EIP: 0x%08lx POS: 0x%08lx\t", RIP, bx_mem.virtualAddressToPosition(RIP)); fflush(stdout);
