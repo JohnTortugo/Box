@@ -160,35 +160,71 @@ void BX_SYSCALL::handle()
 			break;
 
 		case __NR_getuid:
+			EAX = getuid();
 			printf("getuid.\n");
 			break;
 
 		case __NR_getrlimit:
+			{
+				Bit32u ptr;
+				ptr = bx_mem.VirtualToRealAddress(ECX);
+				EAX = getrlimit(EBX, (struct rlimit *) ptr);
+			}
+
 			printf("getrlimit.\n");
 			break;
 
 		case __NR_ioctl:
+			//EAX = ioctl(int d, int request, ...);
 			printf("ioctl.\n");
 			break;
 
 		case __NR_link:
+			{
+				Bit32u oldpath, newpath;
+				oldpath = bx_mem.VirtualToRealAddress(EBX);
+				newpath = bx_mem.VirtualToRealAddress(ECX);
+				EAX = link((const char *)oldpath, (const char *)newpath);
+			}
 			printf("link.\n");
 			break;
 
 		case __NR_kill:
+			EAX = kill(EBX, ECX);
 			printf("kill.\n");
 			break;
 
 		case __NR_lseek:
+			EAX = lseek(EBX, ECX, EDX);
 			printf("lseek.\n");
 			break;
 
 		case __NR_lstat64:
+			{
+				Bit32u path, buf;
+				path = bx_mem.VirtualToRealAddress(EBX);
+				buf = bx_mem.VirtualToRealAddress(ECX);
+				EAX = lstat((const char *)path, (struct stat *)buf);
+			}
 			printf("lstat64.\n");
 			break;
 
 		case __NR_madvise:
+			{
+				Bit32u addr;
+				addr = bx_mem.VirtualToRealAddress(EBX);
+				EAX = madvise((void *)addr, ECX, EDX);
+			}
 			printf("madvise.\n");
+			break;
+
+		case __NR_mkdir:
+			{
+				Bit32u pathname;
+				pathname = bx_mem.VirtualToRealAddress(EBX);
+				EAX = mkdir((const char *)pathname, ECX);
+			}
+			printf("mkdir.\n");
 			break;
 
 		case __NR_mmap:
@@ -199,27 +235,45 @@ void BX_SYSCALL::handle()
 			printf("mmap2.\n");
 			break;
 
-		case __NR_mkdir:
-			printf("mkdir.\n");
-			break;
-
 		case __NR_modify_ldt:
+			{
+				Bit32u ptr;
+				ptr = bx_mem.VirtualToRealAddress(ECX);
+				//				EAX = modify_ldt(EBX, (void *)ptr, EDX);
+			}
 			printf("modify ldt.\n");
 			break;
 
 		case __NR_mprotect:
+			{
+				Bit32u ptr;
+				ptr = bx_mem.VirtualToRealAddress(EBX);
+				EAX = mprotect((void *)ptr, ECX, EDX);
+			}
 			printf("mprotect.\n");
 			break;
 
 		case __NR_mremap:
+		  //void *mremap(void *old_address, size_t old_size,             size_t new_size,int flags, ... /* void *new_address */);
 			printf("mremap.\n");
 			break;
 
 		case __NR_munmap:
+			{
+				Bit32u ptr;
+				ptr = bx_mem.VirtualToRealAddress(EBX);
+				EAX = munmap((void *)ptr, ECX);
+			}
 			printf("munmap.\n");
 			break;
 
 		case __NR_nanosleep:
+			{
+				Bit32u ptr, ptr2;
+				ptr = bx_mem.VirtualToRealAddress(EBX);
+				ptr = bx_mem.VirtualToRealAddress(ECX);
+				EAX = nanosleep((const timespec*)ptr, (timespec*)ptr2);
+			}
 			printf("nanosleep.\n");
 			break;
 
@@ -233,6 +287,11 @@ void BX_SYSCALL::handle()
 			break;
 
 		case __NR_pipe:
+			{
+				Bit32u ptr;
+				ptr = bx_mem.VirtualToRealAddress(EBX);
+				EAX = pipe2((int *)ptr, ECX);
+			}
 			printf("pipe.\n");
 			break;
 
@@ -246,71 +305,146 @@ void BX_SYSCALL::handle()
 			break;
 
 		case __NR_readlink:
+			{
+			  Bit32u path, buf;
+			  path = bx_mem.VirtualToRealAddress(EBX);
+			  buf = bx_mem.VirtualToRealAddress(ECX);
+			  EAX = readlink((const char *)path, (char *)buf, EDX); 
+			}
 			printf("read link.\n");
 			break;
 
 		case __NR_rename:
+			{
+				Bit32u oldpath, newpath;
+				oldpath = bx_mem.VirtualToRealAddress(EBX);
+				newpath = bx_mem.VirtualToRealAddress(ECX);
+				EAX = rename((const char *)oldpath, (const char *)newpath); 
+			}
 			printf("rename.\n");
 			break;
 
 		case __NR_restart_syscall:
-			//EAX = sys_restart_syscall();
+		  //EAX = sys_restart_syscall();
 			printf("restart_syscall.\n");
 			break;
 
 		case __NR_rmdir:
+			{
+				Bit32u pathname;
+				pathname = bx_mem.VirtualToRealAddress(EBX);
+				EAX = rmdir((const char *)pathname); 
+			}
 			printf("rmdir.\n");
 			break;
 
 		case __NR_rt_sigaction:
+			{
+				Bit32u act, oldact;
+				act = bx_mem.VirtualToRealAddress(ECX);
+				oldact = bx_mem.VirtualToRealAddress(EDX);
+				EAX = sigaction(EBX, (const struct sigaction *)act, (struct sigaction *)oldact);
+			}
 			printf("rtsigaction.\n");
 			break;
 
 		case __NR_rt_sigprocmask:
+			{
+				Bit32u set, oldset;
+				set = bx_mem.VirtualToRealAddress(ECX);
+				oldset = bx_mem.VirtualToRealAddress(EDX);
+				EAX = sigprocmask(EBX, (const sigset_t *)set, (sigset_t *)oldset); 
+			}
 			printf("rt_sigprocmask.\n");
 			break;
 
 		case __NR_rt_sigreturn:
-			printf("rt_sigreturn.\n");
-			break;
-
 		case __NR_sigreturn:
-			printf("sigreturn.\n");
+			{
+				Bit32u ptr;
+				ptr =  bx_mem.VirtualToRealAddress(EBX);
+				EAX = sigreturn((sigcontext *)ptr);
+			}
+			printf("rt_sigreturn/sigreturn.\n");
 			break;
 
 		case __NR_socketcall:
+			{
+				Bit32u args;
+				args =  bx_mem.VirtualToRealAddress(ECX);
+				//				EAX = socketcall(EBX, (unsigned long *)args);
+			}
 			printf("socketcall.\n");
 			break;
 
-		case __NR_statfs:
-			printf("statfs.\n");
-			break;
-
 		case __NR_stat64:
+			{
+				Bit32u path, buf;
+				path = bx_mem.VirtualToRealAddress(EBX);
+				buf = bx_mem.VirtualToRealAddress(ECX);
+				EAX = stat((const char *)path, (struct stat *)buf);
+			}
 			printf("stat64.\n");
 			break;
 
+		case __NR_statfs:
+			{
+				Bit32u path, buf;
+				path = bx_mem.VirtualToRealAddress(EBX);
+				buf = bx_mem.VirtualToRealAddress(ECX);
+				EAX = statfs((const char *)path, (struct statfs *)buf);
+			}
+			printf("statfs.\n");
+			break;
+
 		case __NR_time:
+			{
+				Bit32u t;
+				t = bx_mem.VirtualToRealAddress(EBX);
+				EAX = time((time_t *)t); 
+			}
 			printf("time.\n");
 			break;
 
 		case __NR_times:
+			{
+				Bit32u buf;
+				buf = bx_mem.VirtualToRealAddress(EBX);
+				EAX = times((struct tms *)buf); 
+			}
 			printf("times.\n");
 			break;
 
 		case __NR_umask:
+			EAX = umask(EBX); 
 			printf("umask.\n");
 			break;
 
 		case __NR_unlink:
+			{
+				Bit32u pathname;
+				pathname = bx_mem.VirtualToRealAddress(EBX);
+				EAX = unlink((const char *)pathname);
+			}
 			printf("unlink.\n");
 			break;
 
 		case __NR_utime:
+			{
+				Bit32u filename, times;
+				filename = bx_mem.VirtualToRealAddress(EBX);
+				times = bx_mem.VirtualToRealAddress(ECX);
+				EAX = utime((const char *)filename, (const struct utimbuf *)times);
+			}
 			printf("utime.\n");
 			break;
 
 		case __NR_waitpid:
+			{
+				Bit32u status;
+				status = bx_mem.VirtualToRealAddress(ECX);
+				EAX = waitpid(EBX, (int *)status, EDX); 
+			}
 			printf("waitpid.\n");
 			break;
 
@@ -318,19 +452,29 @@ void BX_SYSCALL::handle()
 			printf("wait4.\n");
 			break;
 
-		case __NR_uname: {
-			Bit32u ptr;
-			ptr = bx_mem.VirtualToRealAddress(EBX);
-			EAX = uname((struct utsname *) ptr);
-			break;
-		}
-		case __NR_write: {
-			Bit32u ptr;
-			ptr = bx_mem.VirtualToRealAddress(ECX);
-			EAX = write(EBX, (const void *) ptr , EDX);
-			break;
-		}
+		case __NR_uname: 
+			{
+				Bit32u ptr;
+				ptr = bx_mem.VirtualToRealAddress(EBX);
+				EAX = uname((struct utsname *) ptr);
+				break;
+			}
+
+		case __NR_write: 
+			{
+				Bit32u ptr;
+				ptr = bx_mem.VirtualToRealAddress(ECX);
+				EAX = write(EBX, (const void *) ptr , EDX);
+				break;
+			}
+
 		case __NR_writev:
+			{
+				Bit32u ptr;
+				ptr = bx_mem.VirtualToRealAddress(ECX);
+				EAX = writev(EBX, (const struct iovec *) ptr , EDX);
+				break;
+			}
 			printf("writev.\n");
 			break;
 

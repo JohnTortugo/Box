@@ -17,5 +17,13 @@ public:
 #include "cpu/cpu.h"
 #include <sys/file.h>
 #include "sys/utsname.h"
+#include <sys/resource.h>
+#include <signal.h>
+#include <sys/mman.h>
+#include <sys/uio.h>
+#include <utime.h>
+#include <sys/times.h>
+#include <sys/vfs.h>
+#include <sys/wait.h>
 
 #endif
