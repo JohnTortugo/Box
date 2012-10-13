@@ -8,24 +8,24 @@
 extern char **environ;
 
 char init_prog[] = {
-		0xe8, 0x28, 0x00, 0x00, 0x00,			// call   2d <get_pos>
-		0x83, 0xc3, 0x2c,						// add    $0x2c, %ebx
-		0x8b, 0x03,								// mov    (%ebx), %eax
-		0x85, 0xc0,								// test   %eax, %eax
-		0x74, 0x18,								// je     26 <end>
-		0x53,									// push   %ebx
-		0x68, 0xff, 0x00, 0xff, 0x00,			// push   $0x00ff00ff       	; argc
-		0x68, 0x00, 0xff, 0x00, 0xff,			// push   $0xff00ff00   		; argv (ptr)
-		0x68, 0xff, 0x00, 0xff, 0x00,			// push   $0x00ff00ff       	; env (ptr)
-		0xff, 0xd0,								// call   *%eax
-		0x5b,									// pop    %ebx
-		0x83, 0xc3, 0x04,						// add    $0x4, %ebx
-		0xeb, 0xe2,								// jmp    8 <test>
-		0x83, 0xc3, 0x04,						// add    $0x4, %ebx
-		0x8b, 0x03,								// mov    (%ebx), %eax
-		0xff, 0xe0,								// jmp    *%eax
-		0x8b, 0x1c, 0x24,						// mov	 (%esp), %ebx
-		0xc3									        // ret
+		0xe8, 0x28, 0x00, 0x00, 0x00,		// call   2d <get_pos>
+		0x83, 0xc3, 0x2c,			// add    $0x2c, %ebx
+		0x8b, 0x03,				// mov    (%ebx), %eax
+		0x85, 0xc0,				// test   %eax, %eax
+		0x74, 0x18,				// je     26 <end>
+		0x53,					// push   %ebx
+		0x68, 0xff, 0x00, 0xff, 0x00,		// push   $0x00ff00ff  ; argc
+		0x68, 0x00, 0xff, 0x00, 0xff,		// push   $0xff00ff00  ; argv (ptr)
+		0x68, 0xff, 0x00, 0xff, 0x00,		// push   $0x00ff00ff  ; env (ptr)
+		0xff, 0xd0,				// call   *%eax
+		0x5b,					// pop    %ebx
+		0x83, 0xc3, 0x04,			// add    $0x4, %ebx
+		0xeb, 0xe2,				// jmp    8 <test>
+		0x83, 0xc3, 0x04,			// add    $0x4, %ebx
+		0x8b, 0x03,				// mov    (%ebx), %eax
+		0xff, 0xe0,				// jmp    *%eax
+		0x8b, 0x1c, 0x24,			// mov	 (%esp), %ebx
+		0xc3					// ret
 };
 
 #define GS_SEG_SIZE 4096 //4K page
@@ -240,32 +240,32 @@ void save_auxiliary_vectors(Bit32u execfn, Bit32u vsyscall, ElfLoader * loader)
 {
 	Elf32_Ehdr hdr = loader->getMainExecutable()->getHdr();
 
-	bx_cpu.push_32(AT_NULL);
 	bx_cpu.push_32(0);
+	bx_cpu.push_32(AT_NULL);
 
-	bx_cpu.push_32(AT_PAGESZ);
 	bx_cpu.push_32(4096);
+	bx_cpu.push_32(AT_PAGESZ);
 
-	bx_cpu.push_32(AT_EXECFN);
 	bx_cpu.push_32(execfn);
+	bx_cpu.push_32(AT_EXECFN);
 
-	bx_cpu.push_32(AT_CLKTCK);
 	bx_cpu.push_32(100);
+	bx_cpu.push_32(AT_CLKTCK);
 
-	bx_cpu.push_32(AT_ENTRY);
 	bx_cpu.push_32(loader->getEntryAddress());
+	bx_cpu.push_32(AT_ENTRY);
 
-	bx_cpu.push_32(AT_SYSINFO_EHDR);
 	bx_cpu.push_32(vsyscall);
+	bx_cpu.push_32(AT_SYSINFO_EHDR);
 
-	bx_cpu.push_32(AT_PHDR);
 	bx_cpu.push_32(hdr.e_phoff + loader->getLoadedSegments()[0].loadedPos);
+	bx_cpu.push_32(AT_PHDR);
 
-	bx_cpu.push_32(AT_PHENT);
 	bx_cpu.push_32(hdr.e_phentsize);
+	bx_cpu.push_32(AT_PHENT);
 
-	bx_cpu.push_32(AT_PHNUM);
 	bx_cpu.push_32(hdr.e_phnum);
+	bx_cpu.push_32(AT_PHNUM);
 }
 
 void setInitProgArgs(Bit32u initAddr, int argc, Bit32u argv, Bit32u env)

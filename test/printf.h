@@ -28,6 +28,7 @@
 
 #include <stdarg.h>
 
+#define NULL 0
 #define putchar(c)  write(&c,1) 
 
 #define PAD_RIGHT 1
