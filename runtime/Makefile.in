@@ -43,6 +43,7 @@ BX_OBJS = \
 	main.o \
 	config.o \
 	startup.o \
+	init_stub.o \
 	logio.o
 
 BX_INCLUDES = ../bochs.h ../config.h
@@ -68,5 +69,8 @@ dist-clean: clean
 box.o: box.@CPP_SUFFIX@ 
 main.o: box.@CPP_SUFFIX@ 
 logio.o: logio.@CPP_SUFFIX@ 
-startup.o: startup.@CPP_SUFFIX@ 
+startup.o: startup.@CPP_SUFFIX@ init_stub.h
 config.o: config.@CPP_SUFFIX@ 
+init_stub.h: init_stub.S
+	as -o init_stub.o init_stub.S && \
+	./obj2inc.sh init_stub.o

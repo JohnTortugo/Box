@@ -1,32 +1,14 @@
 #include<stdlib.h>
 #include <string.h>
 #include <elf.h>
+#include <algorithm>
 #include "bochs.h"
 #include "config.h"
 #include "runtime.h"
 
 extern char **environ;
 
-char init_prog[] = {
-		0xe8, 0x28, 0x00, 0x00, 0x00,		// call   2d <get_pos>
-		0x83, 0xc3, 0x2c,			// add    $0x2c, %ebx
-		0x8b, 0x03,				// mov    (%ebx), %eax
-		0x85, 0xc0,				// test   %eax, %eax
-		0x74, 0x18,				// je     26 <end>
-		0x53,					// push   %ebx
-		0x68, 0xff, 0x00, 0xff, 0x00,		// push   $0x00ff00ff  ; argc
-		0x68, 0x00, 0xff, 0x00, 0xff,		// push   $0xff00ff00  ; argv (ptr)
-		0x68, 0xff, 0x00, 0xff, 0x00,		// push   $0x00ff00ff  ; env (ptr)
-		0xff, 0xd0,				// call   *%eax
-		0x5b,					// pop    %ebx
-		0x83, 0xc3, 0x04,			// add    $0x4, %ebx
-		0xeb, 0xe2,				// jmp    8 <test>
-		0x83, 0xc3, 0x04,			// add    $0x4, %ebx
-		0x8b, 0x03,				// mov    (%ebx), %eax
-		0xff, 0xe0,				// jmp    *%eax
-		0x8b, 0x1c, 0x24,			// mov	 (%esp), %ebx
-		0xc3					// ret
-};
+#include "init_stub.h"
 
 #define GS_SEG_SIZE 4096 //4K page
 
@@ -228,9 +210,9 @@ Bit32u build_init_table(ElfLoader *loader)
       }
     }
 
-    offset-= sizeof(init_prog);
+    offset-= sizeof(init_stub);
 
-    bx_mem.write((Bit8u *) init_prog, offset, sizeof(init_prog));
+    bx_mem.write((Bit8u *) init_stub, offset, sizeof(init_stub));
 
     return bx_mem.positionToVirtualAddress(offset);
 }
@@ -269,9 +251,30 @@ void save_auxiliary_vectors(Bit32u execfn, Bit32u vsyscall, ElfLoader * loader)
 
 void setInitProgArgs(Bit32u initAddr, int argc, Bit32u argv, Bit32u env)
 {
+  const char *sARGC="ARGC";
+  const char *sARGV="ARGV";
+  const char *sENVP="ENVP";
   Bit8u * mem = (Bit8u *) (bx_mem.memory +bx_mem.virtualAddressToPosition(initAddr));
+  Bit8u * pos;
 
+  pos = std::search(mem, mem + sizeof(init_stub), sARGC, sARGC + strlen(sARGC));
+  if ( pos == NULL )
+	 BX_PANIC(("Tag ARGC not fount in init_stub"));
+  *((Bit32u *) pos) = argc;
+
+  pos = std::search(mem, mem + sizeof(init_stub), sARGV, sARGV + strlen(sARGV));
+  if ( pos == NULL )
+	 BX_PANIC(("Tag ARGV not fount in init_stub"));
+  *((Bit32u *) pos) = argv;
+
+  pos = std::search(mem, mem + sizeof(init_stub), sENVP, sENVP + strlen(sENVP));
+  if ( pos == NULL )
+	 BX_PANIC(("Tag ENVP not fount in init_stub"));
+  *((Bit32u *) pos) = env;
+/*
   * ((Bit32u *)(mem+16)) = env;
   * ((Bit32u *)(mem+21)) = argv;
   * ((Bit32u *)(mem+26)) = argc;
+  */
+
 }
