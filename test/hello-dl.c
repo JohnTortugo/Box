@@ -4,18 +4,30 @@
  */
 
 int teste(int a);
+int teste2();
 void end(void);
 void write(char * text, int len);
+
+extern int iGlobal;
 
 void _start(void)
 {
  char *msg = "Hello World!\n";
  int a;
 
- for(a=0; a<10;a++)
+ for(a=0; a<2;a++)
   write(msg,13);
 
+ write("Teste recursivo\n",16);
  teste(10);
+
+ write("teste2() com iGlobal=2 (padrao)\n",32);
+ teste2();
+
+ iGlobal = 5;
+
+ write("teste2() com iGlobal=5\n",23);
+ teste2();
 
  end();
 }
