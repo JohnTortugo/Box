@@ -43,7 +43,6 @@ BX_OBJS = \
 	main.o \
 	config.o \
 	startup.o \
-	init_stub.o \
 	logio.o
 
 BX_INCLUDES = ../bochs.h ../config.h
@@ -57,7 +56,7 @@ all: $(BX_OBJS)
 $(BX_OBJS): $(BX_INCLUDES)
 
 clean:
-	@RMCOMMAND@ *.o
+	@RMCOMMAND@ *.o init_stub.h
 
 dist-clean: clean
 	@RMCOMMAND@ Makefile

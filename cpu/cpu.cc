@@ -30,7 +30,7 @@ void BX_CPU_C::cpu_loop(void) {
         // doesn't mean that i was decoded right
         // but means that the input that was correct
         // we can use this for tracing program interpretation
-        d.disasm32((bx_address)ptr, (bx_address)ptr, (const Bit8u *)ptr, disbuf);
+        d.disasm32((bx_address)0, (bx_address)RIP, (const Bit8u *)ptr, disbuf);
         printf("%s\n", disbuf); fflush(stdout);
 
         RIP += i->ilen();

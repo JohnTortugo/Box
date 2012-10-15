@@ -86,7 +86,7 @@ Bit16u BX_MEM_C::read_word(Bit32u addr)
    return *((Bit16u *) lastAddress);
 }
 
-Bit32u BX_MEM_C::read_dword( Bit32u addr)
+Bit32u BX_MEM_C::read_dword(Bit32u addr)
 {
    check_memory_limit(addr);
    lastAddress = ADDR_VIRTUAL_TO_REAL(addr);

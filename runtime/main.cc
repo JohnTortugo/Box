@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
   // Setup start environment (stack and registers)
   setup_start_environment(argc, argv, &loader);
 
-  bx_mem.dump("/tmp/memory.dump");
+  bx_mem.dump((char *) "/tmp/memory.dump");
 
   //TODO:  execute init stubs
 
