@@ -29,12 +29,12 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
 	inits = build_init_table(loader);
 //	BX_INFO(("init table address: 0x%08lx", inits));
 
-	stackaddr = (inits - 2) & 0xFFFFFFF0;
+	stackaddr = (inits - 4) & 0xFFFFFFF0;
 
 	vsyscall = build_vdso_page(stackaddr);
 //	BX_INFO(("vsyscall page address: 0x%08lx", vsyscall));
 
-	stackaddr = (vsyscall - 2) & 0xFFFFFFF0;
+	stackaddr = (vsyscall - 4) & 0xFFFFFFF0;
 //	BX_INFO(("stack start address: 0x%08lx", stackaddr));
 
     bx_cpu.gen_reg[BX_32BIT_REG_EBP].dword.erx = (intptr_t) stackaddr;
@@ -137,6 +137,7 @@ void switchTo32bitsMode()
   BX_CPU(0)->sregs[BX_SEG_REG_SS] =  BX_CPU(0)->sregs[BX_SEG_REG_ES] =  BX_CPU(0)->sregs[BX_SEG_REG_DS];
 
   // GS deltas - sysenter
+  /*
   BX_CPU(0)->sregs[BX_SEG_REG_GS].cache.valid = 1; 	// Valid segment cache
   BX_CPU(0)->sregs[BX_SEG_REG_GS].cache.p = 1; 	   	   // Segment present
   BX_CPU(0)->sregs[BX_SEG_REG_GS].cache.dpl = 3; 	   // Ring 3
@@ -150,6 +151,7 @@ void switchTo32bitsMode()
   BX_CPU(0)->sregs[BX_SEG_REG_GS].selector.index = 3; 	   // Second segment
   BX_CPU(0)->sregs[BX_SEG_REG_GS].selector.ti = 1; 	   // GDT
   BX_CPU(0)->sregs[BX_SEG_REG_GS].selector.rpl = 3; 	   // Ring 3 privilege
+  */
 
   // CR0 deltas
   BX_CPU(0)->cr0.set_PG(0); // paging disabled
