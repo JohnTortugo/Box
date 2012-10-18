@@ -19,25 +19,31 @@ void setInitProgArgs(Bit32u initAddr, int argc, Bit32u argv, Bit32u env);
 
 void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
 {
-	int i=0,size;
-	Bit32u inits, vsyscall, stackaddr, addrArgv, addrEnv;
-	Bit32u av_EXECFN;
-	vector<Bit32u> envs;
+    int i=0,size;
+    Bit32u inits, vsyscall, stackaddr, addrArgv, addrEnv;
+    Bit32u av_EXECFN;
+    vector<Bit32u> envs;
     vector<Bit32u> args;
     vector<Bit32u>::reverse_iterator it;
 
 	inits = build_init_table(loader);
 //	BX_INFO(("init table address: 0x%08lx", inits));
 
-	stackaddr = (inits - 4) & 0xFFFFFFF0;
+	stackaddr = (inits) & 0xFFFFFFF0;
 
 	vsyscall = build_vdso_page(stackaddr);
 //	BX_INFO(("vsyscall page address: 0x%08lx", vsyscall));
 
-	stackaddr = (vsyscall - 4) & 0xFFFFFFF0;
+	stackaddr = (vsyscall) & 0xFFFFFFF0;
 //	BX_INFO(("stack start address: 0x%08lx", stackaddr));
 
     bx_cpu.gen_reg[BX_32BIT_REG_EBP].dword.erx = (intptr_t) stackaddr;
+    
+    //Auxiliary vector data (AT_EXECFN)
+    size= strlen(argv[1])+1;
+    av_EXECFN = stackaddr-size+1;
+    bx_mem.write((Bit8u *) argv[1],bx_mem.virtualAddressToPosition(stackaddr-size+1), size);
+    stackaddr -= size;
 
     //Copy environment variables to stack
     while (environ[i] != '\0' ) {
@@ -57,13 +63,7 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
     	stackaddr -= size;
     }
 
-    //Auxiliary vector data (AT_EXECFN)
-	size= strlen(argv[1])+1;
-	av_EXECFN = stackaddr-size+1;
-	bx_mem.write((Bit8u *) argv[1],bx_mem.virtualAddressToPosition(stackaddr-size+1), size);
-	stackaddr -= size;
-
-	stackaddr &= 0xFFFFFFF0; //Stack align;
+    stackaddr &= 0xFFFFFFF0; //Stack align;
 
     bx_cpu.gen_reg[BX_32BIT_REG_ESP].dword.erx = (intptr_t) stackaddr+4;
 
@@ -90,9 +90,6 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
 
     //Argument count
     bx_cpu.push_32(argc-1);
-
-    // Set exit function pointer (_fini ?)
-    bx_cpu.gen_reg[BX_32BIT_REG_EDX].dword.erx = 0; // loader->getFiniAddress();
 
     // Patch init routine
     setInitProgArgs(inits,argc-1,addrArgv, addrEnv);
@@ -162,15 +159,9 @@ void switchTo32bitsMode()
 
 Bit32u build_vdso_page(Bit32u end)
 {
-  char instr[] = {
-		   0xcd, 0x80,  // int 80h
-		   0xc3            // ret
-  };
+  Bit32u start = (end - GS_SEG_SIZE) & 0xFFFFFFF0;
 
-  Bit32u start = end - GS_SEG_SIZE;
-  printf("vsyscall range 0x%08lx - 0x%08lx\n",start,end);
-
-  bx_mem.write((Bit8u *) instr, bx_mem.virtualAddressToPosition(start) + 0x10, sizeof(instr));
+  memset(bx_mem.memory + bx_mem.virtualAddressToPosition(start), 255,GS_SEG_SIZE);
 
   return start;
 }
