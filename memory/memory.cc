@@ -90,6 +90,11 @@ Bit32u BX_MEM_C::read_dword(Bit32u addr)
 {
    check_memory_limit(addr);
    lastAddress = ADDR_VIRTUAL_TO_REAL(addr);
+
+   if ( addr == 0xE446328 ) {
+  	  BX_INFO(("**Reading %08lx from 0xE4463E8",*((Bit32u *) lastAddress)));
+   }
+
    return *((Bit32u *) lastAddress);
 }
 
@@ -119,6 +124,10 @@ void BX_MEM_C::write_word( Bit32u addr, Bit16u data)
 void BX_MEM_C::write_dword( Bit32u addr, Bit32u data)
 {
   Bit32u *ptr = (Bit32u *) ADDR_VIRTUAL_TO_REAL(addr);
+
+  if ( addr == 0xE446328 ) {
+	  printf("[BX_INFO] **Writing %08lx to %08lx\n",data,addr);
+  }
   check_memory_limit(addr);
   *ptr = data;
 }

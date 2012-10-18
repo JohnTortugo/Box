@@ -16,17 +16,18 @@ extern char **environ;
 
 Bit32u build_vdso_page(Bit32u end);
 Bit32u build_init_table(ElfLoader *loader);
-void save_auxiliary_vectors(Bit32u execfn, Bit32u vsyscall, ElfLoader * loader);
+void save_auxiliary_vectors(Bit32u execfn, Bit32u random, Bit32u vsyscall, ElfLoader * loader);
 void setInitProgArgs(Bit32u initAddr, int argc, Bit32u argv, Bit32u env);
 
-void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
+void setup_environment(int argc, char *argv[], ElfLoader * loader)
 {
-    int i=0,size;
+    int i,size;
     Bit32u inits, vsyscall, stackaddr, addrArgv, addrEnv;
-    Bit32u av_EXECFN;
+    Bit32u av_EXECFN, av_RANDOM;
     vector<Bit32u> envs;
     vector<Bit32u> args;
     vector<Bit32u>::reverse_iterator it;
+    char random[16];
 
 	inits = build_init_table(loader);
 //	BX_INFO(("init table address: 0x%08lx", inits));
@@ -44,13 +45,23 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
     //Auxiliary vector data (AT_EXECFN)
     size= strlen(argv[1])+1;
     av_EXECFN = stackaddr-size+1;
-    bx_mem.write((Bit8u *) argv[1],bx_mem.virtualAddressToPosition(stackaddr-size+1), size);
+    bx_mem.write((Bit8u *) argv[1],bx_mem.virtualAddressToPosition(av_EXECFN), size);
     stackaddr -= size;
+
+    //Auxiliary vector data (AT_RANDOM)
+    srand(time(NULL));
+    for(i=0;i<16;i++)
+    	random[i]= rand() & 0xFF;
+    size= 16;
+    av_RANDOM = stackaddr-size+1;
+    bx_mem.write((Bit8u *) random,bx_mem.virtualAddressToPosition(av_RANDOM), size);
+    stackaddr -= size;
+
+    i=0;
 
     //Copy environment variables to stack
     while (environ[i] != '\0' ) {
     	size= strlen(environ[i])+1;
-//    	printf("Env[%d] Addr: %08lx Size: %d: %s\n",i , stackaddr, size, environ[i]);
     	envs.push_back(stackaddr-size+1);
     	bx_mem.write((Bit8u *) environ[i++],bx_mem.virtualAddressToPosition(stackaddr-size+1), size);
     	stackaddr -= size;
@@ -59,7 +70,6 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
     //Copy command line arguments to stack
     for(i=1;i<argc;i++) {
     	size= strlen(argv[i])+1;
-//    	printf("Arg[%d] Addr: %08lx Size: %d: %s\n",i-1, stackaddr, size, argv[i]);
     	args.push_back(stackaddr-size+1);
     	bx_mem.write((Bit8u *) argv[i],bx_mem.virtualAddressToPosition(stackaddr-size+1), size);
     	stackaddr -= size;
@@ -69,8 +79,8 @@ void setup_start_environment(int argc, char *argv[], ElfLoader * loader)
 
     bx_cpu.gen_reg[BX_32BIT_REG_ESP].dword.erx = (intptr_t) stackaddr+4;
 
-    // Auxiliary vectors
-    save_auxiliary_vectors(av_EXECFN, vsyscall, loader);
+    // Auxiliary vector entries
+    save_auxiliary_vectors(av_EXECFN, av_RANDOM, vsyscall, loader);
 
     // Null delimiter
     bx_cpu.push_32(0);
@@ -212,10 +222,9 @@ Bit32u build_init_table(ElfLoader *loader)
     return bx_mem.positionToVirtualAddress(offset);
 }
 
-void save_auxiliary_vectors(Bit32u execfn, Bit32u vsyscall, ElfLoader * loader)
+void save_auxiliary_vectors(Bit32u execfn, Bit32u random, Bit32u vsyscall, ElfLoader * loader)
 {
 	Elf32_Ehdr hdr = loader->getMainExecutable()->getHdr();
-    vector<LoadedSegment> loadedSegments = loader->getLoadedSegments();
 
 	bx_cpu.push_32(0);
 	bx_cpu.push_32(AT_NULL);
@@ -255,6 +264,12 @@ void save_auxiliary_vectors(Bit32u execfn, Bit32u vsyscall, ElfLoader * loader)
 
 	bx_cpu.push_32(getegid());
 	bx_cpu.push_32(AT_EGID);
+
+	bx_cpu.push_32(0);
+	bx_cpu.push_32(AT_SECURE);
+
+	bx_cpu.push_32(random);
+	bx_cpu.push_32(AT_RANDOM);
 }
 
 void setInitProgArgs(Bit32u initAddr, int argc, Bit32u argv, Bit32u env)

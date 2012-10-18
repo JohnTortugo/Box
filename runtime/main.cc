@@ -32,9 +32,10 @@ int main(int argc, char **argv) {
   initialize();
 
   // Setup start environment (stack and registers)
-  setup_start_environment(argc, argv, &loader);
+  setup_environment(argc, argv, &loader);
 
   bx_mem.dump((char *) "/tmp/memory.dump");
+//  exit(0);
 
   //TODO:  execute init stubs
 

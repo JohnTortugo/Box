@@ -488,8 +488,6 @@ BX_INSF_TYPE BX_CPP_AttrRegparmN(1) BX_CPU_C::CMP_EdIdM(bxInstruction_c *i)
 
   bx_address eaddr = BX_CPU_CALL_METHODR(i->ResolveModrm, (i));
 
-  printf("CMP seg %d addr 0x%08lx\n",i->seg(),eaddr);
-
   op1_32 = read_virtual_dword(i->seg(), eaddr);
 
   op2_32 = i->Id();

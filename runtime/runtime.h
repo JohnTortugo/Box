@@ -12,4 +12,4 @@ void switchTo32bitsMode();
 
 
 //Environment startup functions
-void setup_start_environment(int argc, char *argv[], ElfLoader * loader);
+void setup_environment(int argc, char *argv[], ElfLoader * loader);
