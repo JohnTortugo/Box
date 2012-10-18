@@ -1,5 +1,7 @@
 #include<stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
 #include <elf.h>
 #include <algorithm>
 #include "bochs.h"
@@ -213,6 +215,7 @@ Bit32u build_init_table(ElfLoader *loader)
 void save_auxiliary_vectors(Bit32u execfn, Bit32u vsyscall, ElfLoader * loader)
 {
 	Elf32_Ehdr hdr = loader->getMainExecutable()->getHdr();
+    vector<LoadedSegment> loadedSegments = loader->getLoadedSegments();
 
 	bx_cpu.push_32(0);
 	bx_cpu.push_32(AT_NULL);
@@ -232,7 +235,7 @@ void save_auxiliary_vectors(Bit32u execfn, Bit32u vsyscall, ElfLoader * loader)
 	bx_cpu.push_32(vsyscall);
 	bx_cpu.push_32(AT_SYSINFO_EHDR);
 
-	bx_cpu.push_32(hdr.e_phoff + loader->getLoadedSegments()[0].loadedPos);
+	bx_cpu.push_32(hdr.e_phoff + bx_mem.virtualBase);
 	bx_cpu.push_32(AT_PHDR);
 
 	bx_cpu.push_32(hdr.e_phentsize);
@@ -240,6 +243,18 @@ void save_auxiliary_vectors(Bit32u execfn, Bit32u vsyscall, ElfLoader * loader)
 
 	bx_cpu.push_32(hdr.e_phnum);
 	bx_cpu.push_32(AT_PHNUM);
+
+	bx_cpu.push_32(getuid());
+	bx_cpu.push_32(AT_UID);
+
+	bx_cpu.push_32(geteuid());
+	bx_cpu.push_32(AT_EUID);
+
+	bx_cpu.push_32(getgid());
+	bx_cpu.push_32(AT_GID);
+
+	bx_cpu.push_32(getegid());
+	bx_cpu.push_32(AT_EGID);
 }
 
 void setInitProgArgs(Bit32u initAddr, int argc, Bit32u argv, Bit32u env)
