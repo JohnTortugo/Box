@@ -192,6 +192,7 @@ Bit32u build_init_table(ElfLoader *loader)
 
     offset -= 4;
 
+    printf("MainExecutable Init at: %x\n", loader->getEntryAddress());
 	*(Bit32u *) (mem+offset)  = loader->getEntryAddress();
 
     offset -= 4;
@@ -211,7 +212,7 @@ Bit32u build_init_table(ElfLoader *loader)
     	 addr += loadedSegments[i].loadedPos;
 
     	 *(Bit32u *) (mem+offset)  = (Bit32u) bx_mem.positionToVirtualAddress(addr);
-    	 printf("Init at: %x\n", bx_mem.positionToVirtualAddress(addr));
+    	 printf("Lib %s Init at: %x\n", it->getFileName().c_str(), bx_mem.positionToVirtualAddress(addr));
       }
     }
 

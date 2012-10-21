@@ -18,34 +18,34 @@ int main(int argc, char **argv) {
 	// print banner
 	printBanner();
 
-  // aloca memória (100MB)
+	// aloca memória (100MB)
 	BX_INFO(("Allocating Memory."));
 	bx_mem.allocate(memsize);
 
-  // carrega o elf na memória
+	// carrega o elf na memória
 	BX_INFO(("Loading ELF."));
-  ElfLoader loader(argc, argv, getenv("LD_LIBRARY_PATH"),
+	ElfLoader loader(argc, argv, getenv("LD_LIBRARY_PATH"),
 		                    bx_mem.memory,memsize);
 
 
-  // Initialize Virtual CPU
-  initialize();
+	// Initialize Virtual CPU
+	initialize();
 
-  // Setup start environment (stack and registers)
-  setup_environment(argc, argv, &loader);
+	// Setup start environment (stack and registers)
+	setup_environment(argc, argv, &loader);
 
-  bx_mem.dump((char *) "/tmp/memory.dump");
+//  bx_mem.dump((char *) "/tmp/memory.dump");
 //  exit(0);
 
-  //TODO:  execute init stubs
+	//TODO:  execute init stubs
 
-  // salta para o interpretador
-  BX_INFO(("Running Interpreter."));
-  run();
+	// salta para o interpretador
+	BX_INFO(("Running Interpreter."));
+	run();
 
-  //TODO:  execute fini stubs
+	//TODO:  execute fini stubs
 
-  return 0;
+	return 0;
 }
 
 void initialize()

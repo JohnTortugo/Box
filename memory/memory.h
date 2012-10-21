@@ -38,12 +38,32 @@ public:
 	Bit32u		virtualBase;
 	Bit32u      lastAddress;
 
+	// first byte after mainExecutable .bss or address set by syscall brk
+	Bit32u		programBreak;
+
+	// original program break, this is to keep where is the end of DATA
+	// segment for the main executable
+	Bit32u		origProgramBreak;
+
+	// first byte where an shared library was loaded
+	Bit32u		libraryStart;
+
 	BX_MEM_C();
 	~BX_MEM_C();
 
 	void allocate(Bit64u size);
 
 	void setVirtualMemBase(Bit32u vBase);
+
+	Bit32u getProgramBreak();
+	void setProgramBreak(Bit32u pb);
+
+	Bit32u getLibraryStart();
+	void setLibraryStart(Bit32u ls);
+
+	Bit32u getOrigProgramBreak();
+	void setOrigProgramBreak(Bit32u ls);
+
 	void read(Bit8u *content, Bit32u offset, Bit32u len);
 	void write(Bit8u *content, Bit32u offset, Bit32u len);
 	void copy(Bit32u offsetFrom, Bit32u offsetTo, Bit32u len);

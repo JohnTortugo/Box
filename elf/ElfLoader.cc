@@ -396,7 +396,42 @@ void ElfLoader::createAddressSpace() {
 	}
 	// ok main executable loaded
 
-	// load shared libraries
+
+	/*
+	 * Program break points to the first byte after .bss of main executable.
+	 */
+	bx_mem.setOrigProgramBreak(this->memory_indx);
+	bx_mem.setProgramBreak(this->memory_indx);
+
+	/*
+	 * Now allocate space for the heap just after the DATA (.data .bss) segment
+	 * of the main executable.
+	 */
+	LoadedSegment segDesc;
+	segDesc.fileName 		= "Heap";
+	segDesc.segmentIndex 	= 0;
+	segDesc.hdr.p_align 	= segDesc.hdr.p_filesz = segDesc.hdr.p_flags = 0;
+	segDesc.hdr.p_memsz		= segDesc.hdr.p_offset = segDesc.hdr.p_paddr = 0;
+	segDesc.hdr.p_type		= segDesc.hdr.p_vaddr  = 0;
+	segDesc.loadedPos 		= this->memory_indx;
+
+	Bit32u ind = this->memory_indx;
+	for (this->memory_indx; this->memory_indx<ind+(10*1024*1024); this->memory_indx++) {
+		this->memory[this->memory_indx] = 0;
+	}
+
+	this->loadedSegments.push_back(segDesc);
+
+
+	/*
+	 * Library start is the point where the first library was loaded.
+	 */
+	bx_mem.setLibraryStart(this->memory_indx);
+
+
+	/*
+	 * Load shared libraries segments.
+	 */
 	for (int sIndex = 0; sIndex<sharedLibs.size(); sIndex++) {
 		// list of all segments in the shared library
 		segments 	= sharedLibs[sIndex].getProgHdrTable();
@@ -442,23 +477,14 @@ void ElfLoader::createAddressSpace() {
 	}
 	// ok loading shared libs segments
 
-	// allocating space for heap (10MB) and stack (remainder)
-	LoadedSegment segDesc;
-	segDesc.fileName 		= "Heap";
-	segDesc.segmentIndex 	= 0;
-	segDesc.hdr.p_align 	= segDesc.hdr.p_filesz = segDesc.hdr.p_flags = 0;
-	segDesc.hdr.p_memsz		= segDesc.hdr.p_offset = segDesc.hdr.p_paddr = 0;
-	segDesc.hdr.p_type		= segDesc.hdr.p_vaddr  = 0;
-	segDesc.loadedPos 		= this->memory_indx;
 
-	Bit32u ind = this->memory_indx;
-	for (this->memory_indx; this->memory_indx<ind+(10*1024*1024); this->memory_indx++) {
-		this->memory[this->memory_indx] = 0;
-	}
 
-	this->loadedSegments.push_back(segDesc);
 
-	// stack is initialized at memory_size and is decremented until reaching heap start
+
+
+	/*
+	 * stack is initialized at memory_size
+	 */
 	segDesc.fileName 		= "Stack";
 	segDesc.segmentIndex 	= 0;
 	segDesc.hdr.p_align 	= segDesc.hdr.p_filesz = segDesc.hdr.p_flags = 0;
@@ -471,17 +497,17 @@ void ElfLoader::createAddressSpace() {
 
 
 void ElfLoader::dumpAddressSpaceInfo() {
-	printf("%25s %10s %12s %s %11s %12s %12s %12s %12s %12s %12s %12s\n", "File", "SegIndx", "RealPos", "|", "Type","Offset","VirtAddr","PhysAddr","FileSiz","MemSiz","Flag","Align");
+	printf("%30s %10s %12s %s %5s %12s %12s %12s %12s %12s %12s %12s\n", "File", "SegIndx", "RealPos", "|", "Type","Offset","VirtAddr","PhysAddr","FileSiz","MemSiz","Flag","Align");
 
 	for (int i=0; i<this->loadedSegments.size(); i++) {
 		LoadedSegment segDesc = this->loadedSegments[i];
 
-		printf("%25s ", segDesc.fileName.c_str());
+		printf("%30s ", segDesc.fileName.c_str());
 		printf("%10d ", segDesc.segmentIndex);
 		printf("0x%010x ", segDesc.loadedPos);
 		printf("|");
 
-		printf("0x%010x ", segDesc.hdr.p_type);
+		printf("0x%04x ", segDesc.hdr.p_type);
 		printf("0x%010x ", segDesc.hdr.p_offset);
 		printf("0x%010x ", segDesc.hdr.p_vaddr);
 		printf("0x%010x ", segDesc.hdr.p_paddr);
@@ -583,9 +609,9 @@ void ElfLoader::doRelocations() {
 			Bit32u aRead = 0;
 
 			// rel indicates an offset inside the shared library code
-			rel = loadedSegments[2*(slIndex + 1)].loadedPos + rel;
+			rel = loadedSegments[2*slIndex + 3].loadedPos + rel;
 
-//			fprintf(stderr, "Data Relocation Table Entries (REL) (%x) [%x] (%s)\n", rel - loadedSegments[2*(slIndex + 1)].loadedPos, rel, sharedLibs[slIndex].getFileName().c_str());
+//			fprintf(stderr, "Data Relocation Table Entries (REL) (%x) [%x] (%s)\n", rel - loadedSegments[2*slIndex + 3].loadedPos, rel, sharedLibs[slIndex].getFileName().c_str());
 //			fprintf(stderr, "------------------------------\n");
 //			fprintf(stderr, "%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 			while (aRead < sharedLibs[slIndex].getRelsz()) {
@@ -610,9 +636,9 @@ void ElfLoader::doRelocations() {
 			Bit32u aRead = 0;
 
 			// rel indicates an offset inside the shared library code
-			jmprel = loadedSegments[2*(slIndex + 1)].loadedPos + jmprel;
+			jmprel = loadedSegments[2*slIndex + 3].loadedPos + jmprel;
 
-//			fprintf(stderr, "PLT Relocation Table Entries (JMPREL) (%x) [%x] (%s)\n", jmprel - loadedSegments[2*(slIndex + 1)].loadedPos, jmprel, sharedLibs[slIndex].getFileName().c_str());
+//			fprintf(stderr, "PLT Relocation Table Entries (JMPREL) (%x) [%x] (%s)\n", jmprel - loadedSegments[2*slIndex + 3].loadedPos, jmprel, sharedLibs[slIndex].getFileName().c_str());
 //			fprintf(stderr, "------------------------------\n");
 //			fprintf(stderr, "%10s %10s %10s %10s\n", "Offset","Info","Symb. Ind.","Rel. Type");
 			while (aRead < sharedLibs[slIndex].getPltrelsz()) {
@@ -648,9 +674,9 @@ void ElfLoader::solveRelocation(Elf32_Rel reloc, Bit8u scopeIndex) {
 	if (scopeIndex > 0) {
 		Bit32u slIndex = scopeIndex-1;
 
-		relOff 	= bx_mem.positionToVirtualAddress(loadedSegments[2*(slIndex+1)].loadedPos + relOff);
-		libBase = bx_mem.positionToVirtualAddress(loadedSegments[2*(slIndex+1)].loadedPos);
-		gotAddr	= bx_mem.positionToVirtualAddress(loadedSegments[2*(slIndex+1)].loadedPos + sharedLibs[slIndex].getGotAddr());
+		relOff 	= bx_mem.positionToVirtualAddress(loadedSegments[2*slIndex + 3].loadedPos + relOff);
+		libBase = bx_mem.positionToVirtualAddress(loadedSegments[2*slIndex + 3].loadedPos);
+		gotAddr	= bx_mem.positionToVirtualAddress(loadedSegments[2*slIndex + 3].loadedPos + sharedLibs[slIndex].getGotAddr());
 	}
 	else {
 		libBase = bx_mem.positionToVirtualAddress(loadedSegments[0].loadedPos);
@@ -826,8 +852,8 @@ bool ElfLoader::symbolLookupElfHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sy
 	else {	// shared library (-1)
 		Bit32u slIndex = scopeIndex-1;
 
-		symLoc = symbolFromSymbIndex(sharedLibs[slIndex], symbIndex, loadedSegments[2*(slIndex+1)].loadedPos);
-		symName = symbolNameFromSymbol(sharedLibs[slIndex], symLoc, loadedSegments[2*(slIndex+1)].loadedPos);
+		symLoc = symbolFromSymbIndex(sharedLibs[slIndex], symbIndex, loadedSegments[2*slIndex + 3].loadedPos);
+		symName = symbolNameFromSymbol(sharedLibs[slIndex], symLoc, loadedSegments[2*slIndex + 3].loadedPos);
 	}
 
 //	printf("Searching symbol: %s\n", symName);
@@ -869,17 +895,17 @@ bool ElfLoader::symbolLookupElfHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sy
 			Elf32_Addr symTableAddr = sharedLibs[slIndex].getDynsym();
 
 			// physical address
-			Elf32_Addr symEntry = loadedSegments[2*(slIndex+1)].loadedPos + symTableAddr + symbIndex*sizeof(Elf32_Sym);
+			Elf32_Addr symEntry = loadedSegments[2*slIndex + 3].loadedPos + symTableAddr + symbIndex*sizeof(Elf32_Sym);
 
 			// read the symbol definition
 			bx_mem.read((Bit8u *)symbol, symEntry, sizeof(Elf32_Sym));
 
 			// verifica se o symbol em symbEntry eh o procurado
 			if (symbol->st_shndx != SHN_UNDEF) {
-				Bit8u *actSymbName = symbolNameFromSymbol(sharedLibs[slIndex], *symbol, loadedSegments[2*(slIndex+1)].loadedPos);
+				Bit8u *actSymbName = symbolNameFromSymbol(sharedLibs[slIndex], *symbol, loadedSegments[2*slIndex + 3].loadedPos);
 //				printf("\tTesting symbol %s\n", actSymbName);
 				if (strcmp((char *)actSymbName, (char *)symName) == 0) {
-				    symbol->st_value = bx_mem.positionToVirtualAddress(loadedSegments[2*(slIndex+1)].loadedPos + symbol->st_value);
+				    symbol->st_value = bx_mem.positionToVirtualAddress(loadedSegments[2*slIndex + 3].loadedPos + symbol->st_value);
 					return true;
 				}
 			}
@@ -906,12 +932,12 @@ bool ElfLoader::symbolLookupElfHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sy
 				elf = &sharedLibs[scEntry];
 
 				hashAddr = sharedLibs[scEntry].getHash();
-				hashAddr = loadedSegments[2*(scEntry + 1)].loadedPos + hashAddr;
+				hashAddr = loadedSegments[2*scEntry + 3].loadedPos + hashAddr;
 
 				symTableAddr = sharedLibs[scEntry].getDynsym();
-				symTableAddr = loadedSegments[2*(scEntry + 1)].loadedPos + symTableAddr;
+				symTableAddr = loadedSegments[2*scEntry + 3].loadedPos + symTableAddr;
 
-				loadedPos = loadedSegments[2*(scEntry + 1)].loadedPos;
+				loadedPos = loadedSegments[2*scEntry + 3].loadedPos;
 			}
 
 			// read the number of buckets and the number of chains
@@ -1019,8 +1045,8 @@ bool ElfLoader::symbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sy
 	else {	// shared library (-1)
 		Bit32u slIndex = scopeIndex-1;
 
-		symLoc = symbolFromSymbIndex(sharedLibs[slIndex], symbIndex, loadedSegments[2*(slIndex+1)].loadedPos);
-		symName = symbolNameFromSymbol(sharedLibs[slIndex], symLoc, loadedSegments[2*(slIndex+1)].loadedPos);
+		symLoc = symbolFromSymbIndex(sharedLibs[slIndex], symbIndex, loadedSegments[2*slIndex + 3].loadedPos);
+		symName = symbolNameFromSymbol(sharedLibs[slIndex], symLoc, loadedSegments[2*slIndex + 3].loadedPos);
 	}
 //
 //	printf("Searching symbol: %s\n", symName);
@@ -1062,18 +1088,18 @@ bool ElfLoader::symbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sy
 			Elf32_Addr symTableAddr = sharedLibs[slIndex].getDynsym();
 
 			// physical address
-			Elf32_Addr symEntry = loadedSegments[2*(slIndex+1)].loadedPos + symTableAddr + symbIndex*sizeof(Elf32_Sym);
+			Elf32_Addr symEntry = loadedSegments[2*slIndex + 3].loadedPos + symTableAddr + symbIndex*sizeof(Elf32_Sym);
 
 			// read the symbol definition
 			bx_mem.read((Bit8u *)symbol, symEntry, sizeof(Elf32_Sym));
 
 			// verifica se o symbol em symbEntry eh o procurado
 			if (symbol->st_shndx != SHN_UNDEF) {
-				Bit8u *actSymbName = symbolNameFromSymbol(sharedLibs[slIndex], *symbol, loadedSegments[2*(slIndex+1)].loadedPos);
+				Bit8u *actSymbName = symbolNameFromSymbol(sharedLibs[slIndex], *symbol, loadedSegments[2*slIndex + 3].loadedPos);
 //				printf("\tTesting symbol %s\n", actSymbName);
 				if (strcmp((char *)actSymbName, (char *)symName) == 0) {
 				    // adjust the symbol value virtual address
-				    symbol->st_value = bx_mem.positionToVirtualAddress(loadedSegments[2*(slIndex+1)].loadedPos + symbol->st_value);
+				    symbol->st_value = bx_mem.positionToVirtualAddress(loadedSegments[2*slIndex + 3].loadedPos + symbol->st_value);
 					return bx_mem.positionToVirtualAddress(symEntry);
 				}
 			}
@@ -1090,12 +1116,12 @@ bool ElfLoader::symbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sy
 				}
 			}
 			else {
-				GnuHashInfo ghi = createGnuHashInfo(&sharedLibs[scEntry], loadedSegments[2*(scEntry+1)].loadedPos);
+				GnuHashInfo ghi = createGnuHashInfo(&sharedLibs[scEntry], loadedSegments[2*scEntry + 3].loadedPos);
 
 				bool fnd = findSymbolGnuHash(ghi, (const char *)symName, symbol);
 
 				if (fnd) {
-				    symbol->st_value = bx_mem.positionToVirtualAddress(loadedSegments[2*(scEntry+1)].loadedPos + symbol->st_value);
+				    symbol->st_value = bx_mem.positionToVirtualAddress(loadedSegments[2*scEntry + 3].loadedPos + symbol->st_value);
 				    return true;
 				}
 			}
@@ -1115,7 +1141,7 @@ bool ElfLoader::symbolLookupGnuHash(Bit32u symbIndex, Bit8u scopeIndex, Elf32_Sy
 	symbol->st_shndx = 0;
 
 	if (symLocBind == STB_WEAK) {
-		printf("weak definition...\n");
+		BX_DEBUG(("Weak definition: %s", symName));
 		return true;
 	}
 

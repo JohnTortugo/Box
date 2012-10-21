@@ -201,3 +201,27 @@ void BX_MEM_C::dump(char *filename)
 
   fclose(fd);
 }
+
+Bit32u BX_MEM_C::getProgramBreak() {
+	return this->programBreak;
+}
+
+void BX_MEM_C::setProgramBreak(Bit32u pb) {
+	this->programBreak = pb;
+}
+
+Bit32u BX_MEM_C::getOrigProgramBreak() {
+	return this->origProgramBreak;
+}
+
+void BX_MEM_C::setOrigProgramBreak(Bit32u pb) {
+	this->origProgramBreak = pb;
+}
+
+Bit32u BX_MEM_C::getLibraryStart() {
+	return this->libraryStart;
+}
+
+void BX_MEM_C::setLibraryStart(Bit32u ls) {
+	this->libraryStart = ls;
+}

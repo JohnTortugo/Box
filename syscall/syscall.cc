@@ -4,6 +4,8 @@ extern BX_MEM_C bx_mem;
 
 void BX_SYSCALL::handle()
 {
+	BX_INFO(("Handling syscall 0x%x", EAX));
+
 	switch (EAX) {
 		case __NR_access:
 			{
@@ -16,9 +18,21 @@ void BX_SYSCALL::handle()
 
 		case __NR_brk:
 			{
-				Bit32u ptr;
-				ptr = bx_mem.VirtualToRealAddress(EBX);
-				EAX = brk((void *)ptr);
+				// if is greater than the original program break
+				// that is, final of DATA segment of mainExecutable
+				// if doesn't reach libs start
+				if (EBX > bx_mem.getOrigProgramBreak() && EBX < bx_mem.getLibraryStart()) {
+					bx_mem.setProgramBreak(EBX);
+				}
+#ifdef DEBUG
+				else {
+					if (EBX != 0) {
+						BX_DEBUG(("sys_brk with value outside limits: 0x%h", EBX));
+					}
+				}
+#endif
+
+				EAX = bx_mem.getProgramBreak();
 			}
 		  break;
 
