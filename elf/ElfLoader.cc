@@ -400,8 +400,8 @@ void ElfLoader::createAddressSpace() {
 	/*
 	 * Program break points to the first byte after .bss of main executable.
 	 */
-	bx_mem.setOrigProgramBreak(this->memory_indx);
-	bx_mem.setProgramBreak(this->memory_indx);
+	bx_mem.setOrigProgramBreak( bx_mem.positionToVirtualAddress(this->memory_indx) );
+	bx_mem.setProgramBreak( bx_mem.positionToVirtualAddress(this->memory_indx) );
 
 	/*
 	 * Now allocate space for the heap just after the DATA (.data .bss) segment
@@ -426,7 +426,7 @@ void ElfLoader::createAddressSpace() {
 	/*
 	 * Library start is the point where the first library was loaded.
 	 */
-	bx_mem.setLibraryStart(this->memory_indx);
+	bx_mem.setLibraryStart( bx_mem.positionToVirtualAddress(this->memory_indx) );
 
 
 	/*
