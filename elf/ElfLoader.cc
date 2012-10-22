@@ -693,7 +693,8 @@ void ElfLoader::solveRelocation(Elf32_Rel reloc, Bit8u scopeIndex) {
 	Elf32_Sym symbol;
 
 	// if the relocation need a symbol solve it address now
-	if (relType == 1 || relType == 2 || relType == 6 || relType == 7 || relType == 9) {
+	if (relType == R_386_32 || relType == R_386_PC32 || relType == R_386_GLOB_DAT ||
+	    relType == R_386_JMP_SLOT || relType == R_386_GOTOFF || relType == R_386_COPY) {
 		bool symbFound = symbolLookup(symbIndex, scopeIndex, &symbol);
 
 		if (!symbFound) {
@@ -756,7 +757,6 @@ void ElfLoader::solveRelocation(Elf32_Rel reloc, Bit8u scopeIndex) {
 			finValue = GOT + A - P;
 			break;
 		case R_386_32PLT:
-		    /* not supported */
 		case R_386_TLS_TPOFF:
 		case R_386_TLS_IE:
         case R_386_TLS_GOTIE:

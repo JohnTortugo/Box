@@ -372,16 +372,6 @@ void BX_SYSCALL::handle()
 			printf("rt_sigprocmask.\n");
 			break;
 
-		case __NR_rt_sigreturn:
-		case __NR_sigreturn:
-			{
-				Bit32u ptr;
-				ptr =  bx_mem.VirtualToRealAddress(EBX);
-				EAX = sigreturn((sigcontext *)ptr);
-			}
-			printf("rt_sigreturn/sigreturn.\n");
-			break;
-
 		case __NR_socketcall:
 			{
 				Bit32u args;
@@ -491,6 +481,17 @@ void BX_SYSCALL::handle()
 			}
 			printf("writev.\n");
 			break;
+
+// gcc compilation warning: sigreturn is not implemented and will always fail
+//        case __NR_rt_sigreturn:
+//        case __NR_sigreturn:
+//            {
+//                Bit32u ptr;
+//                ptr =  bx_mem.VirtualToRealAddress(EBX);
+//                EAX = sigreturn((sigcontext *)ptr);
+//            }
+//            printf("rt_sigreturn/sigreturn.\n");
+//            break;
 
 		default:
 			BX_PANIC(("Unknow system call: EAX: 0x%08x", EAX));
