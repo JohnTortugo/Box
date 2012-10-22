@@ -104,7 +104,7 @@ void setup_environment(int argc, char *argv[], ElfLoader * loader)
     bx_cpu.push_32(argc-1);
 
     // Patch init routine
-    setInitProgArgs(inits,argc-1,addrArgv, addrEnv);
+    //setInitProgArgs(inits,argc-1,addrArgv, addrEnv);
 
     // EIP points to libraries initialization routine pointed by inits
     bx_cpu.gen_reg[BX_32BIT_REG_EIP].dword.erx = (intptr_t) inits;

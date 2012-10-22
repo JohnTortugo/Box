@@ -40,8 +40,8 @@ hello-c: hello.c
 	gcc -o hello-c -nostdlib hello.c
 
 hello-dl: libhello.c hello-dl.c
-	rm -f libhello.so && \
-	gcc -shared -nostartfiles -nostdlib -fPIC -Wl,-soname,libhello.so.1 -o libhello.so.1 libhello.c && \
+	@rm -f libhello.so && \
+	gcc -shared -nostartfiles -nostdlib -fPIC -Wl,-export-dynamic -Wl,-soname,libhello.so.1 -o libhello.so.1 libhello.c && \
 	ln -s libhello.so.1 libhello.so && \
 	gcc -nostdlib -o hello-dl -L . -lhello hello-dl.c && \
 	echo "AVISO: Para executar o comando hello-dl defina a variavel: LD_LIBRARY_PATH=`pwd`"

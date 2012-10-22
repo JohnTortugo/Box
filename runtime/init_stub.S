@@ -8,9 +8,11 @@ test:
 	test   %esi, %esi		# Verifica se o valor eh zero (fim dos enderecos)
 	je     jmp_start			# Se zero salta para jmp_start
 	push   %ebx
+/*
 	push   $0x50564e45       # Os valores que serao colocados na pilha na verdade sao TAGS (ENVP, ARGV, ARGC) e NAO DEVEM SER MUDADOS
 	push   $0x56475241       # A funcao setInitProgArgs procura esses tags e os substitui pelos enderecos de env, argv e argc
 	push   $0x43475241
+*/
 	xorl   %ebx, %ebx
 	call   *%esi			# Chama a init da lib
 	pop    %ebx

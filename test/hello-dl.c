@@ -9,11 +9,11 @@ void end(void);
 void write(char * text, int len);
 
 extern int iGlobal;
+int a;
 
 void _start(void)
 {
  char *msg = "Hello World!\n";
- int a;
 
  for(a=0; a<2;a++)
   write(msg,13);
