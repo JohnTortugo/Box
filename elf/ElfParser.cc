@@ -22,6 +22,7 @@ ElfParser::ElfParser(string elfPath) {
 	this->jmprel 		= 0;
 	this->pltrelsz 		= 0;
 	this->hash 			= 0;
+	this->gnuHash	= 0;
 	this->dynsym 		= 0;
 	this->syment 		= 0;
 	this->strtab 		= 0;
