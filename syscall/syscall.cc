@@ -533,7 +533,10 @@ void BX_SYSCALL::handle()
                             fseek(fp, offset, SEEK_SET);
 
                             // copy data from file to memory
-                            fread((char *)(bx_mem.memory + memOffset), length, 1, fp);
+                            Bit32s elength = fread((char *)(bx_mem.memory + memOffset), length, 1, fp);
+
+                            // fill remainder length with zero if file wasnt sufficiently large
+                            if (elength < length) memset((char *)(bx_mem.memory + elength), 0, length - elength);
 
                             // return the info telling where the data was copied
                             EAX = bx_mem.positionToVirtualAddress(memOffset);
