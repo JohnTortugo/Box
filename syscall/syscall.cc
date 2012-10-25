@@ -7,7 +7,7 @@ extern BX_RUNTIME bx_rnt;
 
 void BX_SYSCALL::handle()
 {
-    //BX_DEBUG(("Handling syscall 0x%x", EAX));
+    BX_DEBUG(("Handling syscall 0x%x", EAX));
 
 	switch (EAX) {
 		case __NR_access:
@@ -78,9 +78,10 @@ void BX_SYSCALL::handle()
 		case __NR_creat:
 			{
 				Bit32u ptr = bx_mem.VirtualToRealAddress(EBX);
+
 				EAX = creat((const char *)ptr, ECX);
 
-				if ( EAX > -1 ) {
+				if ( (Bit32s)EAX > -1 ) {
 				   BX_FD fd;
 				   fd.fileName = strdup((const char *)ptr);
 				   fd.flags    = ECX;
@@ -95,7 +96,9 @@ void BX_SYSCALL::handle()
 
 				   bx_rnt.fileDescriptors.push_back(fd);
 				}
-
+				else {
+				    BX_DEBUG(("creat failed for %s", ptr));
+				}
 			}
 			break;
 
@@ -309,7 +312,7 @@ void BX_SYSCALL::handle()
 
 				EAX = open((const char *)ptr, ECX, EDX);
 
-				if ( EAX > -1 ) {
+				if ((Bit32s)EAX > -1) {
 				   BX_FD fd;
 				   fd.fileName = strdup((const char *)ptr);
 				   fd.flags    = ECX;
@@ -323,6 +326,9 @@ void BX_SYSCALL::handle()
 				   fd.memOffset = 0;
 
 				   bx_rnt.fileDescriptors.push_back(fd);
+				}
+				else {
+				    BX_DEBUG(("open failed for %s", ptr));
 				}
 			}
 			break;
