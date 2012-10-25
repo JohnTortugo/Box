@@ -74,7 +74,7 @@ void setup_environment(int argc, char *argv[], ElfLoader * loader)
         	envs.push_back(stackaddr);
         	bx_mem.write((Bit8u *) environ[i++],bx_mem.virtualAddressToPosition(stackaddr), size);
     	}
-    	stackaddr --;
+//    	stackaddr --;
     }
 
     //Copy command line arguments to stack
@@ -83,7 +83,7 @@ void setup_environment(int argc, char *argv[], ElfLoader * loader)
     	stackaddr -= size;
     	args.push_back(stackaddr);
     	bx_mem.write((Bit8u *) argv[i],bx_mem.virtualAddressToPosition(stackaddr), size);
-    	stackaddr --;
+//    	stackaddr --;
     }
 
     stackaddr &= 0xFFFFFFF0; //Stack align;
