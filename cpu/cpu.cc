@@ -8,10 +8,13 @@ void BX_CPU_C::cpu_loop(void) {
     bxInstruction_c *i = new bxInstruction_c();
     Bit8u *ptr;
     int ret;
+
+#ifdef BX_SHOW_DEBUG
     char disbuf[50];
 
     disassembler d;
     d.set_syntax_att();
+#endif
 
     while (1) {
         // I inspected the exec1 pointer using 
@@ -23,15 +26,18 @@ void BX_CPU_C::cpu_loop(void) {
 
         ptr = (Bit8u *) bx_mem.VirtualToRealAddress(RIP);
 
-        //printf("EIP: 0x%08lx POS: 0x%08lx\t", RIP, bx_mem.virtualAddressToPosition(RIP)); fflush(stdout);
         ret = fetchDecode32((Bit8u *) ptr, i, 15);
-        //printf("iLen: %02d \t Exec1: %0x \t\t", i->ilen(), i->execute); fflush(stdout);
+
+#ifdef BX_SHOW_DEBUG
+        printf("EIP: 0x%08lx POS: 0x%08lx\t", RIP, bx_mem.virtualAddressToPosition(RIP));
+        printf("iLen: %02d \t Exec1: %0x \t\t", i->ilen(), i->execute); fflush(stdout);
+        d.disasm32((bx_address)0, (bx_address)RIP, (const Bit8u *)ptr, disbuf);
+        printf("%s\n", disbuf); fflush(stdout);
+#endif
 
         // doesn't mean that i was decoded right
         // but means that the input that was correct
         // we can use this for tracing program interpretation
-        //d.disasm32((bx_address)0, (bx_address)RIP, (const Bit8u *)ptr, disbuf);
-        //printf("%s\n", disbuf); fflush(stdout);
 
         RIP += i->ilen();
 

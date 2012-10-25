@@ -1,3 +1,4 @@
+#include <vector>
 #include "cpu/cpu.h"
 #include "elf/ElfLoader.h"
 

@@ -1,3 +1,4 @@
+#include <sys/ioctl.h>
 #include "syscall.h"
 #include "runtime/runtime.h"
 
@@ -76,9 +77,25 @@ void BX_SYSCALL::handle()
 
 		case __NR_creat:
 			{
-				Bit32u ptr;
-				ptr = bx_mem.VirtualToRealAddress(EBX);
+				Bit32u ptr = bx_mem.VirtualToRealAddress(EBX);
 				EAX = creat((const char *)ptr, ECX);
+
+				if ( EAX > -1 ) {
+				   BX_FD fd;
+				   fd.fileName = strdup((const char *)ptr);
+				   fd.flags    = ECX;
+			 	   fd.mode     = EDX;
+				   fd.fd       = EAX;
+				   fd.fileBacked = true;
+			 	   fd.mMapped  = false;
+				   fd.freed    = false;
+				   fd.fileOffset = 0;
+				   fd.memLength = 0;
+				   fd.memOffset = 0;
+
+				   bx_rnt.fileDescriptors.push_back(fd);
+				}
+
 			}
 			break;
 
@@ -288,23 +305,25 @@ void BX_SYSCALL::handle()
 
 		case __NR_open:
 			{
-				Bit32u ptr;
-				ptr = bx_mem.VirtualToRealAddress(EBX);
+				Bit32u ptr = bx_mem.VirtualToRealAddress(EBX);
+
 				EAX = open((const char *)ptr, ECX, EDX);
 
-				BX_FD fd;
-				fd.fileName = strdup((const char *)ptr);
-				fd.flags    = ECX;
-				fd.mode     = EDX;
-				fd.fd       = EAX;
-				fd.fileBacked = true;
-				fd.mMapped  = false;
-				fd.freed    = false;
-				fd.fileOffset = 0;
-				fd.memLength = 0;
-				fd.memOffset = 0;
+				if ( EAX > -1 ) {
+				   BX_FD fd;
+				   fd.fileName = strdup((const char *)ptr);
+				   fd.flags    = ECX;
+			 	   fd.mode     = EDX;
+				   fd.fd       = EAX;
+				   fd.fileBacked = true;
+			 	   fd.mMapped  = false;
+				   fd.freed    = false;
+				   fd.fileOffset = 0;
+				   fd.memLength = 0;
+				   fd.memOffset = 0;
 
-				bx_rnt.fileDescriptors.push_back(fd);
+				   bx_rnt.fileDescriptors.push_back(fd);
+				}
 			}
 			break;
 
@@ -539,13 +558,15 @@ void BX_SYSCALL::handle()
 //            }
 //            printf("rt_sigreturn/sigreturn.\n");
 //            break;
+        case __NR_ioctl:
+        	EAX = ioctl(EBX,ECX,bx_mem.VirtualToRealAddress(EDX));
+        	break;
         case __NR_rt_sigreturn:
         case __NR_sigreturn:
         case __NR_fcntl:
         case __NR_fcntl64:
         case __NR_fork:
         case __NR_wait4:
-        case __NR_ioctl:
         case __NR_mmap2:
         case __NR_mremap:
             BX_DEBUG(("Unimplemented syscall: EAX: 0x%08x", EAX));
