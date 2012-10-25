@@ -478,7 +478,8 @@ void ElfLoader::createAddressSpace() {
 	// ok loading shared libs segments
 
 
-
+	// point to the next free byte after the region where libraries where mapped
+	bx_mem.afterLibrary = this->memory_indx;
 
 
 

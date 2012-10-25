@@ -225,3 +225,19 @@ Bit32u BX_MEM_C::getLibraryStart() {
 void BX_MEM_C::setLibraryStart(Bit32u ls) {
 	this->libraryStart = ls;
 }
+
+Bit32u BX_MEM_C::readUINT32(Bit32u offset) {
+    Bit32u value;
+
+    memcpy((void *)&value, (void *)(memory+offset), sizeof(value));
+
+    return value;
+}
+
+Bit32s BX_MEM_C::readSINT32(Bit32u offset) {
+    Bit32s value;
+
+    memcpy((void *)&value, (void *)(memory+offset), sizeof(value));
+
+    return value;
+}

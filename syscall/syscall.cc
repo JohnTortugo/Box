@@ -1,10 +1,12 @@
 #include "syscall.h"
+#include "runtime/runtime.h"
 
 extern BX_MEM_C bx_mem;
+extern BX_RUNTIME bx_rnt;
 
 void BX_SYSCALL::handle()
 {
-	BX_INFO(("Handling syscall 0x%x", EAX));
+    //BX_DEBUG(("Handling syscall 0x%x", EAX));
 
 	switch (EAX) {
 		case __NR_access:
@@ -13,7 +15,6 @@ void BX_SYSCALL::handle()
 				ptr = bx_mem.VirtualToRealAddress(EBX);
 				EAX = access((const char *)ptr, ECX);
 			}
-			printf("access.\n");
 			break;
 
 		case __NR_brk:
@@ -42,12 +43,35 @@ void BX_SYSCALL::handle()
 				ptr = bx_mem.VirtualToRealAddress(EBX);
 				EAX = chmod((const char *)ptr, ECX);
 			}
-			printf("chmod\n");
 			break;
 
 		case __NR_close:
-			EAX = close(EBX);
-			printf("close.\n");
+		    {
+		        bool found = false;
+
+		        for (int i=0; i<bx_rnt.fileDescriptors.size(); i++) {
+                    if (bx_rnt.fileDescriptors[i].fd == EBX) {
+                        if (bx_rnt.fileDescriptors[i].mMapped == false) {
+                            // simple case
+                            EAX = close(EBX);
+                        }
+                        else {
+                            lseek(bx_rnt.fileDescriptors[i].fd, bx_rnt.fileDescriptors[i].fileOffset, SEEK_SET);
+                            write(EBX, (char *)(bx_mem.memory + bx_rnt.fileDescriptors[i].memOffset), bx_rnt.fileDescriptors[i].memLength);
+                            EAX = close(EBX);
+
+                            bx_rnt.fileDescriptors.erase(bx_rnt.fileDescriptors.begin() + i);
+                        }
+
+                        found = true;
+                        break;
+                    }
+		        }
+
+		        if (!found) {
+		            BX_DEBUG(("Close syscall didnt found file descriptor."));
+		        }
+		    }
 			break;
 
 		case __NR_creat:
@@ -56,17 +80,14 @@ void BX_SYSCALL::handle()
 				ptr = bx_mem.VirtualToRealAddress(EBX);
 				EAX = creat((const char *)ptr, ECX);
 			}
-			printf("creat\n");
 			break;
 
 		case __NR_dup:
 			EAX = dup(EBX);
-			printf("dup.\n");
 			break;
 
 		case __NR_dup2:
 			EAX = dup2(EBX, ECX);
-			printf("dup2.\n");
 			break;
 
 		case __NR_execve:
@@ -77,7 +98,6 @@ void BX_SYSCALL::handle()
 				envp = bx_mem.VirtualToRealAddress(EDX);
 				EAX = execve((const char *)filename, (char *const *) argv, (char *const *) envp);
 			}
-			printf("execve.\n");
 			break;
 
 		case __NR_exit:
@@ -86,30 +106,18 @@ void BX_SYSCALL::handle()
 
 		case __NR_fchmod:
 			EAX = fchmod(EBX, ECX);
-			printf("fchmod.\n");
 			break;
 
 		case __NR_fchown:
 			EAX = fchown(EBX, ECX, EDX);
-			printf("fchown.\n");
 			break;
 
-		case __NR_fcntl:
-			printf("fnctl.\n");
-			break;
 
-		case __NR_fcntl64:
-			printf("fnctl64.\n");
-			break;
 
 		case __NR_flock:
 			EAX = flock(EBX, ECX);
-			printf("flock\n");
 			break;
 
-		case __NR_fork:
-			printf("fork.\n");
-			break;
 
 		case __NR_fstat64:
 			{
@@ -117,17 +125,14 @@ void BX_SYSCALL::handle()
 				ptr = bx_mem.VirtualToRealAddress(ECX);
 				EAX = fstat(EBX, (struct stat *)ptr);
 			}
-			printf("fstat64.\n");
 			break;
 
 		case __NR_fsync:
 			EAX = fsync(EBX);
-			printf("fsync\n");
 			break;
 
 		case __NR_ftruncate:
 			EAX = ftruncate(EBX, ECX);
-			printf("ftruncate\n");
 			break;
 
 		case __NR_getcwd:
@@ -136,7 +141,6 @@ void BX_SYSCALL::handle()
 				ptr = bx_mem.VirtualToRealAddress(EBX);
 				EAX = bx_mem.RealToVirtualAddress((Bit32u)getcwd((char *)ptr, ECX));
 			}
-			printf("getcwd.\n");
 			break;
 
 		case __NR_getdents:
@@ -188,10 +192,7 @@ void BX_SYSCALL::handle()
 			printf("getrlimit.\n");
 			break;
 
-		case __NR_ioctl:
-			//EAX = ioctl(int d, int request, ...);
-			printf("ioctl.\n");
-			break;
+
 
 		case __NR_link:
 			{
@@ -200,17 +201,14 @@ void BX_SYSCALL::handle()
 				newpath = bx_mem.VirtualToRealAddress(ECX);
 				EAX = link((const char *)oldpath, (const char *)newpath);
 			}
-			printf("link.\n");
 			break;
 
 		case __NR_kill:
 			EAX = kill(EBX, ECX);
-			printf("kill.\n");
 			break;
 
 		case __NR_lseek:
 			EAX = lseek(EBX, ECX, EDX);
-			printf("lseek.\n");
 			break;
 
 		case __NR_lstat64:
@@ -220,7 +218,6 @@ void BX_SYSCALL::handle()
 				buf = bx_mem.VirtualToRealAddress(ECX);
 				EAX = lstat((const char *)path, (struct stat *)buf);
 			}
-			printf("lstat64.\n");
 			break;
 
 		case __NR_madvise:
@@ -229,7 +226,6 @@ void BX_SYSCALL::handle()
 				addr = bx_mem.VirtualToRealAddress(EBX);
 				EAX = madvise((void *)addr, ECX, EDX);
 			}
-			printf("madvise.\n");
 			break;
 
 		case __NR_mkdir:
@@ -238,15 +234,6 @@ void BX_SYSCALL::handle()
 				pathname = bx_mem.VirtualToRealAddress(EBX);
 				EAX = mkdir((const char *)pathname, ECX);
 			}
-			printf("mkdir.\n");
-			break;
-
-		case __NR_mmap:
-			printf("mmap.\n");
-			break;
-
-		case __NR_mmap2:
-			printf("mmap2.\n");
 			break;
 
 		case __NR_modify_ldt:
@@ -264,21 +251,30 @@ void BX_SYSCALL::handle()
 				ptr = bx_mem.VirtualToRealAddress(EBX);
 				EAX = mprotect((void *)ptr, ECX, EDX);
 			}
-			printf("mprotect.\n");
-			break;
-
-		case __NR_mremap:
-		  //void *mremap(void *old_address, size_t old_size,             size_t new_size,int flags, ... /* void *new_address */);
-			printf("mremap.\n");
 			break;
 
 		case __NR_munmap:
 			{
-				Bit32u ptr;
-				ptr = bx_mem.VirtualToRealAddress(EBX);
-				EAX = munmap((void *)ptr, ECX);
+				Bit32u pos = bx_mem.virtualAddressToPosition(EBX);
+				Bit32u len = ECX;
+				bool found = false;
+
+				for (int i=0; i<bx_rnt.fileDescriptors.size(); i++) {
+				    if (bx_rnt.fileDescriptors[i].memOffset == pos) {
+				        bx_rnt.fileDescriptors[i].freed   = true;
+
+				        found = true;
+				        break;
+                    }
+				}
+
+				if (!found) {
+				    BX_DEBUG(("Munmap didnt found range specified: %x.", pos));
+				}
+				else {
+				    EAX = 0;
+				}
 			}
-			printf("munmap.\n");
 			break;
 
 		case __NR_nanosleep:
@@ -288,7 +284,6 @@ void BX_SYSCALL::handle()
 				ptr = bx_mem.VirtualToRealAddress(ECX);
 				EAX = nanosleep((const timespec*)ptr, (timespec*)ptr2);
 			}
-			printf("nanosleep.\n");
 			break;
 
 		case __NR_open:
@@ -296,8 +291,21 @@ void BX_SYSCALL::handle()
 				Bit32u ptr;
 				ptr = bx_mem.VirtualToRealAddress(EBX);
 				EAX = open((const char *)ptr, ECX, EDX);
+
+				BX_FD fd;
+				fd.fileName = strdup((const char *)ptr);
+				fd.flags    = ECX;
+				fd.mode     = EDX;
+				fd.fd       = EAX;
+				fd.fileBacked = true;
+				fd.mMapped  = false;
+				fd.freed    = false;
+				fd.fileOffset = 0;
+				fd.memLength = 0;
+				fd.memOffset = 0;
+
+				bx_rnt.fileDescriptors.push_back(fd);
 			}
-			printf("open.\n");
 			break;
 
 		case __NR_pipe:
@@ -306,7 +314,6 @@ void BX_SYSCALL::handle()
 				ptr = bx_mem.VirtualToRealAddress(EBX);
 				EAX = pipe2((int *)ptr, ECX);
 			}
-			printf("pipe.\n");
 			break;
 
 		case __NR_read:
@@ -314,7 +321,6 @@ void BX_SYSCALL::handle()
 				Bit32u ptr;
 				ptr = bx_mem.VirtualToRealAddress(ECX);
 				EAX = read(EBX, (void *)ptr, EDX);
-				printf("read.\n");
 			}
 			break;
 
@@ -325,7 +331,6 @@ void BX_SYSCALL::handle()
 			  buf = bx_mem.VirtualToRealAddress(ECX);
 			  EAX = readlink((const char *)path, (char *)buf, EDX); 
 			}
-			printf("read link.\n");
 			break;
 
 		case __NR_rename:
@@ -335,7 +340,6 @@ void BX_SYSCALL::handle()
 				newpath = bx_mem.VirtualToRealAddress(ECX);
 				EAX = rename((const char *)oldpath, (const char *)newpath); 
 			}
-			printf("rename.\n");
 			break;
 
 		case __NR_restart_syscall:
@@ -349,7 +353,6 @@ void BX_SYSCALL::handle()
 				pathname = bx_mem.VirtualToRealAddress(EBX);
 				EAX = rmdir((const char *)pathname); 
 			}
-			printf("rmdir.\n");
 			break;
 
 		case __NR_rt_sigaction:
@@ -359,7 +362,6 @@ void BX_SYSCALL::handle()
 				oldact = bx_mem.VirtualToRealAddress(EDX);
 				EAX = sigaction(EBX, (const struct sigaction *)act, (struct sigaction *)oldact);
 			}
-			printf("rtsigaction.\n");
 			break;
 
 		case __NR_rt_sigprocmask:
@@ -369,7 +371,6 @@ void BX_SYSCALL::handle()
 				oldset = bx_mem.VirtualToRealAddress(EDX);
 				EAX = sigprocmask(EBX, (const sigset_t *)set, (sigset_t *)oldset); 
 			}
-			printf("rt_sigprocmask.\n");
 			break;
 
 		case __NR_socketcall:
@@ -378,7 +379,6 @@ void BX_SYSCALL::handle()
 				args =  bx_mem.VirtualToRealAddress(ECX);
 				//				EAX = socketcall(EBX, (unsigned long *)args);
 			}
-			printf("socketcall.\n");
 			break;
 
 		case __NR_stat64:
@@ -388,7 +388,6 @@ void BX_SYSCALL::handle()
 				buf = bx_mem.VirtualToRealAddress(ECX);
 				EAX = stat((const char *)path, (struct stat *)buf);
 			}
-			printf("stat64.\n");
 			break;
 
 		case __NR_statfs:
@@ -398,7 +397,6 @@ void BX_SYSCALL::handle()
 				buf = bx_mem.VirtualToRealAddress(ECX);
 				EAX = statfs((const char *)path, (struct statfs *)buf);
 			}
-			printf("statfs.\n");
 			break;
 
 		case __NR_time:
@@ -407,7 +405,6 @@ void BX_SYSCALL::handle()
 				t = bx_mem.VirtualToRealAddress(EBX);
 				EAX = time((time_t *)t); 
 			}
-			printf("time.\n");
 			break;
 
 		case __NR_times:
@@ -416,12 +413,10 @@ void BX_SYSCALL::handle()
 				buf = bx_mem.VirtualToRealAddress(EBX);
 				EAX = times((struct tms *)buf); 
 			}
-			printf("times.\n");
 			break;
 
 		case __NR_umask:
 			EAX = umask(EBX); 
-			printf("umask.\n");
 			break;
 
 		case __NR_unlink:
@@ -430,7 +425,6 @@ void BX_SYSCALL::handle()
 				pathname = bx_mem.VirtualToRealAddress(EBX);
 				EAX = unlink((const char *)pathname);
 			}
-			printf("unlink.\n");
 			break;
 
 		case __NR_utime:
@@ -440,7 +434,6 @@ void BX_SYSCALL::handle()
 				times = bx_mem.VirtualToRealAddress(ECX);
 				EAX = utime((const char *)filename, (const struct utimbuf *)times);
 			}
-			printf("utime.\n");
 			break;
 
 		case __NR_waitpid:
@@ -449,11 +442,6 @@ void BX_SYSCALL::handle()
 				status = bx_mem.VirtualToRealAddress(ECX);
 				EAX = waitpid(EBX, (int *)status, EDX); 
 			}
-			printf("waitpid.\n");
-			break;
-
-		case __NR_wait4:
-			printf("wait4.\n");
 			break;
 
 		case __NR_uname: 
@@ -479,8 +467,67 @@ void BX_SYSCALL::handle()
 				EAX = writev(EBX, (const struct iovec *) ptr , EDX);
 				break;
 			}
-			printf("writev.\n");
 			break;
+
+        case __NR_mmap:
+            {
+                Bit32u addr     = bx_mem.readUINT32(bx_mem.virtualAddressToPosition(EBX));
+                Bit32u length   = bx_mem.readUINT32(bx_mem.virtualAddressToPosition(EBX+4));
+                Bit32s prot     = bx_mem.readSINT32(bx_mem.virtualAddressToPosition(EBX+8));
+                Bit32s flags    = bx_mem.readSINT32(bx_mem.virtualAddressToPosition(EBX+12));
+                Bit32s fd       = bx_mem.readSINT32(bx_mem.virtualAddressToPosition(EBX+16));
+                Bit32u offset   = bx_mem.readUINT32(bx_mem.virtualAddressToPosition(EBX+20));
+                bool found      = false;
+
+                // check if the region is backed by a file on disk or not
+                if (flags & MAP_ANONYMOUS) {
+                    // identify where we should write the data and register the new mapping
+                    Bit32u memOffset = bx_rnt.newMappedIOSpace(-1, 0, length);
+
+                    // copy data from file to memory
+                    memset((char *)(bx_mem.memory + memOffset), 0, length);
+
+                    // return the info telling where the data was copied
+                    EAX = bx_mem.positionToVirtualAddress(memOffset);
+                }
+                else {
+                    for (int i=0; i<bx_rnt.fileDescriptors.size(); i++) {
+                        if (bx_rnt.fileDescriptors[i].fd == fd) {
+                            // we assume the file already exist because a previous call to open have already been made
+                            FILE *fp = fopen(bx_rnt.fileDescriptors[i].fileName, "r");
+
+                            if (!fp) {
+                                BX_PANIC(("Mmap failed. Cant open file %s", bx_rnt.fileDescriptors[i].fileName));
+                                break;
+                            }
+
+                            // identify where we should write the data and register the new mapping
+                            Bit32u memOffset = bx_rnt.newMappedIOSpace(i, offset, length);
+
+                            // offset from begin of file
+                            fseek(fp, offset, SEEK_SET);
+
+                            // copy data from file to memory
+                            fread((char *)(bx_mem.memory + memOffset), length, 1, fp);
+
+                            // return the info telling where the data was copied
+                            EAX = bx_mem.positionToVirtualAddress(memOffset);
+
+                            // close the tmp file descriptor
+                            fclose(fp);
+
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        BX_DEBUG(("Mmap failed to find FD opened."));
+                        EAX = -1;
+                    }
+                }
+            }
+            break;
 
 // gcc compilation warning: sigreturn is not implemented and will always fail
 //        case __NR_rt_sigreturn:
@@ -492,7 +539,17 @@ void BX_SYSCALL::handle()
 //            }
 //            printf("rt_sigreturn/sigreturn.\n");
 //            break;
-
+        case __NR_rt_sigreturn:
+        case __NR_sigreturn:
+        case __NR_fcntl:
+        case __NR_fcntl64:
+        case __NR_fork:
+        case __NR_wait4:
+        case __NR_ioctl:
+        case __NR_mmap2:
+        case __NR_mremap:
+            BX_DEBUG(("Unimplemented syscall: EAX: 0x%08x", EAX));
+            break;
 		default:
 			BX_PANIC(("Unknow system call: EAX: 0x%08x", EAX));
 			break;

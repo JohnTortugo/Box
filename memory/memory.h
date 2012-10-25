@@ -48,6 +48,10 @@ public:
 	// first byte where an shared library was loaded
 	Bit32u		libraryStart;
 
+	// mark the first free byte after the libraries or when the process use mmap
+	// this point to the next free byte after all memory mapped io regions
+	Bit32u      afterLibrary;
+
 	BX_MEM_C();
 	~BX_MEM_C();
 
@@ -63,6 +67,9 @@ public:
 
 	Bit32u getOrigProgramBreak();
 	void setOrigProgramBreak(Bit32u ls);
+
+	Bit32u readUINT32(Bit32u offset);
+	Bit32s readSINT32(Bit32u offset);
 
 	void read(Bit8u *content, Bit32u offset, Bit32u len);
 	void write(Bit8u *content, Bit32u offset, Bit32u len);
