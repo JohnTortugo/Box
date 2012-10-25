@@ -64,26 +64,26 @@ void setup_environment(int argc, char *argv[], ElfLoader * loader)
     	if ( strncmp("_=", environ[i],2) == 0 ) {
     		char aux[150];
     		size = snprintf(aux,150,"_=%s", argv[1])+1;
-    		stackaddr -= size;
+    		stackaddr -= size-1;
     		envs.push_back(stackaddr);
         	bx_mem.write((Bit8u *) aux,bx_mem.virtualAddressToPosition(stackaddr), size);
         	i++;
     	} else {
         	size= strlen(environ[i])+1;
-        	stackaddr -= size;
+        	stackaddr -= size-1;
         	envs.push_back(stackaddr);
         	bx_mem.write((Bit8u *) environ[i++],bx_mem.virtualAddressToPosition(stackaddr), size);
     	}
-//    	stackaddr --;
+    	stackaddr --;
     }
 
     //Copy command line arguments to stack
     for(i=1;i<argc;i++) {
     	size= strlen(argv[i])+1;
-    	stackaddr -= size;
+    	stackaddr -= size-1;
     	args.push_back(stackaddr);
     	bx_mem.write((Bit8u *) argv[i],bx_mem.virtualAddressToPosition(stackaddr), size);
-//    	stackaddr --;
+    	stackaddr --;
     }
 
     stackaddr &= 0xFFFFFFF0; //Stack align;
