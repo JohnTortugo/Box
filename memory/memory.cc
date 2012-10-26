@@ -134,7 +134,10 @@ void BX_MEM_C::write_qword( Bit32u addr, Bit64u data)
 
  Bit32u  BX_MEM_C::VirtualToRealAddress(Bit32u address)
 {
-  return ADDR_VIRTUAL_TO_REAL(address);
+  if ( address == 0 )
+   return 0;
+  else
+   return ADDR_VIRTUAL_TO_REAL(address);
 };
 
  Bit32u BX_MEM_C::RealToVirtualAddress(Bit32u address)

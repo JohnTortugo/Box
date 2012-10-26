@@ -186,7 +186,6 @@ void BX_SYSCALL::handle()
 				tz = bx_mem.VirtualToRealAddress(ECX);
 				EAX = gettimeofday((struct timeval *)tv, (struct timezone *)tz);
 			}
-			printf("gettimeofday.\n");
 			break;
 
 		case __NR_getuid:
@@ -216,7 +215,7 @@ void BX_SYSCALL::handle()
 			break;
 
 		case __NR_lseek:
-			EAX = lseek(EBX, ECX, EDX);
+			EAX = syscall(EAX, EBX, ECX, EDX);
 			break;
 
 		case __NR_lstat64:
@@ -377,7 +376,7 @@ void BX_SYSCALL::handle()
 				Bit32u path, buf;
 				path = bx_mem.VirtualToRealAddress(EBX);
 				buf = bx_mem.VirtualToRealAddress(ECX);
-				EAX = stat((const char *)path, (struct stat *)buf);
+				EAX = syscall(EAX,(const char *)path, (struct stat *)buf);
 			}
 			break;
 
@@ -386,7 +385,7 @@ void BX_SYSCALL::handle()
 				Bit32u path, buf;
 				path = bx_mem.VirtualToRealAddress(EBX);
 				buf = bx_mem.VirtualToRealAddress(ECX);
-				EAX = statfs((const char *)path, (struct statfs *)buf);
+				EAX = syscall(EAX,(const char *)path, (struct statfs *)buf);
 			}
 			break;
 
