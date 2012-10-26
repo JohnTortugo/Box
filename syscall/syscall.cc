@@ -80,7 +80,7 @@ void BX_SYSCALL::handle()
 			{
 				Bit32u ptr = bx_mem.VirtualToRealAddress(EBX);
 
-				EAX = creat((const char *)ptr, ECX);
+				EAX = syscall(EAX, (const char *)ptr, ECX);
 
 				if ( (Bit32s)EAX > -1 ) {
 				   BX_FD fd;
@@ -144,7 +144,7 @@ void BX_SYSCALL::handle()
 			{
 				Bit32u ptr;
 				ptr = bx_mem.VirtualToRealAddress(ECX);
-				EAX = fstat(EBX, (struct stat *)ptr);
+				EAX = syscall(EAX, EBX, (struct stat *)ptr);
 			}
 			break;
 
@@ -288,7 +288,7 @@ void BX_SYSCALL::handle()
 			{
 				Bit32u ptr = bx_mem.VirtualToRealAddress(EBX);
 
-				EAX = open((const char *)ptr, ECX, EDX);
+				EAX = syscall(EAX,(const char *)ptr, ECX, EDX);
 
 				if ((Bit32s)EAX > -1) {
 				   BX_FD fd;
