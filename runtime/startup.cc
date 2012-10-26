@@ -63,32 +63,32 @@ void setup_environment(int argc, char *argv[], ElfLoader * loader)
     while (environ[i] != '\0' ) {
     	if ( strncmp("_=", environ[i],2) == 0 ) {
     		char aux[150];
-    		size = snprintf(aux,150,"_=%s", argv[1])+1;
-    		stackaddr -= size-1;
+    		size = snprintf(aux,150,"_=%s", argv[1]);
+    		stackaddr -= size;
     		envs.push_back(stackaddr);
-        	bx_mem.write((Bit8u *) aux,bx_mem.virtualAddressToPosition(stackaddr), size);
+        	bx_mem.write((Bit8u *) aux,bx_mem.virtualAddressToPosition(stackaddr), size+1);
         	i++;
     	} else {
-        	size= strlen(environ[i])+1;
-        	stackaddr -= size-1;
+        	size= strlen(environ[i]);
+        	stackaddr -= size;
         	envs.push_back(stackaddr);
-        	bx_mem.write((Bit8u *) environ[i++],bx_mem.virtualAddressToPosition(stackaddr), size);
+        	bx_mem.write((Bit8u *) environ[i++],bx_mem.virtualAddressToPosition(stackaddr), size+1);
     	}
     	stackaddr --;
     }
 
     //Copy command line arguments to stack
     for(i=1;i<argc;i++) {
-    	size= strlen(argv[i])+1;
-    	stackaddr -= size-1;
+    	size= strlen(argv[i]);
+    	stackaddr -= size;
     	args.push_back(stackaddr);
-    	bx_mem.write((Bit8u *) argv[i],bx_mem.virtualAddressToPosition(stackaddr), size);
+    	bx_mem.write((Bit8u *) argv[i],bx_mem.virtualAddressToPosition(stackaddr), size+1);
     	stackaddr --;
     }
 
-    stackaddr &= 0xFFFFFFF0; //Stack align;
+    stackaddr &=  0xFFFFFFF0; //Stack align;
 
-    bx_cpu.gen_reg[BX_32BIT_REG_ESP].dword.erx = (intptr_t) stackaddr+4;
+    bx_cpu.gen_reg[BX_32BIT_REG_ESP].dword.erx = (intptr_t) stackaddr;
 
     // Auxiliary vector entries
     save_auxiliary_vectors(av_EXECFN, av_RANDOM, vsyscall, loader);
@@ -113,6 +113,9 @@ void setup_environment(int argc, char *argv[], ElfLoader * loader)
 
     //Argument count
     bx_cpu.push_32(argc-1);
+
+	//    bx_mem.dump("/tmp/memory.dump");
+	//    exit(0);
 
     // Patch init routine
     //setInitProgArgs(inits,argc-1,addrArgv, addrEnv);
