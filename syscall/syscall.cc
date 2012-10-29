@@ -424,6 +424,8 @@ void BX_SYSCALL::handle()
 				Bit32u pathname;
 				pathname = bx_mem.VirtualToRealAddress(EBX);
 				EAX = syscall(EAX, (const char *)pathname);
+				if ( EAX == 0xffffffff)
+					EAX = ~errno +1;
 			}
 			break;
 
@@ -532,7 +534,9 @@ void BX_SYSCALL::handle()
             }
             break;
         case __NR_ioctl:
-        	EAX = ioctl(EBX,ECX,bx_mem.VirtualToRealAddress(EDX));
+        	EAX = syscall(EAX, EBX, ECX, bx_mem.VirtualToRealAddress(EDX));
+			if ( EAX == 0xffffffff)
+				EAX = ~errno +1;
         	break;
 		case __NR_modify_ldt:
 		case __NR_restart_syscall:
