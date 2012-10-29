@@ -1,4 +1,5 @@
-#include <linux/unistd.h>
+#include <unistd.h>
+#include <sys/syscall.h>
 #include <sys/ioctl.h>
 #include "syscall.h"
 #include "runtime/runtime.h"
@@ -99,6 +100,7 @@ void BX_SYSCALL::handle()
 				}
 				else {
 				    BX_DEBUG(("creat failed for %s", ptr));
+					EAX = ~errno +1;
 				}
 			}
 			break;
@@ -145,6 +147,8 @@ void BX_SYSCALL::handle()
 				Bit32u ptr;
 				ptr = bx_mem.VirtualToRealAddress(ECX);
 				EAX = syscall(EAX, EBX, (struct stat *)ptr);
+				if ( EAX == 0xffffffff)
+					EAX = ~errno +1;
 			}
 			break;
 
@@ -216,8 +220,9 @@ void BX_SYSCALL::handle()
 
 		case __NR_lseek:
 			EAX = syscall(EAX, EBX, ECX, EDX);
+			if ( EAX == 0xffffffff)
+				EAX = ~errno +1;
 			break;
-
 		case __NR_lstat64:
 			{
 				Bit32u path, buf;
@@ -307,6 +312,7 @@ void BX_SYSCALL::handle()
 				}
 				else {
 				    BX_DEBUG(("open failed for %s", ptr));
+				    EAX = ~errno +1;
 				}
 			}
 			break;
@@ -349,7 +355,11 @@ void BX_SYSCALL::handle()
 			{
 				Bit32u pathname;
 				pathname = bx_mem.VirtualToRealAddress(EBX);
-				EAX = rmdir((const char *)pathname); 
+
+				EAX = syscall(EAX, pathname);
+
+				if ( EAX == 0xffffffff)
+					EAX = ~errno +1;
 			}
 			break;
 
@@ -413,7 +423,7 @@ void BX_SYSCALL::handle()
 			{
 				Bit32u pathname;
 				pathname = bx_mem.VirtualToRealAddress(EBX);
-				EAX = unlink((const char *)pathname);
+				EAX = syscall(EAX, (const char *)pathname);
 			}
 			break;
 
