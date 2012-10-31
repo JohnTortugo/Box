@@ -1,0 +1,90 @@
+\begin{thebibliography}{10}
+
+\bibitem{Bala2000}
+V.~Bala, E.~Duesterwald, and S.~Banerjia.
+\newblock Dynamo: a transparent dynamic optimization system.
+\newblock In {\em Proceedings of the ACM SIGPLAN 2000 conference on Programming
+  language design and implementation}, PLDI '00, pages 1--12, New York, NY,
+  USA, 2000. ACM.
+
+\bibitem{Baraz2003}
+L.~Baraz, T.~Devor, O.~Etzion, S.~Goldenberg, A.~Skaletsky, Y.~Wang, and
+  Y.~Zemach.
+\newblock {IA-32} execution layer: a two-phase dynamic translator designed to
+  support {IA-32} applications on itanium-based systems.
+\newblock In {\em Proceedings of the 36th annual IEEE/ACM International
+  Symposium on Microarchitecture}, MICRO 36, Washington, DC, USA, 2003. IEEE
+  Computer Society.
+
+\bibitem{dicache}
+W.~Chen, D.~Chen, and Z.~Wang.
+\newblock An approach to minimizing the interpretation overhead in dynamic
+  binary translation.
+\newblock {\em The Journal of Supercomputing}, 61:804--825, 2012.
+\newblock 10.1007/s11227-011-0636-y.
+
+\bibitem{Hookway1997}
+R.~J. Hookway and M.~A. Herdeg.
+\newblock {DIGITAL FX!32}: combining emulation and binary translation.
+\newblock {\em Journal of Digital Technology}, 9(1):3--12, Jan. 1997.
+
+\bibitem{Klint1981}
+P.~Klint.
+\newblock Interpretation techniques.
+\newblock {\em Software: Practice and Experience}, 11(9):963--973, 1981.
+
+\bibitem{Luk2005}
+C.-K. Luk, R.~Cohn, R.~Muth, H.~Patil, A.~Klauser, G.~Lowney, S.~Wallace, V.~J.
+  Reddi, and K.~Hazelwood.
+\newblock Pin: building customized program analysis tools with dynamic
+  instrumentation.
+\newblock In {\em Proceedings of the 2005 ACM SIGPLAN conference on Programming
+  language design and implementation}, PLDI '05, pages 190--200, New York, NY,
+  USA, 2005. ACM.
+
+\bibitem{Magnusson1994}
+P.~Magnusson and D.~Samuelsson.
+\newblock A compact intermediate format for simics.
+\newblock Technical Report R94:17, Swedish Institute of Computer Science,
+  September 1994.
+
+\bibitem{bochs}
+D.~Mihocka and S.~Shwartsman.
+\newblock Virtualization without direct execution or jitting: Designing a
+  portable virtual machine infraestructure.
+\newblock In {\em 1h Workshop on Architectural and Microarchitectural Support
+  for Binary Translation, AMAS-BT'01, 2001.}, 2001.
+
+\bibitem{SCO1997}
+SCO.
+\newblock System {V} application binary interface, March 1997.
+\newblock \url{http://www.sco.com/developers/devspecs/gabi41.pdf}. (Visitado em
+  25 de setembro de 2012.).
+
+\bibitem{Sites1993}
+R.~L. Sites, A.~Chernoff, M.~B. Kirk, M.~P. Marks, and S.~G. Robinson.
+\newblock Binary translation.
+\newblock {\em Commun. ACM}, 36(2):69--81, Feb. 1993.
+
+\bibitem{Smith2005}
+J.~Smith and R.~Nair.
+\newblock {\em Virtual machines: versatile platforms for systems and
+  processes}.
+\newblock Morgan Kaufmann, 2005.
+
+\bibitem{Sridhar2006}
+S.~Sridhar, J.~S. Shapiro, E.~Northup, and P.~P. Bungale.
+\newblock Hdtrans: an open source, low-level dynamic instrumentation system.
+\newblock In {\em Proceedings of the 2nd international conference on Virtual
+  execution environments}, VEE '06, pages 175--185, New York, NY, USA, 2006.
+  ACM.
+
+\bibitem{Wang2007}
+C.~Wang, S.~Hu, H.-s. Kim, S.~Nair, M.~Breternitz, Z.~Ying, and Y.~Wu.
+\newblock Stardbt: An efficient multi-platform dynamic binary translation
+  system.
+\newblock In L.~Choi, Y.~Paek, and S.~Cho, editors, {\em Advances in Computer
+  Systems Architecture}, volume 4697 of {\em Lecture Notes in Computer
+  Science}, pages 4--15. Springer Berlin / Heidelberg, 2007.
+
+\end{thebibliography}

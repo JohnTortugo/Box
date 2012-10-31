@@ -1,0 +1,48 @@
+This is BibTeX, Version 0.99c (TeX Live 2009/Debian)
+The top-level auxiliary file: box.aux
+The style file: abbrv.bst
+Database file #1: box.bib
+Warning--entry type for "SCO1997" isn't style-file defined
+--line 153 of file box.bib
+You've used 13 entries,
+            2118 wiz_defined-function locations,
+            601 strings with 6725 characters,
+and the built_in function-call counts, 5078 in all, are:
+= -- 492
+> -- 288
+< -- 6
++ -- 114
+- -- 99
+* -- 378
+:= -- 850
+add.period$ -- 45
+call.type$ -- 13
+change.case$ -- 86
+chr.to.int$ -- 0
+cite$ -- 13
+duplicate$ -- 186
+empty$ -- 366
+format.name$ -- 99
+if$ -- 1065
+int.to.chr$ -- 0
+int.to.str$ -- 13
+missing$ -- 12
+newline$ -- 69
+num.names$ -- 28
+pop$ -- 93
+preamble$ -- 1
+purify$ -- 74
+quote$ -- 0
+skip$ -- 125
+stack$ -- 0
+substring$ -- 246
+swap$ -- 44
+text.length$ -- 6
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 50
+warning$ -- 0
+while$ -- 45
+width$ -- 15
+write$ -- 157
+(There was 1 warning)
