@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
 	verifyParams(argc, argv);
 
 	// print banner
-	printBanner();
+	// printBanner();
 
 	// aloca memória (100MB)
 	BX_INFO(("Allocating Memory."));
@@ -79,6 +79,9 @@ void initialize()
     bx_cpu.initialize();
     bx_cpu.sanity_checks();
     bx_cpu.register_state();
+#ifdef DICACHE
+    bx_cpu.initializeDiCache();
+#endif
 
     BX_INSTR_INITIALIZE(0);
 

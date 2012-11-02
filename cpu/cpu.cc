@@ -5,46 +5,54 @@
 #include "disasm/disasm.h"
 
 void BX_CPU_C::cpu_loop(void) {
-    bxInstruction_c *i = new bxInstruction_c();
     Bit8u *ptr;
     int ret;
 
-#ifdef BX_SHOW_DEBUG
-    char disbuf[50];
-
-    disassembler d;
-    d.set_syntax_att();
+#ifdef DICACHE
+    bxInstruction_c *i;
+#else
+    bxInstruction_c *i = new bxInstruction_c();
 #endif
 
+    /*
+     * Main loop.
+     */
     while (1) {
-        // I inspected the exec1 pointer using 
-        // objdump -dC box | grep exec1 
-        // and it indeed is pointing to the right function =DDD
-        // hurray
-
     	BX_CPU_THIS_PTR prev_rip = RIP;
 
+#ifdef DICACHE
+    	Bit32u diIndx = RIP % bx_cpu.diCache.size();
+
+        if ( bx_cpu.diCache[diIndx].tag != RIP ) {
+            ptr = (Bit8u *) bx_mem.VirtualToRealAddress(RIP);
+            ret = fetchDecode32((Bit8u *) ptr, &bx_cpu.diCache[diIndx].ins, 15);
+
+            bx_cpu.diCache[diIndx].tag = RIP;
+            bx_cpu.diCache[diIndx].ptr = ptr;
+            bx_cpu.diCache[diIndx].ret = ret;
+        }
+
+        i = (&bx_cpu.diCache[diIndx].ins);
+#else
         ptr = (Bit8u *) bx_mem.VirtualToRealAddress(RIP);
-
         ret = fetchDecode32((Bit8u *) ptr, i, 15);
-
-#ifdef BX_SHOW_DEBUG
-        printf("EIP: 0x%08lx POS: 0x%08lx\t", RIP, bx_mem.virtualAddressToPosition(RIP));
-        printf("iLen: %02d \t Exec1: %0x \t\t", i->ilen(), i->execute); fflush(stdout);
-        d.disasm32((bx_address)0, (bx_address)RIP, (const Bit8u *)ptr, disbuf);
-        printf("%s\n", disbuf); fflush(stdout);
 #endif
 
-        // doesn't mean that i was decoded right
-        // but means that the input that was correct
-        // we can use this for tracing program interpretation
+#ifdef BX_SHOW_DEBUG
+        char disbuf[50];
+
+        disassembler d;
+        d.set_syntax_att();
+
+        printf("EIP: 0x%08lx POS: 0x%08lx\t", RIP, bx_mem.virtualAddressToPosition(RIP));
+        printf("iLen: %02d \t Exec1: %0x \t\t", i->ilen(), i->execute);
+        d.disasm32((bx_address)0, (bx_address)RIP, (const Bit8u *)ptr, disbuf);
+        printf("%s\n", disbuf);
+        fflush(stdout);
+#endif
 
         RIP += i->ilen();
-
-        // call the interpretation routine
-        // memory isn't working yet
         (bx_cpu.*i->execute)(i);
-
     }
 }
 

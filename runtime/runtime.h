@@ -1,3 +1,6 @@
+#ifndef __BX_RUNTIME_H__
+#define __BX_RUNTIME_H__
+
 #include <vector>
 #include "cpu/cpu.h"
 #include "elf/ElfLoader.h"
@@ -54,3 +57,4 @@ public:
 
     Bit32u newMappedIOSpace(int i, Bit32u offset, Bit32u length);
 };
+#endif

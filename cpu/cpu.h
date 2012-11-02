@@ -25,6 +25,7 @@
 #include "config.h"
 #include "syscall/syscall.h"
 #include <setjmp.h>
+#include <vector>
 
 // segment register encoding
 #define BX_SEG_REG_ES    0
@@ -377,6 +378,7 @@ extern const char* cpu_mode_string(unsigned cpu_mode);
 
 class BX_CPU_C;
 class BX_MEM_C;
+class BX_RUNTIME;
 
 // normal member functions.  This can ONLY be used within BX_CPU_C classes.
 // Anyone on the outside should use the BX_CPU macro (defined in bochs.h)
@@ -398,6 +400,7 @@ class BX_MEM_C;
 extern BX_CPU_C   bx_cpu;
 extern BX_MEM_C   bx_mem;
 extern BX_SYSCALL bx_sys;
+extern BX_RUNTIME bx_rnt;
 
 // notify internal debugger/instrumentation about memory access
 #define BX_NOTIFY_LIN_MEMORY_ACCESS(laddr, paddr, size, pl, rw, dataptr) {              \
@@ -696,6 +699,14 @@ struct monitor_addr_t {
 
 class BX_SMM_State;
 
+struct DiCacheEntry {
+    Bit32u tag;
+    Bit8u *ptr;
+    int ret;
+
+    bxInstruction_c ins;
+};
+
 class BX_CPU_C {
 
 public: // for now...
@@ -731,6 +742,12 @@ public: // for now...
 
 #define BX_SUPPORT_SVM_EXTENSION(feature) \
    (bx_cpu.svm_extensions_bitmask & (feature))
+
+  std::vector<DiCacheEntry> diCache;
+
+  void initializeDiCache() {
+      diCache.resize(512);
+  }
 
   // General register set
   // rax: accumulator

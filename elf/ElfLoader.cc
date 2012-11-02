@@ -47,7 +47,7 @@ ElfLoader::ElfLoader(int p_argc, char **p_argv, char *ldLibPath, Bit8u *p_memory
 	// create the process address space
 	BX_INFO(("Mounting process address space."));
 	createAddressSpace();
-	dumpAddressSpaceInfo();
+	//dumpAddressSpaceInfo();
 	BX_INFO(("Address space mounted."));
 
 	// Doing relocations
