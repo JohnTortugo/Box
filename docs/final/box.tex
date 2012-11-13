@@ -355,7 +355,7 @@ de instruções do Bochs, na sua versão mais básica. O corpo do laço
   	\begin{center}
     	\includegraphics[scale=0.5]{figures/bochs_loop.png}
 	\end{center}
-	\caption{Laço principal de interpretação de instruções do Bochs}
+	\caption{Laço principal de interpretação de instruções do Bochs.}
 	\label{fig:bochs_loop}
 \end{figure}
 
@@ -473,12 +473,51 @@ pilha inicial contém informações que o kernel passa para o carregador
 nativo do sistema, estas informações podem/são usadas tanto pelo
 carregador quanto pela biblioteca de runtime utilizada. Essas informações,
 são passadas na forma de um vetor e contém dados como por exemplo, 
-tamanho de página no sistema, endereço onde o cabeçalho ELF do 
+tamanho de página utilizado no sistema, endereço onde o cabeçalho ELF do 
 programa foi carregado, entre outras coisas. A Figura~\ref{fig:stack_ini}
 mostra o formato inicial da pilha de execução de um programa.
 
+\begin{figure}[!h]
+  	\begin{center}
+    	\includegraphics[scale=0.5]{figures/stack_ini.png}
+	\end{center}
+	\caption{Formato da pilha inicial de execução de um programa.}
+	\label{fig:stack_ini}
+\end{figure}
 
 \subsubsection{Emulação de Syscalls}
+
+Sempre que a aplicação guest faz uma chamada ao sistema operacional o
+Box deve interceptar essa chamada e decidir entre duas opções: 1) 
+apenas ``redireciona'' a chamada ao sistema nativo ou 2) implementa a 
+execução da syscall. A interceptação das chamadas é feita porque todas
+as instruções executadas pela aplicação guest são interpretadas e porque
+pode ser necessário alguma tradução dos endereços gerados pela aplicação.
+
+Todas as instruções que não modificam o espaço de endereçamento da 
+aplicação guest, são redirecionadas para o SO nativo. Exemplos de 
+chamadas que são tratadas dessa forma são: mkdir, fstat, getpid, getuid, 
+uname, rename, rmdir, nanosleep, utime, ioctl e chmod.
+
+Aquelas chamadas de sistema que alteraram o espaço de endereçamento da 
+aplicação ou que retornam informações que podem vir a serem usadas 
+posteriormente para controlar alguma alteração, são implementadas pelo Box. 
+Exemplos de chamdas que precisaram ser implementadas são: open, close, creat,
+brk, mmap e munmap. Estas chamadas, com exceção da brk, estão relacionadas 
+pelo fato de poderem serem utilizadas para fazer ``memory mapped I/O'' e 
+portanto precisam de atenção especial para fazer o mapeamento das entradas
+de dados diretamente para a memória da aplicação sendo emulada. A chamada
+brk precisa ser implementada porque ela é utilizada para aumentar o tamanho
+do segmento de dados do programa, efetivamente sendo utilizada pela biblioteca
+de runtime para fazer requisição ao SO para alocar mais memória para a
+aplicação.
+
+O Box atualmente não conta com suporte para tratamento de sinais ou 
+aplicações que usam multiplas threads de execução, portanto as chamadas
+de sistema relacionadas a tais ações ainda não foram implementadas.
+
+
+
 
 \subsubsection{Emulação da Memória}
 

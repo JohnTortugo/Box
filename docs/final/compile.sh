@@ -1,7 +1,6 @@
 #!/bin/bash
 
-latex box
+pdflatex box
 bibtex box
-latex box
-latex box
-dvipdf box
+pdflatex box
+pdflatex box
