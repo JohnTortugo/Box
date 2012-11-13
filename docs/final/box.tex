@@ -15,7 +15,7 @@
 %%% SEGUIR:
 %% \usepackage[latin1]{inputenc}
 \usepackage[utf8]{inputenc}
-\usepackage[dvips]{graphicx}
+\usepackage{graphicx}
 \usepackage{url}
 \usepackage{multirow}
 \usepackage{amsmath}
@@ -347,9 +347,17 @@ TLB, etc.
 
 O Bochs utiliza alguns mecanismos para acelerar a interpretação das 
 aplicações, como por exemplo trace cache e threaded-interpretation.
-A Figura~\ref{fig:bochs_cycle} mostra o laço principal de interpretação 
+A Figura~\ref{fig:bochs_loop} mostra o laço principal de interpretação 
 de instruções do Bochs, na sua versão mais básica. O corpo do laço
 é composto de seis partes, detalhadas a seguir:
+
+\begin{figure}[!h]
+  	\begin{center}
+    	\includegraphics[scale=0.5]{figures/bochs_loop.png}
+	\end{center}
+	\caption{Laço principal de interpretação de instruções do Bochs}
+	\label{fig:bochs_loop}
+\end{figure}
 
 \begin{itemize}
 	\item \textbf{Events:} Nesse estágio ocorre a verificação se ocorreu alguma
@@ -392,9 +400,59 @@ de instruções do Bochs, na sua versão mais básica. O corpo do laço
 
 \subsection{Box}
 
+Nesta seção descrevemos os principais componentes da máquina virtual 
+de processo Box e os maiores desafios que enfrentamos durante o seu 
+desenvolvimento.
+
+Embora estas duas máquinas virtuais (Bochs e Box) sejam similares 
+conceitualmente (emulação de uma interface em cima de outra) elas
+possuem uma arquitetura drasticamente diferente. Por exemplo, 
+uma vez que o Bochs faz a execução de um sistema operacional ele
+não precisa se preocupar com detalhes de criação de processos ou
+chamadas de sistema, porém uma máquina de processos geralmente
+precisa. Da mesma forma, uma máquina virtual de processo não precisa
+emular o conceito de discos rigidos, placas de vídeo, rede, etc. uma
+vez que esses recursos não são diretamente visiveis ao processo.
+
+
 \subsubsection{Componentes Removidos}
 
+Todos os componentes de hardware que não são diretamente acessados
+pelos processos foram removidos, isso enclui placa de vídeo, placa de
+rede, placa de som, mouse, teclado, cdrom, disco rigido, diskete, portas
+USB, PCI, COM, etc.
+
+Além dos componentes de hardware, também ouve grande modificação na 
+forma como os acessos a memória do programa guest são feitos. O Bochs 
+faz a simulação de caches de instrução, dados, e translation lookasside 
+buffer (TLB), no nenhum desses componentes foi mantido no Box.
+
 \subsubsection{Carregador}
+
+A implementação atual do Box não conta con nenhum auxilio do kernel do
+sistema operacional para montar o espaço de endereçamento da aplicação
+sendo emulada. Enquanto isso foi escolhido para permitir a emulação de
+todo o processo de carregamento e execução da aplicação, isso trouxe 
+uma serie de complicações para o desenvolvimento do projeto.
+
+Não contar com o suporte do kernel significa que teremos que implementar
+no projeto toda a infraestrutura de código responsável por fazer o 
+carregamento e ligação do executável principal e bibliotecas compartilhadas,
+bem como criar o espaço de endereçamento inicial da aplicação.
+
+Durante as etapas iniciais de desenvolvimento do projeto, o objetivo era
+o desenvolvimento de um carregador suficientemente poderoso para suportar
+a execução de aplicativos compilados com linkagem dinâmica utilizando a
+biblioteca de runtime Glibc~\cite{glibc}. O desenvolvimento deste carregador
+avançou até o ponto de ser possivel executar pequenas aplicações com linkagem
+dinâmica, mas sem o uso da Glibc. Nesse ponto percebemos que o desenvolvimento
+do carregador da forma inicialmente proposta gastaria mais tempo que o 
+disponível para a realização do projeto, e dessa forma, foi decidido que
+a primeira versão do Box seria capaz de executar apenas aplicações 
+estaticamente compiladas utilizando a biblioteca de runtime $\upmu$ClibC.
+
+
+
 
 \subsubsection{Emulação de Syscalls}
 
