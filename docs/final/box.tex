@@ -516,10 +516,31 @@ O Box atualmente não conta com suporte para tratamento de sinais ou
 aplicações que usam multiplas threads de execução, portanto as chamadas
 de sistema relacionadas a tais ações ainda não foram implementadas.
 
-
-
-
 \subsubsection{Emulação da Memória}
+
+O espaço de endereçamento da aplicação guest é totalmente independente
+do espaço de endereçamento do Box. Atualmente o espaço de endereçamento
+guest é emulado utilizando um vetor de tamanho fixo que pode ser configurado
+no momento de compilação do Box.
+
+Durante a inicialização do Box o carregador cria ponteiro para todos os
+segmentos de memória que podem ser afetados durante a execução da aplicação.
+Por exemplo, é criado um ponteiro para o primeiro byte após o segmento de
+dados da aplicação, ponto conhecido como \textit{program break}, esse 
+ponteiro aponta para o primeiro byte do heap da aplicação, quando chamadas
+para syscall forem tratadas esse ponteiro será decrementado para aumentar
+o tamanho do segmento de dados da aplicação. Outros ponteiros são criados
+para armazenar o início da stack e os limites das regiões que contem código.
+
+Também durante a inicialização do sistema o carregador registra o endereço
+virtual base da aplicação, isto é em geral o primeiro byte do segmento de
+texto do executável principal. Esse endereço é associado com o primeiro
+byte do vetor utilizado para emular a memória da aplicação guest e a partir
+de então todos os acessos a memória são traduzidos utilizando esse endereço
+base.
+
+O Box atualmente não trata proteção de páginas.
+
 
 \subsection{Mibench}
 
