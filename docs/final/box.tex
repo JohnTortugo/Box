@@ -451,7 +451,31 @@ disponível para a realização do projeto, e dessa forma, foi decidido que
 a primeira versão do Box seria capaz de executar apenas aplicações 
 estaticamente compiladas utilizando a biblioteca de runtime $\upmu$ClibC.
 
+A principal tarefa do carregador atualmente implementado no Box é 
+encontrar o executável principal da aplicação, fazer o seu parcing e
+montar o espaço de endereçamento onde a aplicação executará. A primeira
+tarefa é simples, uma vez que o usuário passa o endereço completo da
+aplicação como parâmetro para o Box. O executável deve estar códificado
+no formato ELF-32~\cite{elf} e não fazer uso de linkagem dinâmica. A 
+segunda tarefa do carregador é fazer o parsing do executável e encontrar
+quais segmentos (geralmente dois segmentos, um de texto e outro de dados) 
+de código devem ser carregados na memória. Uma vez que esses segmentos 
+tenham sido encontrados o carregador começa a montar o espaço de 
+endereçamento do processo. O espaço de endereçamento é montado seguindo
+a mesma estrutura que seria utilizada pelo carregador nativo do Linux e
+é exemplificado na Figura~\ref{fig:esp_end} para os casos com linkagem
+dinâmica e estática.
 
+Outra tarefa desempenhada pelo kernel/carregador nativo do SO e que
+precisou ser implementada no Box foi a estrutura inicial da pilha de
+execução da aplicação. Além dos parâmetros e variáveis de ambiente a
+pilha inicial contém informações que o kernel passa para o carregador
+nativo do sistema, estas informações podem/são usadas tanto pelo
+carregador quanto pela biblioteca de runtime utilizada. Essas informações,
+são passadas na forma de um vetor e contém dados como por exemplo, 
+tamanho de página no sistema, endereço onde o cabeçalho ELF do 
+programa foi carregado, entre outras coisas. A Figura~\ref{fig:stack_ini}
+mostra o formato inicial da pilha de execução de um programa.
 
 
 \subsubsection{Emulação de Syscalls}
