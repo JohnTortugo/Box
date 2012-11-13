@@ -326,7 +326,69 @@ de 32 bits, compilados para Linux e não empregar tradução de binários.
 
 \section{Infraestrutura de Pesquisa} \label{sec:infraestrutura}
 
+Nessa seção descrevemos em detalhes as principais ferramentas que
+utilizamos para desenvolver esse projeto. Inicialmente apresentamos
+os detalhes mais relevantes da máquina virtual de sistema Bochs, 
+posteriormente apresentamos a máquina virtual de processos Box, que
+foi desenvolvida a partir do Bochs especificamente para este projeto.
+As duas últimas subseções desta seção descrevem os benchmarks 
+utilizados para realizar os experimentos e as bibliotecas de runtime
+utilizadas por estes benchmarks.
+
 \subsection{Bochs}
+
+O Bochs é uma máquina virtual de sistema que utiliza interpretação como
+técnica de emulação das instruções, veja Figura~\ref{fig:bochs}. Sendo 
+uma máquina virtual de sistema o Bochs necessita fazer a emulação de 
+diversos componentes de sistema, tais como: placa de vídeo, rede, som,
+dispositivos de disco, cdrom, mouse e teclado além de dispositivos de
+componentes internos da arquitetura como cache de instruções, segmentação,
+TLB, etc.
+
+O Bochs utiliza alguns mecanismos para acelerar a interpretação das 
+aplicações, como por exemplo trace cache e threaded-interpretation.
+A Figura~\ref{fig:bochs_cycle} mostra o laço principal de interpretação 
+de instruções do Bochs, na sua versão mais básica. O corpo do laço
+é composto de seis partes, detalhadas a seguir:
+
+\begin{itemize}
+	\item \textbf{Events:} Nesse estágio ocorre a verificação se ocorreu alguma
+	interrupção ou ``trap'' durante a interpretação da instrução
+	anterior. Note que o Bochs possui suporte a execução de traços e
+	threaded-interpretation. Essa verificação é feita apenas quando
+	a execução volta ao laço principal de interpretação.
+
+	\item \textbf{Prefetch:} Nesse estágio ocorre a verificação de permissões 
+	de acesso a página de código, validação de limites de segmento e 
+	o cálculo do endereço ``host'' da próxima instrução a ser emulada.
+
+	\item \textbf{Decode:} Nesse estágio ocorre a busca e decodificação da
+	instrução a ser emulada. O Bochs possui uma cache interna das 
+	instruções mais recentemente decodificadas, se a instrução a
+	ser interpretada estiver na cache as informações são reutilizadas
+	caso contrário a instrução é decodificada.
+
+	\item \textbf{Instrumentation:} Nesse estágio o Bochs verifica se a
+	instrução a ser interpretada é alvo de alguma rotina de 
+	instrumentação. Em caso afirmativo a rotina de instrumentação é
+	invocada antes da interpretação da instrução.
+
+	\item \textbf{Memory Addresses:} Nesse estágio endereços de memória
+	utilizados pela instrução a ser interpretada são resolvidos.
+	Em outras palavras, este passo é o responsável por tratar as
+	várias formas de endereçamento presentes na família x86.
+
+	\item \textbf{Execution:} Nesse estágio ocorre de fato a interpretação 
+	da instrução. Durante a decodificação da instrução, a rotina
+	que deve efetuar a interpretação é anotada como meta-informação
+	da instrução, este estágio utiliza essa informação para fazer
+	uma chamada indireta para essa rotina.
+
+	\item \textbf{Commit:} Esse estágio faz a consolidação da execução da
+	instrução, isto é, atualiza o registrador EIP.
+
+\end{itemize}
+
 
 \subsection{Box}
 
