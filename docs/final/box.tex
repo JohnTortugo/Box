@@ -456,7 +456,7 @@ encontrar o executável principal da aplicação, fazer o seu parcing e
 montar o espaço de endereçamento onde a aplicação executará. A primeira
 tarefa é simples, uma vez que o usuário passa o endereço completo da
 aplicação como parâmetro para o Box. O executável deve estar códificado
-no formato ELF-32~\cite{elf} e não fazer uso de linkagem dinâmica. A 
+no formato ELF-32~\cite{SCO1997} e não fazer uso de linkagem dinâmica. A 
 segunda tarefa do carregador é fazer o parsing do executável e encontrar
 quais segmentos (geralmente dois segmentos, um de texto e outro de dados) 
 de código devem ser carregados na memória. Uma vez que esses segmentos 
@@ -541,8 +541,27 @@ base.
 
 O Box atualmente não trata proteção de páginas.
 
-
 \subsection{Mibench}
+
+A infraestrutura de testes, em relação a benchmarks, que utilizamos durante
+o desenvolvimento e medição de desempenho do sistema é baseada no conjunto
+de aplicativos Mibench~\cite{mibench}. O Mibench contém vários aplicativos
+divididos em seis grupos: automotivo, rede, escritório, telecomunicações,
+segurança e entretenimento. O Mibench foi projetado para testes de sistemas
+embarcados e para tanto os aplicativos que o compõe em geral são pequenos 
+(em código estático), possuem um pequeno foot print dinâmico (número de
+instruções tocadas durante a execução) e tem um curto período de execução.
+A Tabela~\ref{tab:mibench} mostra essas informações de acordo com nossas
+medições.
+
+Nossa escolha por este conjunto de aplicações é principalmente devido ao
+curto período de execução das aplicações. Consideramos utilizar outros
+conjuntos de programas para teste, como por exemplo o SPEC CPU 2006~\cite{spec2006},
+porém para testar a primeira versão do sistema resolvemos começar com
+programas mais ``simples''.
+
+
+
 
 \subsection{$\upmu$ClibC}
 
