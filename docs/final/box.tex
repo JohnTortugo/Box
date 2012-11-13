@@ -560,13 +560,31 @@ conjuntos de programas para teste, como por exemplo o SPEC CPU 2006~\cite{spec20
 porém para testar a primeira versão do sistema resolvemos começar com
 programas mais ``simples''.
 
-
-
-
 \subsection{$\upmu$ClibC}
 
+Uma das etapas que mais gastou tempo de desenvolvimento no Box, foi a 
+parte de configuração do ambiente de inicialização do programa/libc. 
+Grande parte dessa dificuldade é devido a falta de documentação 
+explicando de forma clara qual é a parte do kernel e do loader na
+tarefa de criação de processos no Linux. Especificamente, é dificil
+encontrar literatura dizendo qual seria o estado dos registradores e
+qual a estrutura do espaço de endereçamento no momento em que o 
+processo é inicializado. Para resolver essa falta de documentação
+tivemos que inspecionar diretamente o código do Linux, porém isso
+retardou o processo de desenvolvimento do Box e a decisão de não
+utilizar a Glibc e linkagem dinâmica foi tomada.
 
+A $\upmu$ClibC é uma biblioteca C desenvolvida com o proposito de
+rodar em sistemas Linux para dispositivos embarcados. Dessa forma 
+ela é bem menos genérica que a Glibc e por isso possui um \textit{foot print}
+de execução bem menor. Outra característica importante da $\upmu$ClibC
+é a possibilidade de fazer sua instalação de forma seletiva de
+seus componentes. Estas e outras características nos levaram a
+escolher a $\upmu$ClibC como alternativa a GlibC.
 
+Como a implementação atual do Box não possui suporte a 
+\textit{multithreading} a instalação da $\upmu$ClibC que utilizamos
+nos testes não consta com estes recurso.
 
 
 \section{Resultados} \label{sec:resultados}
