@@ -96,47 +96,64 @@ especificamente para esse estudo.
 \end{abstract}
 
 
-
-
-
-
 \section{Introdução}
-Uma Máquina Virtual (MV) é uma plataforma versátil que pode ser empregada para resolver diversos problemas na área de computação. 
-Uma MV pode ser vista como uma camada utilizada para prover a integração entre duas interfaces (possivelmente distintas). 
-Esta camada pode ser implementada com emulação em software, virtualização em hardware ou uma composição das duas abordagens.
-As interfaces podem ser tanto a \emph{Application Binary Interface} (ABI) em MVs de processo, quanto a \emph{Instruction Set Architecture} (ISA) em MVs de sistema.
-Dessa forma, tais ferramentas ocupam uma posição estratégica que pode ser explorada de diversas formas:
-\textit{cross-platform emulation} - permitindo que aplicações escritas para uma plataforma sejam executadas em outra; 
-\textit{simulação} - simulação do comportamento do hardware durante a execução do programa; \textit{análise} - análise do
-perfil de execução das aplicações; \textit{otimização} - aplicar otimizações no código da aplicação utilizando informações
+Uma Máquina Virtual (MV) é uma plataforma versátil que pode ser empregada para resolver 
+diversos problemas na área de computação. 
+Uma MV pode ser vista como uma camada utilizada para prover a integração entre duas 
+interfaces (possivelmente distintas). 
+Esta camada pode ser implementada com emulação em software, virtualização em hardware ou 
+uma composição das duas abordagens.
+As interfaces podem ser tanto a \emph{Application Binary Interface} (ABI) em MVs de 
+processo, quanto a \emph{Instruction Set Architecture} (ISA) em MVs de sistema.
+Dessa forma, tais ferramentas ocupam uma posição estratégica que pode ser explorada de 
+diversas formas:
+\textit{cross-platform emulation} - permitindo que aplicações escritas para uma plataforma 
+sejam executadas em outra; 
+\textit{simulação} - simulação do comportamento do hardware durante a execução do programa; 
+\textit{análise} - análise do perfil de execução das aplicações; 
+\textit{otimização} - aplicar otimizações no código da aplicação utilizando informações
 obtidas durante a execução do código.  
 
-Duas abordagens são frequentemente empregadas para implementar a emulação de código em uma máquina virtual: interpretação e tradução.
-Uma MV que emprega interpretação utiliza funções para simular o comportamento de cada instrução da aplicação sendo emulada. 
-O processo de tradução porém, emprega técnicas da área de compiladores para produzir um código binário nativo (possivelmente otimizado) equivalente àquele da aplicação sendo emulada.
-É comum encontrarmos MVs que, visando maximizar o desempenho, empregam estas abordagens em conjunto.
+Duas abordagens são frequentemente empregadas para implementar a emulação de código em uma 
+máquina virtual: interpretação e tradução.
+Uma MV que emprega interpretação utiliza funções para simular o comportamento de cada 
+instrução da aplicação sendo emulada. 
+O processo de tradução porém, emprega técnicas da área de compiladores para produzir um 
+código binário nativo (possivelmente otimizado) equivalente àquele da aplicação sendo emulada.
+É comum encontrarmos MVs que, visando maximizar o desempenho, empregam estas abordagens em 
+conjunto.
 
-Note que uma MV de sistema emula não apenas as instruções da arquitetura alvo, mas toda uma infraestrutura de hardware
-necessária para executar um sistema operacional. Nisto estão inclusos dispositivos como placa de rede, hierarquia de memória,
-placa gráfica e etc. Para tarefas como \textit{cross-platform emulation} e perfilamento da execução do código de uma aplicação
-em específico, o uso de uma MV de sistema também agrega ao \textit{overhead} de emulação da aplicação o \textit{overhead} de emulação destes 
-dispositivos e do sistema operacional. Portanto frequentemente nestes cenários uma máquina virtual de processo é preferível
+Note que uma MV de sistema emula não apenas as instruções da arquitetura alvo, mas toda uma 
+infraestrutura de hardware necessária para executar um sistema operacional. 
+Nisto estão inclusos dispositivos como placa de rede, hierarquia de memória, placa gráfica 
+e etc. 
+Para tarefas como \textit{cross-platform emulation} e perfilamento da execução do código de 
+uma aplicação em específico, o uso de uma MV de sistema também agrega ao \textit{overhead} de 
+emulação da aplicação o \textit{overhead} de emulação destes dispositivos e do sistema 
+operacional. 
+Portanto frequentemente nestes cenários uma máquina virtual de processo é preferível
 em relação a uma MV de sistema.
 
-Nesse texto apresentamos uma proposta de avaliação do \textit{overhead} de emulação do sistema operacional e dispositivos de hardware em uma máquina virtual de sistema interpretada em relação a uma máquina virtual de processo interpretada. 
+Nesse texto apresentamos uma proposta de avaliação do \textit{overhead} de emulação do sistema 
+operacional e dispositivos de hardware em uma máquina virtual de sistema interpretada em relação
+a uma máquina virtual de processo interpretada. 
 
-Para tanto, propomos a transformação de uma máquina virtual de sistema em uma máquina virtual de processo. 
-Além de uma melhor compreensão do \textit{overhead} de emulação em uma máquina virtual de sistema, este trabalho tem como resultado uma infraestrutura para a realização de experimentos voltados para a área de máquinas virtuais. 
+Para tanto, propomos a transformação de uma máquina virtual de sistema em uma máquina virtual 
+de processo. 
+Além de uma melhor compreensão do \textit{overhead} de emulação em uma máquina virtual de 
+sistema, este trabalho tem como resultado uma infraestrutura para a realização de experimentos 
+voltados para a área de máquinas virtuais. 
 
-Este texto está organizado da seguinte forma. Na Seção~\ref{sec:objetivos} apresentamos com certo nível de detalhamento nossos objetivos. 
-Na Seção~\ref{sec:fundamentacao} apresentamos a fundamentação teórica para a realização do projeto. Na Seção~\ref{sec:bibliografia} apresentamos um levantamento bibliográfico da área de máquinas virtuais a nível de binários. 
-A Seção~\ref{sec:infraestrutura} e a Seção~\ref{sec:metodologia} descrevem a infraestrutura e a metodologia proposta para a realização do projeto, respectivamente. 
+Este texto está organizado da seguinte forma. Na Seção~\ref{sec:objetivos} apresentamos com certo 
+nível de detalhamento nossos objetivos. 
+Na Seção~\ref{sec:fundamentacao} apresentamos a fundamentação teórica para a realização do projeto.
+Na Seção~\ref{sec:bibliografia} apresentamos um levantamento bibliográfico da área de máquinas 
+virtuais a nível de binários. 
+A Seção~\ref{sec:infraestrutura} e a Seção~\ref{sec:metodologia} descrevem a infraestrutura e a 
+metodologia proposta para a realização do projeto, respectivamente. 
 Por fim a Seção~\ref{sec:conclusao} apresenta a conclusão do trabalho. 
   
   
-
-
-
 \section{Fundamentação Teórica} \label{sec:fundamentacao}
 
 \subsection{Máquinas Virtuais}
@@ -322,8 +339,6 @@ de 32 bits, compilados para Linux e não empregar tradução de binários.
 % de sistemas operacionais em relação a processos. Será que achamos? Será que tem? 
 
 
-
-
 \section{Infraestrutura de Pesquisa} \label{sec:infraestrutura}
 
 Nessa seção descrevemos em detalhes as principais ferramentas que
@@ -337,13 +352,12 @@ utilizadas por estes benchmarks.
 
 \subsection{Bochs}
 
-O Bochs é uma máquina virtual de sistema que utiliza interpretação como
-técnica de emulação das instruções, veja Figura~\ref{fig:bochs}. Sendo 
+O Bochs é uma máquina virtual que utiliza interpretação como
+técnica de emulação das instruções, veja Figura~\ref{fig:bochs}. Por ser 
 uma máquina virtual de sistema o Bochs necessita fazer a emulação de 
-diversos componentes de sistema, tais como: placa de vídeo, rede, som,
-dispositivos de disco, cdrom, mouse e teclado além de dispositivos de
-componentes internos da arquitetura como cache de instruções, segmentação,
-TLB, etc.
+diversos componentes como: placa de vídeo, rede, som, dispositivos de 
+disco, cdrom, mouse e teclado além de dispositivos de componentes internos 
+da arquitetura como cache de instruções, segmentação, paginação, TLB, etc.
 
 O Bochs utiliza alguns mecanismos para acelerar a interpretação das 
 aplicações, como por exemplo trace cache e threaded-interpretation.
