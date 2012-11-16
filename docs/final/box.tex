@@ -20,6 +20,8 @@
 \usepackage{multirow}
 \usepackage{amsmath}
 \usepackage{upgreek}
+\usepackage{caption}
+\usepackage{subcaption}
 
 \bibliographystyle{abbrv}
 
@@ -410,7 +412,7 @@ seis partes, detalhadas a seguir:
 
 \begin{figure}[!h]
   	\begin{center}
-    	\includegraphics[scale=0.5]{figures/bochs_loop.eps}
+    	\includegraphics[scale=0.5]{figures/bochs_loop}
 	\end{center}
 	\caption{Laço principal de interpretação de instruções do Bochs.}
 	\label{fig:bochs_loop}
@@ -529,7 +531,7 @@ Figura~\ref{fig:esp_end} para os casos com linkagem dinâmica e estática.
 
 \begin{figure}[!h]
         \begin{center}
-        \includegraphics[scale=0.5]{figures/esp_end.eps}
+        \includegraphics[scale=0.5]{figures/esp_end}
         \end{center}
         \caption{Espaço de endereçamento inicial da aplicação.}
         \label{fig:esp_end}
@@ -548,7 +550,7 @@ programa.
 
 \begin{figure}[!h]
   	\begin{center}
-    	\includegraphics[scale=0.5]{figures/stack_ini.eps}
+    	\includegraphics[scale=0.5]{figures/stack_ini}
 	\end{center}
 	\caption{Formato da pilha inicial de execução de um programa.}
 	\label{fig:stack_ini}
@@ -658,8 +660,24 @@ recurso.
 \subsection{Overhead de Emulação de Sistema}
 
 Comparação com o Bochs.
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\textwidth]{figures/bochs_dicache_nativo}
+	\caption{Tempo de execução do Mibench no Bochs, Box-DiCache e nativamente.}
+	\label{fig:bochs_dicache_nativo}
+\end{figure}
+
+
 
 \subsection{Otimizando a Interpretação}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\textwidth]{figures/dicache_nocache}
+	\caption{Tempo de execução do Mibench no Box com DiCache e sem cache.}
+	\label{fig:dicache_nocache}
+\end{figure}
+
 
 Gráficos mostrando o tempo de execução do Box com DICache, Threaded
 Interpretation e ambas as técnicas habilitadas.
