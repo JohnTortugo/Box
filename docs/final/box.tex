@@ -655,7 +655,33 @@ recurso.
 
 \section{Resultados} \label{sec:resultados}
 
+Nessa seção apresentamos os resultados que obtivemos nos nossos experimentos
+com o Box e Bochs. Inicialmente apresentamos a metodologia que seguimos para
+os testes, em seguida apresentamos os resultados da comparação do Box com o
+Bochs e a execução nativa, posteriormente mostramos o ganho de desempenho com
+a introdução da cache de decodificação, DICache, no Box. Por fim apresentamos
+uma análise mostrando quais componentes do Box dominam o tempo de execução de
+diversos benchmarks.
+
 \subsection{Metodologia}
+
+Todos os experimentos foram realizados em uma máquina de 32 bits rodando o
+sistema operacional Debian Squeeze. A máquina de testes é um Intel Core 2 Duo
+de 2.13 GHz, com 4Mb de cache L2 e 3Gb de memória RAM.
+
+Os aplicativos utilizados para testes são do Mibench, nos experimentos rodamos
+os programas com as entradas ``pequenas'' e ``grandes'', aqui mostramos apenas
+os resultados para a entrada grande. O Apêndice A contém os 
+resultados para os dois conjuntos de entrada.
+
+Os experimentos foram feitos na máquina em modo mono-usuário (\textit{runlevel 1})
+e para cada par aplicativo/entrada foi coletado o tempo de dez execuções, aqui
+mostramos apenas a média arimética destas dez execuções. O Apêndice A contém os 
+valores de intervalo de confiança e desvio padrão, os quais omitimos aqui porquê, 
+como pode ser visto no apêndice, a margem de erro e o desvio padrão foram despreziveis.
+
+Utilizamos o Bochs-2.6 nos experimentos, atualmente esta é a versão mais recente.
+
 
 \subsection{Overhead de Emulação de Sistema}
 
@@ -695,6 +721,10 @@ gasta a maior parte do tempo durante a emulação.
 
 \section{Conclusão}  \label{sec:conclusao}
 
+
+
+\newpage
+\section*{Apêndice A} \label{ap:results}
 
 
 
