@@ -605,6 +605,9 @@ typedef
 
 #endif
 
+#define BX_ICACHE	0
+#define BX_DICACHE	0
+
 #define BX_GDBSTUB      0
 #define BX_DEBUGGER     0
 #define BX_DISASM       0

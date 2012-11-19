@@ -28,24 +28,21 @@
 
 #include "param_names.h"
 
-//bxPageWriteStampTable pageWriteStampTable;
+bxPageWriteStampTable pageWriteStampTable;
 
 void flushICaches(void)
 {
-  for (unsigned i=0; i<BX_SMP_PROCESSORS; i++) {
-    BX_CPU(i)->iCache.flushICacheEntries();
-    BX_CPU(i)->async_event |= BX_ASYNC_EVENT_STOP_TRACE;
-  }
+  BX_CPU(0)->iCache.flushICacheEntries();
+  BX_CPU(0)->async_event |= BX_ASYNC_EVENT_STOP_TRACE;
 
-  //pageWriteStampTable.resetWriteStamps();
+  pageWriteStampTable.resetWriteStamps();
 }
 
 void handleSMC(bx_phy_address pAddr, Bit32u mask)
 {
-  for (unsigned i=0; i<BX_SMP_PROCESSORS; i++) {
-    BX_CPU(i)->async_event |= BX_ASYNC_EVENT_STOP_TRACE;
-    BX_CPU(i)->iCache.handleSMC(pAddr, mask);
-  }
+
+ BX_CPU(0)->async_event |= BX_ASYNC_EVENT_STOP_TRACE;
+ BX_CPU(0)->iCache.handleSMC(pAddr, mask);
 }
 
 #if BX_SUPPORT_HANDLERS_CHAINING_SPEEDUPS
@@ -90,20 +87,11 @@ bxICacheEntry_c* BX_CPU_C::serveICacheMiss(bxICacheEntry_c *entry, Bit32u eipBia
   Bit32u traceMask = 0;
 
   // Don't allow traces longer than cpu_loop can execute
-  static unsigned quantum =
-#if BX_SUPPORT_SMP
-    (BX_SMP_PROCESSORS > 1) ? SIM->get_param_num(BXPN_SMP_QUANTUM)->get() :
-#endif
-    BX_MAX_TRACE_LENGTH;
+  static unsigned quantum = BX_MAX_TRACE_LENGTH;
  
   for (unsigned n=0;n < quantum;n++)
   {
-#if BX_SUPPORT_X86_64
-    if (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64)
-      ret = fetchDecode64(fetchPtr, i, remainingInPage);
-    else
-#endif
-      ret = fetchDecode32(fetchPtr, i, remainingInPage);
+    ret = fetchDecode32( (Bit8u *) bx_mem.VirtualToRealAddress((Bit32u) fetchPtr), i, remainingInPage);
 
     if (ret < 0) {
       // Fetching instruction on segment/page boundary
@@ -122,8 +110,8 @@ bxICacheEntry_c* BX_CPU_C::serveICacheMiss(bxICacheEntry_c *entry, Bit32u eipBia
       // Add the instruction to trace cache
       entry->pAddr = ~entry->pAddr;
       entry->traceMask = 0x80000000; /* last line in page */
-      //pageWriteStampTable.markICacheMask(entry->pAddr, entry->traceMask);
-      //pageWriteStampTable.markICacheMask(BX_CPU_THIS_PTR pAddrFetchPage, 0x1);
+      pageWriteStampTable.markICacheMask(entry->pAddr, entry->traceMask);
+      pageWriteStampTable.markICacheMask(BX_CPU_THIS_PTR pAddrFetchPage, 0x1);
 
 #if BX_SUPPORT_HANDLERS_CHAINING_SPEEDUPS
       entry->tlen++; /* Add the inserted end of trace opcode */
@@ -160,7 +148,7 @@ bxICacheEntry_c* BX_CPU_C::serveICacheMiss(bxICacheEntry_c *entry, Bit32u eipBia
     if (remainingInPage >= 15) { // avoid merging with page split trace
       if (mergeTraces(entry, i, pAddr)) {
           entry->traceMask |= traceMask;
-          //pageWriteStampTable.markICacheMask(pAddr, entry->traceMask);
+          pageWriteStampTable.markICacheMask(pAddr, entry->traceMask);
           BX_CPU_THIS_PTR iCache.commit_trace(entry->tlen);
           return entry;
       }
@@ -171,7 +159,7 @@ bxICacheEntry_c* BX_CPU_C::serveICacheMiss(bxICacheEntry_c *entry, Bit32u eipBia
 
   entry->traceMask |= traceMask;
 
-  //pageWriteStampTable.markICacheMask(pAddr, entry->traceMask);
+  pageWriteStampTable.markICacheMask(pAddr, entry->traceMask);
 
 #if BX_SUPPORT_HANDLERS_CHAINING_SPEEDUPS
   entry->tlen++; /* Add the inserted end of trace opcode */
@@ -226,7 +214,7 @@ void BX_CPU_C::boundaryFetch(const Bit8u *fetchPtr, unsigned remainingInPage, bx
 
   // Read all leftover bytes in current page up to boundary.
   for (j=0; j<remainingInPage; j++) {
-    fetchBuffer[j] = *fetchPtr++;
+    fetchBuffer[j] = *((Bit8u *) bx_mem.VirtualToRealAddress((Bit32u) fetchPtr++));
   }
 
   // The 2nd chunk of the instruction is on the next page.
@@ -243,19 +231,14 @@ void BX_CPU_C::boundaryFetch(const Bit8u *fetchPtr, unsigned remainingInPage, bx
   }
 
   // We can fetch straight from the 0th byte, which is eipFetchPtr;
-  fetchPtr = BX_CPU_THIS_PTR eipFetchPtr;
+  fetchPtr = (Bit8u *) bx_mem.VirtualToRealAddress((Bit32u) BX_CPU_THIS_PTR eipFetchPtr);
 
   // read leftover bytes in next page
   for (k=0; k<fetchBufferLimit; k++, j++) {
     fetchBuffer[j] = *fetchPtr++;
   }
 
-#if BX_SUPPORT_X86_64
-  if (BX_CPU_THIS_PTR cpu_mode == BX_MODE_LONG_64)
-    ret = fetchDecode64(fetchBuffer, i, remainingInPage+fetchBufferLimit);
-  else
-#endif
-    ret = fetchDecode32(fetchBuffer, i, remainingInPage+fetchBufferLimit);
+  ret = fetchDecode32(fetchBuffer, i, remainingInPage+fetchBufferLimit);
 
   if (ret < 0) {
     BX_INFO(("boundaryFetch #GP(0): failed to complete instruction decoding"));

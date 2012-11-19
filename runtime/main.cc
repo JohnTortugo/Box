@@ -79,7 +79,7 @@ void initialize()
     bx_cpu.initialize();
     bx_cpu.sanity_checks();
     bx_cpu.register_state();
-#ifdef DICACHE
+#if BX_DICACHE == 1
     bx_cpu.initializeDiCache();
 #endif
 

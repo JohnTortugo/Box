@@ -625,7 +625,7 @@ typedef struct {
 
 #define PAGE_OFFSET(laddr) ((Bit32u)(laddr) & 0xfff)
 
-// #include "icache.h"
+#include "icache.h"
 
 // general purpose register
 #ifdef BX_BIG_ENDIAN
@@ -1004,7 +1004,7 @@ public: // for now...
   // An instruction cache.  Each entry should be exactly 32 bytes, and
   // this structure should be aligned on a 32-byte boundary to be friendly
   // with the host cache lines.
-  // bxICache_c iCache BX_CPP_AlignN(32);
+  bxICache_c iCache BX_CPP_AlignN(32);
   Bit32u fetchModeMask;
 
   struct {
@@ -3024,9 +3024,9 @@ public: // for now...
   int fetchDecode32(const Bit8u *fetchPtr, bxInstruction_c *i, unsigned remainingInPage) BX_CPP_AttrRegparmN(3);
 
   void boundaryFetch(const Bit8u *fetchPtr, unsigned remainingInPage, bxInstruction_c *);
-//  bxICacheEntry_c *serveICacheMiss(bxICacheEntry_c *entry, Bit32u eipBiased, bx_phy_address pAddr);
-//  bxICacheEntry_c* getICacheEntry(void);
-//  bx_bool mergeTraces(bxICacheEntry_c *entry, bxInstruction_c *i, bx_phy_address pAddr);
+  bxICacheEntry_c *serveICacheMiss(bxICacheEntry_c *entry, Bit32u eipBiased, bx_phy_address pAddr);
+  bxICacheEntry_c* getICacheEntry(void);
+  bx_bool mergeTraces(bxICacheEntry_c *entry, bxInstruction_c *i, bx_phy_address pAddr);
 #if BX_SUPPORT_HANDLERS_CHAINING_SPEEDUPS
   BX_INSF_TYPE linkTrace(bxInstruction_c *i) BX_CPP_AttrRegparmN(1);
 #endif

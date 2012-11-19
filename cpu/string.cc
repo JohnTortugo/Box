@@ -81,9 +81,10 @@ Bit32u BX_CPU_C::FastRepMOVSB(bxInstruction_c *i, unsigned srcSeg, bx_address sr
     count = bytesFitSrc;
   if (count > bytesFitDst)
     count = bytesFitDst;
+/*
   if (count > bx_pc_system.getNumCpuTicksLeftNextEvent())
     count = bx_pc_system.getNumCpuTicksLeftNextEvent();
-
+*/
   // If after all the restrictions, there is anything left to do...
   if (count) {
     // Transfer data directly using host addresses
@@ -154,8 +155,10 @@ Bit32u BX_CPU_C::FastRepMOVSW(bxInstruction_c *i, unsigned srcSeg, bx_address sr
     count = wordsFitSrc;
   if (count > wordsFitDst)
     count = wordsFitDst;
+/*
   if (count > bx_pc_system.getNumCpuTicksLeftNextEvent())
     count = bx_pc_system.getNumCpuTicksLeftNextEvent();
+*/
 
   // If after all the restrictions, there is anything left to do...
   if (count) {
@@ -227,8 +230,10 @@ Bit32u BX_CPU_C::FastRepMOVSD(bxInstruction_c *i, unsigned srcSeg, bx_address sr
     count = dwordsFitSrc;
   if (count > dwordsFitDst)
     count = dwordsFitDst;
+/*
   if (count > bx_pc_system.getNumCpuTicksLeftNextEvent())
     count = bx_pc_system.getNumCpuTicksLeftNextEvent();
+*/
 
   // If after all the restrictions, there is anything left to do...
   if (count) {
@@ -282,8 +287,10 @@ Bit32u BX_CPU_C::FastRepSTOSB(bxInstruction_c *i, unsigned dstSeg, bx_address ds
   // source or dest pages.
   if (count > bytesFitDst)
     count = bytesFitDst;
+/*
   if (count > bx_pc_system.getNumCpuTicksLeftNextEvent())
     count = bx_pc_system.getNumCpuTicksLeftNextEvent();
+*/
 
   // If after all the restrictions, there is anything left to do...
   if (count) {
@@ -338,8 +345,10 @@ Bit32u BX_CPU_C::FastRepSTOSW(bxInstruction_c *i, unsigned dstSeg, bx_address ds
   // source or dest pages.
   if (count > wordsFitDst)
     count = wordsFitDst;
+/*
   if (count > bx_pc_system.getNumCpuTicksLeftNextEvent())
     count = bx_pc_system.getNumCpuTicksLeftNextEvent();
+*/
 
   // If after all the restrictions, there is anything left to do...
   if (count) {
@@ -394,8 +403,10 @@ Bit32u BX_CPU_C::FastRepSTOSD(bxInstruction_c *i, unsigned dstSeg, bx_address ds
   // source or dest pages.
   if (count > dwordsFitDst)
     count = dwordsFitDst;
+/*
   if (count > bx_pc_system.getNumCpuTicksLeftNextEvent())
     count = bx_pc_system.getNumCpuTicksLeftNextEvent();
+*/
 
   // If after all the restrictions, there is anything left to do...
   if (count) {
@@ -529,7 +540,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVSB32_XbYb(bxInstruction_c *i)
       // one, since the main cpu loop will decrement one.  Also,
       // the count is predecremented before examined, so defintely
       // don't roll it under zero.
-      BX_TICKN(byteCount-1);
+      //BX_TICKN(byteCount-1);
 
       // Decrement eCX. Note, the main loop will decrement 1 also, so
       // decrement by one less than expected, like the case above.
@@ -708,7 +719,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::MOVSD32_XdYd(bxInstruction_c *i)
       // one, since the main cpu loop will decrement one.  Also,
       // the count is predecremented before examined, so defintely
       // don't roll it under zero.
-      BX_TICKN(dwordCount-1);
+      //BX_TICKN(dwordCount-1);
 
       // Decrement eCX. Note, the main loop will decrement 1 also, so
       // decrement by one less than expected, like the case above.
@@ -1675,7 +1686,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::STOSB32_YbAL(bxInstruction_c *i)
       // one, since the main cpu loop will decrement one.  Also,
       // the count is predecremented before examined, so defintely
       // don't roll it under zero.
-      BX_TICKN(byteCount-1);
+      //BX_TICKN(byteCount-1);
 
       // Decrement eCX.  Note, the main loop will decrement 1 also, so
       // decrement by one less than expected, like the case above.

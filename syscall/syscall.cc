@@ -7,45 +7,38 @@
 extern BX_MEM_C bx_mem;
 extern BX_RUNTIME bx_rnt;
 
+Bit32u vEAX, vEBX, vECX, vEDX;
+
 void BX_SYSCALL::handle()
 {
+#ifdef BX_SHOW_DEBUG
     BX_DEBUG(("Handling syscall 0x%x", EAX));
-
+#endif
 	switch (EAX) {
+		case __NR_write: 
+			vEAX = bx_mem.VirtualToRealAddress(ECX);
+			EAX = write(EBX, (const void *) vEAX , EDX);
+			break;
 		case __NR_access:
-			{
-				Bit32u ptr;
-				ptr = bx_mem.VirtualToRealAddress(EBX);
-				EAX = access((const char *)ptr, ECX);
-			}
+			vEBX = bx_mem.VirtualToRealAddress(EBX);
+			EAX = access((const char *)vEBX, ECX);
 			break;
 
 		case __NR_brk:
-			{
-				// if is greater than the original program break
-				// that is, final of DATA segment of mainExecutable
-				// if doesn't reach libs start
-				if (EBX > bx_mem.getOrigProgramBreak() && EBX < bx_mem.getLibraryStart()) {
-					bx_mem.setProgramBreak(EBX);
-				}
-#ifdef DEBUG
-				else {
-					if (EBX != 0) {
-						BX_DEBUG(("sys_brk with value outside limits: 0x%h", EBX));
-					}
-				}
-#endif
-
-				EAX = bx_mem.getProgramBreak();
+			// if is greater than the original program break
+			// that is, final of DATA segment of mainExecutable
+			// if doesn't reach libs start
+			if (EBX > bx_mem.getOrigProgramBreak() && EBX < bx_mem.getLibraryStart()) {
+				bx_mem.setProgramBreak(EBX);
 			}
-		  break;
+			else if (EBX != 0)
+			    BX_DEBUG(("sys_brk with value outside limits: 0x%h", EBX));
 
+			EAX = bx_mem.getProgramBreak();
+			break;
 		case __NR_chmod:
-			{
-				Bit32u ptr;
-				ptr = bx_mem.VirtualToRealAddress(EBX);
-				EAX = chmod((const char *)ptr, ECX);
-			}
+			vEBX = bx_mem.VirtualToRealAddress(EBX);
+			EAX = chmod((const char *)vEBX, ECX);
 			break;
 
 		case __NR_close:
@@ -451,14 +444,6 @@ void BX_SYSCALL::handle()
 				Bit32u ptr;
 				ptr = bx_mem.VirtualToRealAddress(EBX);
 				EAX = uname((struct utsname *) ptr);
-				break;
-			}
-
-		case __NR_write: 
-			{
-				Bit32u ptr;
-				ptr = bx_mem.VirtualToRealAddress(ECX);
-				EAX = write(EBX, (const void *) ptr , EDX);
 				break;
 			}
 

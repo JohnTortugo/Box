@@ -42,6 +42,7 @@ BX_INCDIRS = -I.. -I$(srcdir)/.. -I../@INSTRUMENT_DIR@ -I$(srcdir)/../@INSTRUMEN
 BX_OBJS = \
 	init.o \
 	cpu.o \
+	icache.o \
 	access.o \
 	access32.o \
 	vm8086.o \

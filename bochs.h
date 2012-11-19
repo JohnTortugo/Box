@@ -98,8 +98,6 @@ extern "C" {
 #define BX_SHARE_PATH NULL
 #endif
 
-#define DICACHE 1
-
 
 //
 // some macros to interface the CPU and memory to external environment

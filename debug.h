@@ -10,4 +10,5 @@
   #define BX_ERROR(fmt)
   #define BX_INFO(fmt)
   #define BX_DEBUG(fmt)
+  //#define BX_DEBUG(fmt)
 #endif
