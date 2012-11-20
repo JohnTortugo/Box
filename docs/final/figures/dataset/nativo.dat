@@ -2,9 +2,7 @@ benchmark           overhead
 basicmath	        1.023
 bitcnts	            0.183
 qsort	            0.250
-susan-smoothing	    0.134
 susan-edges	        0.037
-susan-corners	    0.012
 tiff2rgba	        0.335
 tiffmedian	        0.278
 tiffdither	        0.280
@@ -14,15 +12,12 @@ djpeg	            0.017
 patricia	        0.222
 dijkstra	        0.057
 ispell	            0.301
-search	            0.010
 say	                0.823
 blowfish-e	        0.196
 blowfish-d	        0.197
 rijndael-e	        0.266
 rijndael-d	        0.254
 sha	                0.042
-pgp-sa	            0.051
-pgp-z	            0.039
 rawcaudio	        0.339
 rawdaudio	        0.279
 crc	                0.305

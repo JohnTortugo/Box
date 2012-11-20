@@ -8,6 +8,7 @@
 \def\statsbochs{\datapath/bochs.dat}
 \def\statsnativ{\datapath/nativo.dat}
 \def\statsboxdic{\datapath/box_dicache.dat}
+\def\statsboxica{\datapath/box_icache.dat}
 
 \pgfplotsset{regions style/.style={%
 	compat=1.3,
@@ -19,9 +20,9 @@
 	ytick align=inside,
 	xtick align=outside,
 	xtick pos=left,
-	symbolic x coords={basicmath,bitcnts,qsort,susan-smoothing,susan-edges,susan-corners,tiff2rgba,tiffmedian,tiffdither,tiff2bw,cjpeg,djpeg,patricia,dijkstra,ispell,search,say,blowfish-e,blowfish-d,rijndael-e,rijndael-d,sha,pgp-sa,pgp-z,rawcaudio,rawdaudio,crc,toast,untoast},
-	xticklabels={basicmath,bitcnts,qsort,susan-smoothing,susan-edges,susan-corners,tiff2rgba,tiffmedian,tiffdither,tiff2bw,cjpeg,djpeg,patricia,dijkstra,ispell,search,say,blowfish-e,blowfish-d,rijndael-e,rijndael-d,sha,pgp-sa,pgp-z,rawcaudio,rawdaudio,crc,toast,untoast},
-	xtick={basicmath,bitcnts,qsort,susan-smoothing,susan-edges,susan-corners,tiff2rgba,tiffmedian,tiffdither,tiff2bw,cjpeg,djpeg,patricia,dijkstra,ispell,search,say,blowfish-e,blowfish-d,rijndael-e,rijndael-d,sha,pgp-sa,pgp-z,rawcaudio,rawdaudio,crc,toast,untoast},
+	symbolic x coords={basicmath,bitcnts,qsort,susan-edges,tiff2rgba,tiffmedian,tiffdither,tiff2bw,cjpeg,djpeg,patricia,dijkstra,ispell,say,blowfish-e,blowfish-d,rijndael-e,rijndael-d,sha,rawcaudio,rawdaudio,crc,toast,untoast},
+	xticklabels={basicmath,bitcnts,qsort,susan-edges,tiff2rgba,tiffmedian,tiffdither,tiff2bw,cjpeg,djpeg,patricia,dijkstra,ispell,say,blowfish-e,blowfish-d,rijndael-e,rijndael-d,sha,rawcaudio,rawdaudio,crc,toast,untoast},
+	xtick={basicmath,bitcnts,qsort,susan-edges,tiff2rgba,tiffmedian,tiffdither,tiff2bw,cjpeg,djpeg,patricia,dijkstra,ispell,say,blowfish-e,blowfish-d,rijndael-e,rijndael-d,sha,rawcaudio,rawdaudio,crc,toast,untoast},
 	yticklabel=\pgfmathprintnumber{\tick},
 	ytick={0,10,20,...,60},
 	xticklabel style={anchor=east,rotate=90},
@@ -49,20 +50,19 @@
 \begin{document}
 \begin{tikzpicture}
 \begin{axis}[regions style, ybar, bar width=1ex]
-	\addplot +[draw=black, fill=black] table[x=benchmark, y expr=\thisrow{overhead}] {\statsboxdic};
+	\addplot +[draw=black, fill=black] table[x=benchmark, y expr=\thisrow{overhead}] {\statsbochs};
 	\makeatletter
 
-	\addplot +[xshift=-.5ex, draw=black, fill=black!60] table[x=benchmark, y expr=\thisrow{overhead}] {\statsbochs};
+	\addplot +[xshift=-.5ex, draw=black, fill=black!60] table[x=benchmark, y expr=\thisrow{overhead}] {\statsboxica};
 	\makeatletter
 
 	\addplot +[xshift=-.9ex, draw=black, fill=black!30] table[x=benchmark, y expr=\thisrow{overhead}] {\statsnativ};
 	\makeatletter
 
-	\legend{Box(Di-Cache), Bochs, Nativo}
+	\legend{Bochs, Box(I-Cache), Nativo}
 \end{axis}
 
-	\node[color=black,draw=none,xshift=3.0ex,yshift=16.0ex,rotate=60] {\tiny 233.46};
-    \node[color=black,draw=none,xshift=87.5ex,yshift=16.0ex,rotate=60] {\tiny 184.04};
+	\node[color=black,draw=none,xshift=3.5ex,yshift=16.0ex,rotate=60] {\tiny 233.46};
 
 
 
