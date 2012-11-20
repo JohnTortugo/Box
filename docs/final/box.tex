@@ -18,6 +18,7 @@
 \usepackage{graphicx}
 \usepackage{url}
 \usepackage{multirow}
+\usepackage{multicol}
 \usepackage{amsmath}
 \usepackage{upgreek}
 \usepackage{caption}
@@ -669,16 +670,60 @@ Todos os experimentos foram realizados em uma máquina de 32 bits rodando o
 sistema operacional Debian Squeeze. A máquina de testes é um Intel Core 2 Duo
 de 2.13 GHz, com 4Mb de cache L2 e 3Gb de memória RAM.
 
-Os aplicativos utilizados para testes são do Mibench, nos experimentos rodamos
-os programas com as entradas ``pequenas'' e ``grandes'', aqui mostramos apenas
-os resultados para a entrada grande. O Apêndice A contém os 
-resultados para os dois conjuntos de entrada.
+Os aplicativos utilizados para testes são do pacote de benchmarc Mibench, nos
+experimentos rodamos os programas com as entradas ``pequenas'' e ``grandes'',
+aqui mostramos apenas os resultados para a entrada grande. O Apêndice A contém
+os resultados para os dois conjuntos de entrada.
 
-Os experimentos foram feitos na máquina em modo mono-usuário (\textit{runlevel 1})
-e para cada par aplicativo/entrada foi coletado o tempo de dez execuções, aqui
-mostramos apenas a média arimética destas dez execuções. O Apêndice A contém os 
-valores de intervalo de confiança e desvio padrão, os quais omitimos aqui porquê, 
-como pode ser visto no apêndice, a margem de erro e o desvio padrão foram despreziveis.
+Os experimentos foram feitos na máquina em modo mono-usuário (\textit{runlevel
+  1}) e para cada par aplicativo/entrada foi coletado o tempo de dez execuções,
+aqui mostramos apenas a média arimética destas dez execuções. Durante a execucão
+dos testes também foi coletado o número total de instruções e o número de
+chamadas ao sistema operacional de cada aplicativo. Essas informações são
+apresentadas na Tabela \ref{tab:instr}.
+
+\begin{table}
+ \caption{Número de instruções e syscalls dos aplicativos do MiBench}
+ \begin{center}
+  \begin{tabular}{|l|r|r|} \hline
+    \bf{Aplicativo} & \bf{Instruções} & \bf{Syscalls} \\ \hline
+    basichmath & 2245174977 & 7996 \\ \hline
+    bitcount & 645799557 & 18 \\ \hline
+    qsort & 724781929 & 1160 \\ \hline 
+    susan-smoothing & 26107053 & 19 \\ \hline
+    susan-edges & 62382631 & 20 \\ \hline
+    susan-corners & 19305482 & 23 \\ \hline
+    tiff2rgba & 133523722 & 12455 \\ \hline
+    tiffmedian & 544600121 & 15583 \\ \hline
+    tiffdither & 904052825 & 3471 \\ \hline 
+    tiff2bw & 154051379 & 9353 \\ \hline 
+    cjpeg & 84673918 & 542 \\ \hline 
+    djpeg & 23591372 & 365 \\ \hline
+    patricia & 531614551 & 2050 \\ \hline
+    dijkstra & 186205562 & 1096 \\ \hline
+    ispell & 778996260 & 6957 \\ \hline 
+    search & 8859144 & 47 \\ \hline
+    say & 95772915 & 64 \\ \hline
+    blowfish-e & 625506759 & 1600 \\ \hline
+    blowfish-d & 635168355 & 1600 \\ \hline 
+    rijndael-e & 233325816 & 204569 \\ \hline 
+    rijndael-d & 233732135 & 204567 \\ \hline 
+    sha & 123886774 & 408 \\ \hline
+    pgp-sa & 6825231 & 340 \\ \hline
+    pgp-z & 13567840 & 5781 \\ \hline
+    rawcaudio & 729304831 & 26622 \\ \hline
+    rawdaudio & 682210259 & 26622 \\ \hline 
+    crc32 & 985166454 & 6508 \\ \hline 
+    toast & 2063665205 & 412 \\ \hline
+    untoast & 807954820 & 7539 \\ \hline
+  \end{tabular}
+  \label{tab:instr}
+ \end{center}
+\end{table}
+
+ O Apêndice A contém os valores de intervalo de confiança e desvio padrão, os
+ quais omitimos aqui porquê, como pode ser visto no apêndice, a margem de erro e
+ o desvio padrão foram despreziveis.
 
 Utilizamos o Bochs-2.6 nos experimentos, atualmente esta é a versão mais recente.
 
@@ -692,7 +737,6 @@ Comparação com o Bochs.
 	\caption{Tempo de execução do Mibench no Bochs, Box-DiCache e nativamente.}
 	\label{fig:bochs_dicache_nativo}
 \end{figure}
-
 
 
 \subsection{Otimizando a Interpretação}
@@ -714,24 +758,15 @@ Gráfico, por exemplo na forma de pizza, mostrando quais são os pontos onde o B
 gasta a maior parte do tempo durante a emulação.
 
 
-
-
-
-
-
 \section{Conclusão}  \label{sec:conclusao}
-
 
 
 \newpage
 \section*{Apêndice A} \label{ap:results}
 
 
-
 \newpage
 \bibliography{box}
-
-
 
 
 \end{document}
