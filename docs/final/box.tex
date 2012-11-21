@@ -476,14 +476,14 @@ são diretamente visíveis ao processo.
 \subsubsection{Componentes Removidos}
 
 Todos os componentes de hardware que não eram diretamente acessados pelos
-processos foram removidos, isso inclui todo o subsistema de I/O e as e os
+processos foram removidos, isso inclui todo o subsistema de I/O e os
 plugins específicos de dispositivos como placa de vídeo, placa de rede, placa de
-som, mouse, teclado, cdrom, disco rígido, diskete, portas USB, barramento PCI,
+som, mouse, teclado, cdrom, disco rígido, disquete, portas USB, barramento PCI,
 COM, etc.
 
 O subsistema de memória também sofreu grandes mudanças, pois originalmente o
 Bochs emulava mecanismos de caches de instrução, dados, e \emph{translation
-lookasside buffer} (TLB). Todos esses recursos foram removidos por serem
+lookaside buffer} (TLB). Todos esses recursos foram removidos por serem
 transparentes ao processo durante a execução.
 
 \subsubsection{Carregador}
@@ -540,8 +540,8 @@ implementada no Box foi a criação da pilha de dados de execução da
 aplicação. Além dos parâmetros e variáveis de ambiente a pilha inicial contém
 informações que o kernel passa para o carregador nativo do sistema, estas
 informações podem/são usadas tanto pelo carregador quanto pela biblioteca de
-runtime utilizada. Essas informações, são passadas na forma de um vetor e contém
-dados como por exemplo, tamanho de página utilizado no sistema, endereço onde o
+runtime utilizada. Essas informações são passadas na forma de um vetor e contém
+dados como tamanho de página utilizado no sistema, endereço onde o
 cabeçalho ELF do programa foi carregado, entre outras. A
 Figura~\ref{fig:stack_ini} mostra o formato inicial da pilha de execução de um
 programa.
@@ -557,8 +557,8 @@ programa.
 \subsubsection{Emulação de Syscalls}
 
 Sempre que a aplicação guest faz uma chamada ao sistema operacional o Box deve
-interceptar essa chamada e decidir entre duas opções: 1) apenas ``redireciona''
-a chamada ao sistema nativo ou 2) implementa a execução da syscall. A
+interceptar essa chamada e decidir entre duas opções: 1) apenas ``redirecionar''
+a chamada ao sistema nativo ou 2) implementar a execução da syscall. A
 interceptação das chamadas é feita porque todas as instruções executadas pela
 aplicação guest são interpretadas e porque pode ser necessário alguma tradução
 dos endereços gerados pela aplicação.
@@ -568,11 +568,11 @@ guest, são redirecionadas para o S.O. nativo. Exemplos de chamadas que são
 tratadas dessa forma são: mkdir, fstat, getpid, getuid, uname, rename, rmdir,
 nanosleep, utime, ioctl e chmod.
 
-Aquelas chamadas de sistema que alteraram o espaço de endereçamento da aplicação
-ou que retornam informações que podem vir a serem usadas posteriormente para
-controlar alguma alteração, são implementadas pelo Box.  Exemplos de chamdas que
+Aquelas chamadas de sistema que alteram o espaço de endereçamento da aplicação
+ou que retornam informações que podem vir a ser usadas posteriormente para
+controlar alguma alteração são implementadas pelo Box.  Exemplos de chamadas que
 precisaram ser implementadas são: open, close, creat, brk, mmap e munmap. Estas
-chamadas, com exceção da brk, estão relacionadas pelo fato de poderem serem
+chamadas, com exceção da brk, estão relacionadas pelo fato de poderem ser
 utilizadas para fazer ``\emph{memory mapped I/O}'' e portanto precisam de atenção
 especial para fazer o mapeamento das entradas de dados diretamente para a
 memória da aplicação sendo emulada. A chamada brk precisa ser implementada
@@ -581,7 +581,7 @@ efetivamente sendo utilizada pela biblioteca de runtime para fazer requisição 
 S.O. para alocar mais memória para a aplicação.
 
 O Box atualmente não conta com suporte para tratamento de sinais ou aplicações
-que usam multiplas threads de execução, portanto as chamadas de sistema
+que usam múltiplas threads de execução, portanto as chamadas de sistema
 relacionadas a tais ações ainda não foram implementadas.
 
 \subsubsection{Emulação da Memória}
@@ -594,17 +594,17 @@ compilação do Box.
 Durante a inicialização do Box o carregador cria ponteiro para todos os
 segmentos de memória que podem ser afetados durante a execução da aplicação.
 Por exemplo, é criado um ponteiro para o primeiro byte após o segmento de dados
-da aplicação, ponto conhecido como \emph{program break}, esse ponteiro aponta
-para o primeiro byte do heap da aplicação, quando chamadas para syscall forem
-tratadas esse ponteiro será decrementado para aumentar o tamanho do segmento de
+da aplicação, ponto conhecido como \emph{program break}, que aponta
+para o primeiro byte do heap da aplicação. Quando chamadas para syscalls forem
+tratadas, esse ponteiro será decrementado para aumentar o tamanho do segmento de
 dados da aplicação. Outros ponteiros são criados para armazenar o início da
 stack e os limites das regiões que contem código.
 
 Também durante a inicialização do sistema o carregador registra o endereço
-virtual base da aplicação, isto é em geral o primeiro byte do segmento de texto
-do executável principal. Esse endereço é associado com o primeiro byte do vetor
-utilizado para emular a memória da aplicação guest e a partir de então todos os
-acessos a memória são traduzidos utilizando esse endereço base.
+virtual base da aplicação. Isto é, em geral, o primeiro byte do segmento de
+texto do executável principal. Esse endereço é associado com o primeiro byte do
+vetor utilizado para emular a memória da aplicação guest, e a partir de então
+todos os acessos a memória são traduzidos utilizando esse endereço base.
 
 O Box atualmente não trata proteção de páginas.
 
@@ -668,7 +668,7 @@ para testar a primeira versão do sistema resolvemos começar com programas mais
 
 \subsection{$\upmu$ClibC}
 
-Uma das etapas que mais gastou tempo de desenvolvimento no Box, foi a parte de
+Uma das etapas que mais gastou tempo de desenvolvimento no Box foi a parte de
 configuração do ambiente de inicialização do programa/libc.  Grande parte dessa
 dificuldade é devido a falta de documentação explicando de forma clara qual é a
 parte do kernel e do loader na tarefa de criação de processos no
@@ -679,14 +679,14 @@ documentação tivemos que inspecionar diretamente o código do Linux, porém is
 retardou o processo de desenvolvimento do Box e a decisão de não utilizar a
 Glibc e linkagem dinâmica foi tomada.
 
-A $\upmu$ClibC é uma biblioteca C desenvolvida com o proposito de rodar em
+A $\upmu$ClibC é uma biblioteca C desenvolvida com o propósito de rodar em
 sistemas Linux para dispositivos embarcados. Dessa forma ela é bem menos
 genérica que a Glibc e por isso possui um \emph{foot print} de execução bem
 menor. Outra característica importante da $\upmu$ClibC é a possibilidade de
 fazer sua instalação de forma seletiva de seus componentes. Estas e outras
 características nos levaram a escolher a $\upmu$ClibC como alternativa a GlibC.
 
-Como a implementação atual do Box não possui suporte a \emph{multithreading} a
+Como a implementação atual do Box não possui suporte a \emph{multithreading}, a
 instalação da $\upmu$ClibC que utilizamos nos testes não consta com estes
 recurso.
 
@@ -696,7 +696,7 @@ recurso.
 Nessa seção apresentamos os resultados que obtivemos nos nossos experimentos
 com o Box e Bochs. Inicialmente apresentamos a metodologia que seguimos para
 os testes, em seguida apresentamos os resultados da comparação do Box com o
-Bochs e a execução nativa, posteriormente mostramos o ganho de desempenho com
+Bochs e a execução nativa, e posteriormente mostramos o ganho de desempenho com
 a introdução da cache de decodificação, DICache, no Box. 
 %Por fim apresentamos
 %uma análise mostrando quais componentes do Box dominam o tempo de execução de
@@ -731,7 +731,7 @@ tipo de otimização. De modo geral, a comparação entre os tempos de execuçã
 máquinas virtuais de sistema e processo mostrou que a versão de sistema apresentou 
 tempos significativamente menores. Tal diferença pode ser justificada pelo fato do
 Bochs contar com otimizações que são direcionadas à implementação do subsistema de 
-memória e a utilização da cache de instruções pre decodificadas. Os resultados 
+memória e a utilização da cache de instruções pré decodificadas. Os resultados 
 indicam que essas otimizações foram suficientes para superar qualquer redução de 
 tempo obtido pela eliminação de emulação da parte de sistema operacional. 
 
@@ -743,13 +743,13 @@ tempo obtido pela eliminação de emulação da parte de sistema operacional.
 \end{figure}
 
 Através dos resultados obtidos é possível observar o impacto causado pela
-decodificação continua de instruções (usada pelo Box) comparada com a 
+decodificação contínua de instruções (usada pelo Box) comparada com a 
 abordagem de pré decodificação utilizada pelo Bochs.
 
 \subsection{Otimizando a Interpretação}
 
 Como forma de minimizar o impacto causado pela decodificação repetida de
-instruções já executada duas abordagens foram adotadas. Na primeira, foi
+instruções já executada, duas abordagens foram adotadas. Na primeira, foi
 implementada a técnica DICache \cite{dicache}, na segunda, o código de
 pré decodificação de instruções do Bochs foi incluído no Box. Para isso
 modificações tiveram que ser feitas no código original do Bochs para garantir a
@@ -768,11 +768,11 @@ resultados obtidos com a implementação das duas abordagens.
 Pode-se observar que alguns aplicativos tiveram uma redução significativa no
 tempo de execução. Conforme apresentado na Figura~\ref{fig:bochs_icache}, a
 implementação da código de emulação do cache de instruções em algumas casos
-resultou os tempos de execução inferiores aos tempos de execução na máquina
+resultou em tempos de execução inferiores aos tempos de execução na máquina
 virtual de sistemas.
 
 É importante destacar que as otimizações empregadas foram executadas de forma
-exclusiva pois não foi possível dentro do prazo disponível implementar as
+exclusiva, pois não foi possível dentro do prazo disponível implementar as
 modificações necessárias para permitir que ambas fosse utilizadas em conjunto.
 
 \begin{figure}[h]
@@ -799,8 +799,7 @@ fatores:
    visto que muitas delas estão fortemente associadas a subsistemas que integram
    a máquina virtual;
  \item Em condições normais, a execução de um sistema operacional deve produzir
-   um baixo impacto no tempo de execução da aplicação, uma vez que a maior parte
-   do tempo, o código em execução é da aplicação e não do sistema operacional.
+   um baixo impacto no tempo de execução da aplicação, uma vez que na maior parte do tempo o código em execução é da aplicação, e não do sistema operacional.
 \end{itemize}
 
 Embora não tenha sido possível provar a existência de \emph{overhead} de
@@ -812,7 +811,7 @@ otimização como DICache e pré-decodificação.
 
 Os resultados obtidos nos testes com otimização mostram que a MV desenvolvida
 tem potencial para executar aplicações com tempos inferiores aos tempos de uma
-MV de sistema, essa característica aliada ao fato de que MVs de processos
+MV de sistema. Essa característica, aliada ao fato de que MVs de processos
 possuem menos requisitos necessários para a execução de programa, a transforma
 numa poderosa ferramenta para análise de execução de aplicativos. Para isso,
 estão previstos como trabalhos futuros:
@@ -839,7 +838,7 @@ execuções de cada benchmark/entrada.
  \begin{tabular}{|l|r|r|r|}
    \cline{2-4}
    \multicolumn{1}{c|}{}& \multicolumn{3}{|c|}{Nativo} \\ \hline
-   Benchmark & Média & Desvio Padrão & Int. de Confiança \\ \hline
+   \bf{Benchmark} & \bf{Média} & \bf{Desvio Padrão} & \bf{Int. de Confiança} \\ \hline
    basicmath & 1.023 & 0.002 & 0.001\\ \hline
    bitcnts & 0.183 & 0.011 & 0.007\\ \hline
    qsort & 0.250 & 0.020 & 0.012\\ \hline
@@ -881,7 +880,7 @@ execuções de cada benchmark/entrada.
  \begin{tabular}{|l|r|r|r|}
    \cline{2-4}
    \multicolumn{1}{c|}{}& \multicolumn{3}{|c|}{Box-NoCache} \\ \hline
-   Benchmark & Média & Desv. Pad. & Interv. Conf.\\ \hline 
+   \bf{Benchmark} & \bf{Média} & \bf{Desvio Padrão} & \bf{Int. de Confiança} \\ \hline
    basicmath & 233.463 & 3.716 & 2.303\\ \hline 
    bitcnts & 53.376 & 0.238 & 0.148\\ \hline 
    qsort & 68.704 & 0.483 & 0.299\\ \hline 
@@ -923,7 +922,7 @@ execuções de cada benchmark/entrada.
  \begin{tabular}{|l|r|r|r|}
    \cline{2-4}
    \multicolumn{1}{c|}{}& \multicolumn{3}{|c|}{Box-DiCache} \\ \hline
-   Benchmark & Média & Desv. Pad. & Interv. Conf.\\ \hline 
+   \bf{Benchmark} & \bf{Média} & \bf{Desvio Padrão} & \bf{Int. de Confiança} \\ \hline
    basicmath & 179.211 & 0.474 & 0.294\\ \hline 
    bitcnts & 23.985 & 0.075 & 0.046\\ \hline 
    qsort & 46.879 & 0.352 & 0.218\\ \hline 
@@ -965,7 +964,7 @@ execuções de cada benchmark/entrada.
  \begin{tabular}{|l|r|r|r|}
    \cline{2-4}
    \multicolumn{1}{c|}{}& \multicolumn{3}{|c|}{Bochs} \\ \hline
-   Benchmark & Média & Desv. Pad. & Interv. Conf.\\ \hline 
+   \bf{Benchmark} & \bf{Média} & \bf{Desvio Padrão} & \bf{Int. de Confiança} \\ \hline
    basicmath & 58.402 & 0.106 & 0.066\\ \hline 
    bitcnts & 8.277 & 0.019 & 0.012\\ \hline 
    qsort & 16.224 & 0.103 & 0.064\\ \hline 
@@ -1007,7 +1006,7 @@ execuções de cada benchmark/entrada.
  \begin{tabular}{|l|r|r|r|}
    \cline{2-4}
    \multicolumn{1}{c|}{}& \multicolumn{3}{|c|}{Box-ICache} \\ \hline
-   Benchmark & Média & Desv. Pad. & Interv. Conf.\\ \hline 
+   \bf{Benchmark} & \bf{Média} & \bf{Desvio Padrão} & \bf{Int. de Confiança} \\ \hline
    basicmath & 74.511 & 0.303 & 0.188\\ \hline 
    bitcnts & 9.332 & 0.058 & 0.036\\ \hline 
    qsort & 20.299 & 0.062 & 0.039\\ \hline 
