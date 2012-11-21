@@ -36,7 +36,7 @@
 % DATA DE PUBLICAÇÃO (PARA A CAPA)
 %
 \TRYear{12}  % Dois dígitos apenas
-\TRMonth{09} % Numérico, 01-12
+\TRMonth{11} % Numérico, 01-12
 
 % LISTA DE AUTORES PARA CAPA (sem afiliações).
 \TRAuthor{R. Barboza Jr \and D. C. S. Lucas \and A. S. Ferreira}
@@ -146,16 +146,14 @@ máquina virtual de processo.  Além de uma melhor compreensão do
 tem como resultado uma infraestrutura para a realização de experimentos voltados
 para a área de máquinas virtuais.
 
-Este texto está organizado da seguinte forma. Na Seção~\ref{sec:objetivos}
-apresentamos com certo nível de detalhamento nossos objetivos.  Na
+Este trabalho está organizado da seguinte forma: na
 Seção~\ref{sec:fundamentacao} apresentamos a fundamentação teórica para a
-realização do projeto.  Na Seção~\ref{sec:bibliografia} apresentamos um
-levantamento bibliográfico da área de máquinas virtuais a nível de binários.  A
-Seção~\ref{sec:infraestrutura} e a Seção~\ref{sec:metodologia} descrevem a
-infraestrutura e a metodologia proposta para a realização do projeto,
-respectivamente.  Por fim a Seção~\ref{sec:conclusao} apresenta a conclusão do
+realização do projeto; a Seção~\ref{sec:bibliografia} apresentamos um
+levantamento bibliográfico da área de máquinas virtuais a nível de binários; a
+Seção~\ref{sec:infraestrutura} e a Seção~\ref{sec:resultados} descrevem a
+infraestrutura utilizada na realização do projeto e os resultados obtidos,
+respectivamente; por fim a Seção~\ref{sec:conclusao} apresenta a conclusão do
 trabalho.
-  
   
 \section{Fundamentação Teórica} \label{sec:fundamentacao}
 
@@ -399,11 +397,10 @@ bibliotecas de runtime utilizadas por estes benchmarks.
 \subsection{Bochs}
 
 O Bochs é uma máquina virtual que utiliza interpretação como técnica de emulação
-das instruções, veja Figura~\ref{fig:bochs}. Por ser uma máquina virtual de
-sistema o Bochs faz a emulação de diversos componentes como: placa de vídeo,
-rede, som, dispositivos de disco, cdrom, mouse e teclado além de dispositivos de
-componentes internos da arquitetura como cache de instruções, segmentação,
-paginação, TLB, etc.
+das instruções. Por ser uma máquina virtual de sistema o Bochs faz a emulação de
+diversos componentes como: placa de vídeo, rede, som, dispositivos de disco,
+cdrom, mouse e teclado além de dispositivos de componentes internos da
+arquitetura como cache de instruções, segmentação, paginação, TLB, etc.
 
 O Bochs utiliza diversos mecanismos para acelerar a interpretação das
 aplicações, como por exemplo \emph{trace cach}e e \emph{threaded-interpretation}. A
@@ -726,42 +723,114 @@ Utilizamos o Bochs-2.6 nos experimentos, atualmente esta é a versão mais recen
 
 \subsection{Overhead de Emulação de Sistema}
 
-Comparação com o Bochs.
-\begin{figure}
+De modo geral, a comparação entre os tempos de execução das máquinas virtuais de
+sistema e processo mostrou que a versão de sistema apresentou tempos
+significativamente menores. Tal diferença pode ser justificada pelo fato do
+Bochs contar com otimizações que fazem parte do implmentação de memória e cache
+de instruções. Acreditamos que essas otimizações são suficientes para superar
+qualquer redução de tempo obtido pela eliminação do \emph{overhead} da emulação de uma
+máquina completa. A figura~\ref{fig:bochs_nocache_nativo} apresenta os tempos de
+execução dos aplicativos de \emph{benchmark} executados nativamente, no Bochs e
+no Box sem nenhum tipo de otimização.
+
+\begin{figure}[h]
 	\centering
-	\includegraphics[width=1.0\textwidth]{figures/bochs_dicache_nativo}
-	\caption{Tempo de execução do Mibench no Bochs, Box-DiCache e nativamente.}
-	\label{fig:bochs_dicache_nativo}
+	\includegraphics[width=1.0\textwidth]{figures/bochs_nocache_nativo}
+	\caption{Tempo de execução do Mibench no Bochs, Box e nativamente.}
+	\label{fig:bochs_nocache_nativo}
 \end{figure}
 
+Através dos resultados obtidos é possível observar o impacto causado pela
+decodificação continua de instruções comparada com a abordagem utilizada pelo
+Bochs, que utiliza mecanismos de pré decodificação, formação de blocos e cache
+de instruções.
 
 \subsection{Otimizando a Interpretação}
 
-\begin{figure}
+Como forma de minimizar o impacto causado pela decodificação repetida de
+instruções já executada duas abordagens foram adotadas. Na primeira, foi
+implementada a técnica DICache \cite{dicache}, na segunda, o código original de
+emulação da cache de instruções do Bochs foi incluido no Box. Para isso
+modificações tiveram que ser feitas no código original do Bochs para garantir a
+compatibilidade com o subsistema de memória utilizado no Box. Alterações também
+foram necessárias no laço de interpretação de instruções do Box de modo a
+integrar a novas funcionalidade. A figura~\ref{fig:dicache_nocache} apresenta os
+resultados obtidos com a implementação das duas abordagens.
+
+\begin{figure}[h]
 	\centering
 	\includegraphics[width=1.0\textwidth]{figures/dicache_nocache}
-	\caption{Tempo de execução do Mibench no Box com DiCache e sem cache.}
+	\caption{Tempo de execução do Mibench no Box com DICache, I-Cache e sem cache.}
 	\label{fig:dicache_nocache}
 \end{figure}
 
+Pode-se observar que os tempos de execução aplicações de benchmark tiveram uma
+redução significativa. Conforme apresentado na Figura~\ref{fig:bochs_icache}, a
+implementação da código de emulação do cahe de instruções em algumas casos
+resultou os tempos de execução inferiores aos tempos de execução na máquina
+virtual de sistemas.
 
-Gráficos mostrando o tempo de execução do Box com DICache, Threaded
-Interpretation e ambas as técnicas habilitadas.
+É importante destacar que as otimizações empregadas foram executadas de forma
+exclusiva pois não foi possível dentro do prazo disponível implementar as
+modificações necessárias para permitir que ambas fosse utilizadas em conjunto.
 
-\subsection{Caracterizando o Overhead do Sistema}
+\begin{figure}[h]
+        \centering
+        \includegraphics[width=1.0\textwidth]{figures/bochs_icache}
+        \caption{Tempos de execução do Mibench no Bochs e Box com instruction cache.}
+        \label{fig:bochs_icache}
+\end{figure}
 
-Gráfico, por exemplo na forma de pizza, mostrando quais são os pontos onde o Box
-gasta a maior parte do tempo durante a emulação.
+\section{Conclusão} \label{sec:conclusao}
 
+Este relátorio apresentou as descobertas encontradas durante a análise
+comparativa entre máquinas virtuais de sistema e processo.  Para a realização
+desta análise, foi desenvolvida uma máquina virtual de processos interpretada
+para execução de aplicativos Linux IA-32, baseado no código da máquina virtual
+de sistema Bochs.  
+Os resultados obtidos nos testes não sustentaram a hipótese da
+existência de \emph{overhead} causado pela interpretação de todo o sistema operacional
+em máquinas virtuais de sistema. Tal fato pode ser justificado pelos seguintes
+fatores:
 
-\section{Conclusão}  \label{sec:conclusao}
+\begin{itemize}
+ \item Não foi possível desativar totalmente as otimizações existentes no Bochs,
+   visto que muitas delas estão fortemente associadas a subsistemas que integram
+   a máquina virtual;
+ \item Em condições normais, a execução de um sistema operacional deve produzir
+   um baixo impacto no tempo de execucão da aplicação, uma vez que a maior parte
+   do tempo, o código em execução é da aplicação e não do sistema operacional.
+\end{itemize}
 
+Embora não tenha sido possível provar a existência de \emph{overhead} de
+execução de máquinas virtuais de sistema, foi comprovado o impacto causado pela
+aplicação de técnicas de otimização em uma MV. A redução no tempo
+de execução das aplicações executada no Box utilizando otimizações mostra o
+quanto a interpretação pode ser beneficiada com a utilização de técnicas de
+otimização como DICache, pré-decodificação e formação de blocos.
+
+Os resultados obtidos nos testes com otimização mostram que a MV desenvolvida
+tem potencial para executar aplicações com tempos inferiores aos tempos de uma
+MV de sistema, essa característica aliada ao fato de que MVs de processos
+possuem menos requisitos necessários para a execução de programa, a transforma
+numa poderosa ferramenta para análise de execução de aplicativos. Para isso,
+estão previstos como trabalhos futuros:
+
+\begin{itemize}
+ \item Aumentar a compatibilidade com ambientes reais através da utilização de
+   carredores nativos para carregamento de bibliotecas dinâmicas, implementação
+   mais detalhada da interface com o sistema operacional (syscalls);
+ \item Implementação de mecanismos de instrumentação de código;
+ \item Execução multiplataforma.
+\end{itemize}
 
 \newpage
+
 \section*{Apêndice A} \label{ap:results}
 
 
 \newpage
+
 \bibliography{box}
 
 
