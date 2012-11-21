@@ -470,15 +470,15 @@ operacional ele não precisa se preocupar com detalhes de criação de processos
 chamadas de sistema, porém uma máquina de processos geralmente precisa. 
 
 Da mesma forma, uma máquina virtual de processo não precisa emular dispositivos
-como discos rigidos, placas de vídeo, rede, etc., uma vez que tais recursos não
+como discos rígidos, placas de vídeo, rede, etc., uma vez que tais recursos não
 são diretamente visíveis ao processo.
 
 \subsubsection{Componentes Removidos}
 
 Todos os componentes de hardware que não eram diretamente acessados pelos
-processos foram removidos, isso enclui todo o subsistema de I/O e as e os
+processos foram removidos, isso inclui todo o subsistema de I/O e as e os
 plugins específicos de dispositivos como placa de vídeo, placa de rede, placa de
-som, mouse, teclado, cdrom, disco rigido, diskete, portas USB, barramento PCI,
+som, mouse, teclado, cdrom, disco rígido, diskete, portas USB, barramento PCI,
 COM, etc.
 
 O subsistema de memória também sofreu grandes mudanças, pois originalmente o
@@ -488,7 +488,7 @@ transparentes ao processo durante a execução.
 
 \subsubsection{Carregador}
 
-A implementação do Box não conta con nenhum auxílio do sistema operacional para
+A implementação do Box não conta com nenhum auxílio do sistema operacional para
 preparar o ambiente de execução do processo sendo emulado. Por esse motivo, foi
 necessário implementar mecanismos para permitir a emulação de toda a etapa de
 carregamento e execução do processo, isso trouxe uma série de complicações para
@@ -518,7 +518,7 @@ o executável principal da aplicação; 2) fazer a leitura das estruturas do
 executável (\emph{parsing}); 3) montar o espaço de endereçamento onde a
 aplicação executará. A primeira tarefa é simples, uma vez que o usuário passa o
 endereço completo da aplicação como parâmetro para o Box. O executável deve
-estar códificado no formato ELF-32~\cite{SCO1997} e não fazer uso de linkagem
+estar codificado no formato ELF-32~\cite{SCO1997} e não fazer uso de linkagem
 dinâmica. A segunda tarefa do carregador é fazer o parsing do executável e
 encontrar quais segmentos (geralmente dois segmentos, um de texto e outro de
 dados) de código devem ser carregados na memória. Uma vez que esses segmentos
@@ -610,16 +610,6 @@ O Box atualmente não trata proteção de páginas.
 
 \subsection{Mibench}
 
-A infraestrutura de testes, em relação a benchmarks, que utilizamos durante o
-desenvolvimento e medição de desempenho do sistema é baseada no conjunto de
-aplicativos Mibench~\cite{mibench}. O Mibench contém vários aplicativos
-divididos em seis grupos: automotivo, rede, escritório, telecomunicações,
-segurança e entretenimento. O Mibench foi projetado para testes de sistemas
-embarcados e para tanto os aplicativos que o compõe em geral são pequenos (em
-código estático), possuem um pequeno foot print dinâmico (número de instruções
-tocadas durante a execução) e tem um curto período de execução.  A
-Tabela~\ref{tab:mibench} mostra essas informações de acordo com nossas medições.
-
 \begin{table}                                                                                                                                                                                              
  \caption{Número de instruções e syscalls dos aplicativos do MiBench}
  \begin{center}
@@ -659,6 +649,17 @@ Tabela~\ref{tab:mibench} mostra essas informações de acordo com nossas mediç�
  \end{center}
 \end{table}
 
+A infraestrutura de testes, em relação a benchmarks, que utilizamos durante o
+desenvolvimento e medição de desempenho do sistema é baseada no conjunto de
+aplicativos Mibench~\cite{mibench}. O Mibench contém vários aplicativos
+divididos em seis grupos: automotivo, rede, escritório, telecomunicações,
+segurança e entretenimento. O Mibench foi projetado para testes de sistemas
+embarcados e para tanto os aplicativos que o compõe em geral são pequenos (em
+código estático), possuem um pequeno foot print dinâmico (número de instruções
+tocadas durante a execução) e tem um curto período de execução. A 
+Tabela~\ref{tab:mibench} mostra algumas informações sobre o Mibench que 
+coletamos durante nossos experimentos.
+
 Nossa escolha por este conjunto de aplicações é principalmente devido ao curto
 período de execução das aplicações. Consideramos utilizar outros conjuntos de
 programas para teste, como por exemplo o SPEC CPU 2006~\cite{spec2006}, porém
@@ -671,7 +672,7 @@ Uma das etapas que mais gastou tempo de desenvolvimento no Box, foi a parte de
 configuração do ambiente de inicialização do programa/libc.  Grande parte dessa
 dificuldade é devido a falta de documentação explicando de forma clara qual é a
 parte do kernel e do loader na tarefa de criação de processos no
-Linux. Especificamente, é dificil encontrar literatura dizendo qual seria o
+Linux. Especificamente, é difícil encontrar literatura dizendo qual seria o
 estado dos registradores e qual a estrutura do espaço de endereçamento no
 momento em que o processo é inicializado. Para resolver essa falta de
 documentação tivemos que inspecionar diretamente o código do Linux, porém isso
@@ -696,9 +697,10 @@ Nessa seção apresentamos os resultados que obtivemos nos nossos experimentos
 com o Box e Bochs. Inicialmente apresentamos a metodologia que seguimos para
 os testes, em seguida apresentamos os resultados da comparação do Box com o
 Bochs e a execução nativa, posteriormente mostramos o ganho de desempenho com
-a introdução da cache de decodificação, DICache, no Box. Por fim apresentamos
-uma análise mostrando quais componentes do Box dominam o tempo de execução de
-diversos benchmarks.
+a introdução da cache de decodificação, DICache, no Box. 
+%Por fim apresentamos
+%uma análise mostrando quais componentes do Box dominam o tempo de execução de
+%diversos benchmarks.
 
 \subsection{Metodologia}
 
@@ -706,32 +708,32 @@ Todos os experimentos foram realizados em uma máquina de 32 bits rodando o
 sistema operacional Debian Squeeze. A máquina de testes é um Intel Core 2 Duo
 de 2.13 GHz, com 4Mb de cache L2 e 3Gb de memória RAM.
 
-Os aplicativos utilizados para testes são do pacote de benchmarc Mibench, nos
+Os aplicativos utilizados para testes são os presentes no benchmark Mibench. Nos
 experimentos rodamos os programas com as entradas ``pequenas'' e ``grandes'',
-aqui mostramos apenas os resultados para a entrada grande. O Apêndice A contém
-os resultados para os dois conjuntos de entrada.
+aqui mostramos apenas os gráficos para a entrada grande. O Apêndice A contém
+os resultados em forma de tabela para todos os benchmarks.
 
 Os experimentos foram feitos na máquina em modo mono-usuário (\textit{runlevel
   1}) e para cada par aplicativo/entrada foi coletado o tempo de dez execuções,
 aqui mostramos apenas a média arimética destas dez execuções. O Apêndice A
 contém os valores de intervalo de confiança e desvio padrão, os quais omitimos
 aqui porquê, como pode ser visto no apêndice, a margem de erro e o desvio padrão
-foram despreziveis.
+foram desprezíveis.
 
 Utilizamos o Bochs-2.6 nos experimentos, atualmente esta é a versão mais recente.
 
 
 \subsection{Overhead de Emulação de Sistema}
 
-De modo geral, a comparação entre os tempos de execução das máquinas virtuais de
-sistema e processo mostrou que a versão de sistema apresentou tempos
-significativamente menores. Tal diferença pode ser justificada pelo fato do
-Bochs contar com otimizações que fazem parte do implmentação de memória e cache
-de instruções. Acreditamos que essas otimizações são suficientes para superar
-qualquer redução de tempo obtido pela eliminação do \emph{overhead} da emulação de uma
-máquina completa. A figura~\ref{fig:bochs_nocache_nativo} apresenta os tempos de
-execução dos aplicativos de \emph{benchmark} executados nativamente, no Bochs e
-no Box sem nenhum tipo de otimização.
+A Figura~\ref{fig:bochs_nocache_nativo} apresenta os tempos de execução dos 
+aplicativos do Mibench executados nativamente, no Bochs e no Box sem nenhum 
+tipo de otimização. De modo geral, a comparação entre os tempos de execução das 
+máquinas virtuais de sistema e processo mostrou que a versão de sistema apresentou 
+tempos significativamente menores. Tal diferença pode ser justificada pelo fato do
+Bochs contar com otimizações que são direcionadas à implementação do subsistema de 
+memória e a utilização da cache de instruções pre decodificadas. Os resultados 
+indicam que essas otimizações foram suficientes para superar qualquer redução de 
+tempo obtido pela eliminação de emulação da parte de sistema operacional. 
 
 \begin{figure}[h]
 	\centering
@@ -741,20 +743,19 @@ no Box sem nenhum tipo de otimização.
 \end{figure}
 
 Através dos resultados obtidos é possível observar o impacto causado pela
-decodificação continua de instruções comparada com a abordagem utilizada pelo
-Bochs, que utiliza mecanismos de pré decodificação, formação de blocos e cache
-de instruções.
+decodificação continua de instruções (usada pelo Box) comparada com a 
+abordagem de pré decodificação utilizada pelo Bochs.
 
 \subsection{Otimizando a Interpretação}
 
 Como forma de minimizar o impacto causado pela decodificação repetida de
 instruções já executada duas abordagens foram adotadas. Na primeira, foi
-implementada a técnica DICache \cite{dicache}, na segunda, o código original de
-emulação da cache de instruções do Bochs foi incluido no Box. Para isso
+implementada a técnica DICache \cite{dicache}, na segunda, o código de
+pré decodificação de instruções do Bochs foi incluído no Box. Para isso
 modificações tiveram que ser feitas no código original do Bochs para garantir a
 compatibilidade com o subsistema de memória utilizado no Box. Alterações também
 foram necessárias no laço de interpretação de instruções do Box de modo a
-integrar a novas funcionalidade. A figura~\ref{fig:dicache_nocache} apresenta os
+integrar a novas funcionalidade. A Figura~\ref{fig:dicache_nocache} apresenta os
 resultados obtidos com a implementação das duas abordagens.
 
 \begin{figure}[h]
@@ -764,9 +765,9 @@ resultados obtidos com a implementação das duas abordagens.
 	\label{fig:dicache_nocache}
 \end{figure}
 
-Pode-se observar que os tempos de execução aplicações de benchmark tiveram uma
-redução significativa. Conforme apresentado na Figura~\ref{fig:bochs_icache}, a
-implementação da código de emulação do cahe de instruções em algumas casos
+Pode-se observar que alguns aplicativos tiveram uma redução significativa no
+tempo de execução. Conforme apresentado na Figura~\ref{fig:bochs_icache}, a
+implementação da código de emulação do cache de instruções em algumas casos
 resultou os tempos de execução inferiores aos tempos de execução na máquina
 virtual de sistemas.
 
@@ -781,10 +782,10 @@ modificações necessárias para permitir que ambas fosse utilizadas em conjunto
         \label{fig:bochs_icache}
 \end{figure}
 
-\section{Conclusão} \label{sec:conclusao}
+\section{Conclusões} \label{sec:conclusao}
 
-Este relátorio apresentou as descobertas encontradas durante a análise
-comparativa entre máquinas virtuais de sistema e processo.  Para a realização
+Este relatório apresentou as descobertas encontradas durante a análise
+comparativa entre máquinas virtuais de sistema e de processo.  Para a realização
 desta análise, foi desenvolvida uma máquina virtual de processos interpretada
 para execução de aplicativos Linux IA-32, baseado no código da máquina virtual
 de sistema Bochs.  
@@ -798,7 +799,7 @@ fatores:
    visto que muitas delas estão fortemente associadas a subsistemas que integram
    a máquina virtual;
  \item Em condições normais, a execução de um sistema operacional deve produzir
-   um baixo impacto no tempo de execucão da aplicação, uma vez que a maior parte
+   um baixo impacto no tempo de execução da aplicação, uma vez que a maior parte
    do tempo, o código em execução é da aplicação e não do sistema operacional.
 \end{itemize}
 
@@ -807,7 +808,7 @@ execução de máquinas virtuais de sistema, foi comprovado o impacto causado pe
 aplicação de técnicas de otimização em uma MV. A redução no tempo
 de execução das aplicações executada no Box utilizando otimizações mostra o
 quanto a interpretação pode ser beneficiada com a utilização de técnicas de
-otimização como DICache, pré-decodificação e formação de blocos.
+otimização como DICache e pré-decodificação.
 
 Os resultados obtidos nos testes com otimização mostram que a MV desenvolvida
 tem potencial para executar aplicações com tempos inferiores aos tempos de uma
@@ -817,24 +818,28 @@ numa poderosa ferramenta para análise de execução de aplicativos. Para isso,
 estão previstos como trabalhos futuros:
 
 \begin{itemize}
- \item Aumentar a compatibilidade com ambientes reais através da utilização de
-   carredores nativos para carregamento de bibliotecas dinâmicas, implementação
-   mais detalhada da interface com o sistema operacional (syscalls);
- \item Implementação de mecanismos de instrumentação de código;
- \item Execução multiplataforma.
+	\item Aumentar a compatibilidade com ambientes reais através da utilização de carregadores nativos.
+	\item Implementação de novas chamadas de sistema.
+	\item Implementação de mecanismos de instrumentação de código.
+	\item Execução multiplataforma.
 \end{itemize}
 
 \newpage
 
 \section*{Apêndice A} \label{ap:results}
 
-\begin{table}
- \caption{Tempo de execução, desvio e média}
+As Tabelas~\ref{tab:tempos_nativo} à \ref{tab:tempos_boxicache} mostram os 
+resultados que obtivemos com o conjunto de aplicativos Mibench executando a 
+entrada de dados grande. Os resultados apresentados são derivados de 10 
+execuções de cada benchmark/entrada.
+
+\begin{table}[!h]
+ \caption{Tempo médio de execução nativa, desvio padrão e intervalo de confiança.}
  \begin{center}
  \begin{tabular}{|l|r|r|r|}
    \cline{2-4}
    \multicolumn{1}{c|}{}& \multicolumn{3}{|c|}{Nativo} \\ \hline
-   Benchmark & Média & Desvio Padrão & Intervalo de Confiança \\ \hline
+   Benchmark & Média & Desvio Padrão & Int. de Confiança \\ \hline
    basicmath & 1.023 & 0.002 & 0.001\\ \hline
    bitcnts & 0.183 & 0.011 & 0.007\\ \hline
    qsort & 0.250 & 0.020 & 0.012\\ \hline
@@ -871,7 +876,7 @@ estão previstos como trabalhos futuros:
 \end{table}
 
 \begin{table}
- \caption{Tempo de execução, desvio e média}
+ \caption{Tempo médio de execução no Box-NoCache, desvio padrão e intervalo de confiança.}
  \begin{center}
  \begin{tabular}{|l|r|r|r|}
    \cline{2-4}
@@ -913,7 +918,7 @@ estão previstos como trabalhos futuros:
 \end{table}
  
 \begin{table}
- \caption{Tempo de execução, desvio e média}
+ \caption{Tempo médio de execução no Box-DiCache, desvio padrão e intervalo de confiança.}
  \begin{center}
  \begin{tabular}{|l|r|r|r|}
    \cline{2-4}
@@ -955,7 +960,7 @@ estão previstos como trabalhos futuros:
 \end{table}
 
 \begin{table}
- \caption{Tempo de execução, desvio e média}
+ \caption{Tempo médio de execução no Bochs, desvio padrão e intervalo de confiança.}
  \begin{center}
  \begin{tabular}{|l|r|r|r|}
    \cline{2-4}
@@ -997,11 +1002,11 @@ estão previstos como trabalhos futuros:
 \end{table}
 
 \begin{table}
- \caption{Tempo de execução, desvio e média}
+ \caption{Tempo médio de execução no Box-ICache, desvio padrão e intervalo de confiança.}
  \begin{center}
  \begin{tabular}{|l|r|r|r|}
    \cline{2-4}
-   \multicolumn{1}{c|}{}& \multicolumn{3}{|c|}{Bochs ICache} \\ \hline
+   \multicolumn{1}{c|}{}& \multicolumn{3}{|c|}{Box-ICache} \\ \hline
    Benchmark & Média & Desv. Pad. & Interv. Conf.\\ \hline 
    basicmath & 74.511 & 0.303 & 0.188\\ \hline 
    bitcnts & 9.332 & 0.058 & 0.036\\ \hline 
