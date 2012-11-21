@@ -760,6 +760,216 @@ gasta a maior parte do tempo durante a emulação.
 \newpage
 \section*{Apêndice A} \label{ap:results}
 
+\begin{table}
+ \caption{Tempo de execução, desvio e média}
+ \begin{center}
+ \begin{tabular}{|l|r|r|r|}
+   \cline{2-4}
+   \multicolumn{1}{c|}{}& \multicolumn{3}{|c|}{Nativo} \\ \hline
+   Benchmark & Média & Desvio Padrão & Intervalo de Confiança \\ \hline
+   basicmath & 1.023 & 0.002 & 0.001\\ \hline
+   bitcnts & 0.183 & 0.011 & 0.007\\ \hline
+   qsort & 0.250 & 0.020 & 0.012\\ \hline
+   susan-smoothing & 0.134 & 0.022 & 0.014\\ \hline
+   susan-edges & 0.037 & 0.006 & 0.004\\ \hline
+   susan-corners & 0.012 & 0.005 & 0.003\\ \hline
+   tiff2rgba & 0.335 & 0.218 & 0.135\\ \hline
+   tiffmedian & 0.278 & 0.020 & 0.013\\ \hline 
+   tiffdither & 0.280 & 0.028 & 0.018\\ \hline 
+   tiff2bw & 0.085 & 0.012 & 0.007\\ \hline 
+   cjpeg & 0.050 & 0.053 & 0.033\\ \hline 
+   djpeg & 0.017 & 0.011 & 0.007\\ \hline 
+   patricia & 0.222 & 0.023 & 0.014\\ \hline 
+   dijkstra & 0.057 & 0.013 & 0.008\\ \hline 
+   ispell & 0.301 & 0.034 & 0.021\\ \hline 
+   search & 0.010 & 0.017 & 0.010\\ \hline 
+   say & 0.823 & 0.022 & 0.013\\ \hline 
+   blowfish-e & 0.196 & 0.034 & 0.021\\ \hline 
+   blowfish-d & 0.197 & 0.011 & 0.007\\ \hline 
+   rijndael-e & 0.266 & 0.019 & 0.011\\ \hline 
+   rijndael-d & 0.254 & 0.002 & 0.001\\ \hline 
+   sha & 0.042 & 0.025 & 0.015\\ \hline 
+   pgp-sa & 0.051 & 0.056 & 0.035\\ \hline 
+   pgp-z & 0.039 & 0.015 & 0.009\\ \hline 
+   rawcaudio & 0.339 & 0.130 & 0.081\\ \hline 
+   rawdaudio & 0.279 & 0.013 & 0.008\\ \hline 
+   crc & 0.305 & 0.010 & 0.006\\ \hline 
+   toast & 0.501 & 0.023 & 0.014\\ \hline 
+   untoast & 0.228 & 0.006 & 0.004 \\
+   \hline
+  \end{tabular}
+  \label{tab:tempos_nativo}
+ \end{center}
+\end{table}
+
+
+\begin{table}
+ \caption{Tempo de execução, desvio e média}
+ \begin{center}
+ \begin{tabular}{|l|r|r|r|}
+   \cline{2-4}
+   \multicolumn{1}{c|}{}& \multicolumn{3}{|c|}{Box-NoCache} \\ \hline
+   Benchmark & Média & Desv. Pad. & Interv. Conf.\\ \hline 
+   basicmath & 233.463 & 3.716 & 2.303\\ \hline 
+   bitcnts & 53.376 & 0.238 & 0.148\\ \hline 
+   qsort & 68.704 & 0.483 & 0.299\\ \hline 
+   susan-smoothing & 3.374 & 0.047 & 0.029\\ \hline 
+   susan-edges & 9.182 & 0.042 & 0.026\\ \hline 
+   susan-corners & 2.823 & 0.028 & 0.017\\ \hline 
+   tiff2rgba & 16.606 & 0.054 & 0.034\\ \hline 
+   tiffmedian & 50.930 & 0.526 & 0.326\\ \hline 
+   tiffdither & 95.966 & 0.781 & 0.484\\ \hline 
+   tiff2bw & 15.562 & 0.602 & 0.373\\ \hline 
+   cjpeg & 9.294 & 0.022 & 0.014\\ \hline 
+   djpeg & 2.964 & 0.026 & 0.016\\ \hline 
+   patricia & 54.226 & 0.578 & 0.358\\ \hline 
+   dijkstra & 15.967 & 0.194 & 0.120\\ \hline 
+   ispell & 81.081 & 0.610 & 0.378\\ \hline 
+   search & 0.859 & 0.044 & 0.027\\ \hline 
+   say & 14.113 & 0.024 & 0.015\\ \hline 
+   blowfish-e & 57.234 & 0.489 & 0.303\\ \hline 
+   blowfish-d & 58.386 & 0.436 & 0.271\\ \hline 
+   rijndael-e & 29.349 & 0.160 & 0.099\\ \hline 
+   rijndael-d & 30.866 & 1.935 & 1.199\\ \hline 
+   sha & 13.453 & 0.089 & 0.055\\ \hline 
+   pgp-sa & 0.670 & 0.002 & 0.001\\ \hline 
+   pgp-z & 1.220 & 0.011 & 0.007\\ \hline 
+   rawcaudio & 72.592 & 0.549 & 0.340\\ \hline 
+   rawdaudio & 59.891 & 0.314 & 0.194\\ \hline 
+   crc & 95.995 & 1.538 & 0.953\\ \hline 
+   toast & 184.047 & 1.334 & 0.827\\ \hline 
+   untoast & 71.222 & 0.718 & 0.445\\
+   \hline
+  \end{tabular}
+  \label{tab:tempos_boxnocache}
+ \end{center}
+\end{table}
+ 
+\begin{table}
+ \caption{Tempo de execução, desvio e média}
+ \begin{center}
+ \begin{tabular}{|l|r|r|r|}
+   \cline{2-4}
+   \multicolumn{1}{c|}{}& \multicolumn{3}{|c|}{Box-DiCache} \\ \hline
+   Benchmark & Média & Desv. Pad. & Interv. Conf.\\ \hline 
+   basicmath & 179.211 & 0.474 & 0.294\\ \hline 
+   bitcnts & 23.985 & 0.075 & 0.046\\ \hline 
+   qsort & 46.879 & 0.352 & 0.218\\ \hline 
+   susan-smoothing & 1.617 & 0.034 & 0.021\\ \hline 
+   susan-edges & 7.627 & 0.019 & 0.012\\ \hline 
+   susan-corners & 2.044 & 0.006 & 0.003\\ \hline 
+   tiff2rgba & 7.887 & 0.124 & 0.077\\ \hline 
+   tiffmedian & 25.397 & 0.313 & 0.194\\ \hline 
+   tiffdither & 57.333 & 0.087 & 0.054\\ \hline 
+   tiff2bw & 6.925 & 0.034 & 0.021\\ \hline 
+   cjpeg & 4.845 & 0.028 & 0.017\\ \hline 
+   djpeg & 1.746 & 0.021 & 0.013\\ \hline 
+   patricia & 44.347 & 0.139 & 0.086\\ \hline 
+   dijkstra & 7.686 & 0.011 & 0.007\\ \hline 
+   ispell & 60.786 & 0.078 & 0.048\\ \hline 
+   search & 0.636 & 0.004 & 0.002\\ \hline 
+   say & 12.151 & 0.045 & 0.028\\ \hline 
+   blowfish-e & 44.264 & 0.413 & 0.256\\ \hline 
+   blowfish-d & 44.707 & 0.405 & 0.251\\ \hline 
+   rijndael-e & 36.451 & 0.106 & 0.066\\ \hline 
+   rijndael-d & 37.343 & 0.222 & 0.137\\ \hline 
+   sha & 7.723 & 0.086 & 0.053\\ \hline 
+   pgp-sa & 0.447 & 0.002 & 0.001\\ \hline 
+   pgp-z & 0.714 & 0.004 & 0.002\\ \hline 
+   rawcaudio & 33.437 & 0.295 & 0.183\\ \hline 
+   rawdaudio & 27.648 & 0.281 & 0.174\\ \hline 
+   crc & 50.293 & 0.555 & 0.344\\ \hline 
+   toast & 110.080 & 0.884 & 0.548\\ \hline 
+   untoast & 33.199 & 0.097 & 0.060\\
+   \hline
+  \end{tabular}
+  \label{tab:tempos_boxdicache}
+ \end{center}
+\end{table}
+ 
+\begin{table}
+ \caption{Tempo de execução, desvio e média}
+ \begin{center}
+ \begin{tabular}{|l|r|r|r|}
+   \cline{2-4}
+   \multicolumn{1}{c|}{}& \multicolumn{3}{|c|}{Bochs} \\ \hline
+   Benchmark & Média & Desv. Pad. & Interv. Conf.\\ \hline 
+   basicmath & 58.402 & 0.106 & 0.066\\ \hline 
+   bitcnts & 8.277 & 0.019 & 0.012\\ \hline 
+   qsort & 16.224 & 0.103 & 0.064\\ \hline 
+   susan-smoothing & 11.175 & 0.766 & 0.474\\ \hline 
+   susan-edges & 1.904 & 0.013 & 0.008\\ \hline 
+   susan-corners & 0.653 & 0.025 & 0.016\\ \hline 
+   tiff2rgba & 8.053 & 0.483 & 0.299\\ \hline 
+   tiffmedian & 12.389 & 0.740 & 0.458\\ \hline 
+   tiffdither & 18.348 & 0.120 & 0.075\\ \hline 
+   tiff2bw & 4.331 & 0.137 & 0.085\\ \hline 
+   cjpeg & 2.003 & 0.099 & 0.062\\ \hline 
+   djpeg & 0.777 & 0.010 & 0.006\\ \hline 
+   patricia & 13.230 & 0.105 & 0.065\\ \hline 
+   dijkstra & 2.809 & 0.012 & 0.008\\ \hline 
+   ispell & 18.511 & 0.893 & 0.553\\ \hline 
+   search & 0.238 & 0.010 & 0.006\\ \hline 
+   say & 49.562 & 0.052 & 0.032\\ \hline 
+   blowfish-e & 12.952 & 0.070 & 0.043\\ \hline 
+   blowfish-d & 13.045 & 0.057 & 0.036\\ \hline 
+   rijndael-e & 14.557 & 0.260 & 0.161\\ \hline 
+   rijndael-d & 14.636 & 0.266 & 0.165\\ \hline 
+   sha & 2.571 & 0.030 & 0.018\\ \hline 
+   pgp-sa & 0.231 & 0.030 & 0.019\\ \hline 
+   pgp-z & 0.361 & 0.007 & 0.005\\ \hline 
+   rawcaudio & 12.855 & 0.252 & 0.156\\ \hline 
+   rawdaudio & 10.383 & 0.071 & 0.044\\ \hline 
+   crc & 20.076 & 0.101 & 0.062\\ \hline 
+   toast & 34.731 & 0.177 & 0.109\\ \hline 
+   untoast & 14.685 & 5.718 & 3.544\\
+   \hline
+ \end{tabular}
+ \label{tab:tempos_bochs}
+ \end{center}
+\end{table}
+
+\begin{table}
+ \caption{Tempo de execução, desvio e média}
+ \begin{center}
+ \begin{tabular}{|l|r|r|r|}
+   \cline{2-4}
+   \multicolumn{1}{c|}{}& \multicolumn{3}{|c|}{Bochs ICache} \\ \hline
+   Benchmark & Média & Desv. Pad. & Interv. Conf.\\ \hline 
+   basicmath & 74.511 & 0.303 & 0.188\\ \hline 
+   bitcnts & 9.332 & 0.058 & 0.036\\ \hline 
+   qsort & 20.299 & 0.062 & 0.039\\ \hline 
+   susan-smoothing & 0.983 & 0.005 & 0.003\\ \hline 
+   susan-edges & 2.558 & 0.019 & 0.012\\ \hline 
+   susan-corners & 0.803 & 0.010 & 0.006\\ \hline 
+   tiff2rgba & 4.701 & 0.392 & 0.243\\ \hline 
+   tiffmedian & 13.447 & 0.142 & 0.088\\ \hline 
+   tiffdither & 21.579 & 0.061 & 0.038\\ \hline 
+   tiff2bw & 3.713 & 0.027 & 0.017\\ \hline 
+   cjpeg & 2.525 & 0.011 & 0.007\\ \hline 
+   djpeg & 0.921 & 0.025 & 0.015\\ \hline 
+   patricia & 17.006 & 0.071 & 0.044\\ \hline 
+   dijkstra & 2.968 & 0.022 & 0.014\\ \hline 
+   ispell & 24.859 & 0.038 & 0.024\\ \hline 
+   search & 0.279 & 0.003 & 0.002\\ \hline 
+   say & 6.946 & 0.038 & 0.024\\ \hline 
+   blowfish-e & 15.022 & 0.301 & 0.187\\ \hline 
+   blowfish-d & 15.157 & 0.095 & 0.059\\ \hline 
+   rijndael-e & 9.246 & 0.016 & 0.010\\ \hline 
+   rijndael-d & 9.442 & 0.080 & 0.049\\ \hline 
+   sha & 3.602 & 0.031 & 0.019\\ \hline 
+   pgp-sa & 0.286 & 0.003 & 0.002\\ \hline 
+   pgp-z & 0.445 & 0.004 & 0.003\\ \hline 
+   rawcaudio & 15.301 & 0.067 & 0.042\\ \hline 
+   rawdaudio & 13.387 & 1.041 & 0.645\\ \hline 
+   crc & 27.880 & 0.252 & 0.156\\ \hline 
+   toast & 38.157 & 0.110 & 0.068\\ \hline 
+   untoast & 14.171 & 0.072 & 0.045\\
+   \hline
+ \end{tabular}
+ \label{tab:tempos_boxicache}
+ \end{center}
+\end{table}
 
 \newpage
 \bibliography{box}
