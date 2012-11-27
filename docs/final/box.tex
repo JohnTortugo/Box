@@ -461,13 +461,13 @@ A implementação da cache de instruções do Bochs, além de armazenar as instr
 recentemente executadas, fornece um conjunto de otimizações voltadas a reduzir o
 impacto causado pela decodificação contínua de instruções. Para isso, são
 implementados mecanismos de \emph{prefetch} e pré-decodificação das
-instrução. Em sua implementação padrão, a cache possui um total de 64K entradas,
+instruções. Em sua implementação padrão, a cache possui um total de 64K entradas,
 sendo que cada entrada representa a primeira entrada de um bloco de instruções e
 o número de instruções contidas no bloco.
 
 Durante a execução da CPU virtual, o laço de interpretação solicita à cache a
-próxima instrução a ser executada, neste ponto a cache verifica se a instrução
-solicitada já foi decodificada anteriormente, em caso afirmativo. O endereço da
+próxima instrução a ser executada. Neste ponto a cache verifica se a instrução
+solicitada já foi decodificada anteriormente, e, em caso afirmativo, o endereço da
 entrada no cache que contém a instrução é devolvido ao laço. Caso a instrução
 não tenha sido decodificada anteriormente, a cache faz o \emph(fetch) da página
 de memória onde a instrução a ser executada está contida e inicia a
