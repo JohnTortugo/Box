@@ -120,7 +120,7 @@ informações obtidas durante a execução do código.
 Duas abordagens são frequentemente empregadas para implementar a emulação de
 código em uma máquina virtual: interpretação e tradução.  Uma MV que emprega
 interpretação utiliza funções para simular o comportamento de cada instrução da
-aplicação sendo emulada.  O processo de tradução porém, emprega técnicas da área
+aplicação sendo emulada.  O processo de tradução, porém, emprega técnicas da área
 de compiladores para produzir um código binário nativo (possivelmente otimizado)
 equivalente àquele da aplicação sendo emulada.  É comum encontrarmos MVs que,
 visando maximizar o desempenho, empregam estas abordagens em conjunto.
@@ -148,11 +148,11 @@ para a área de máquinas virtuais.
 
 Este trabalho está organizado da seguinte forma: na
 Seção~\ref{sec:fundamentacao} apresentamos a fundamentação teórica para a
-realização do projeto; a Seção~\ref{sec:bibliografia} apresentamos um
+realização do projeto; na Seção~\ref{sec:bibliografia} apresentamos um
 levantamento bibliográfico da área de máquinas virtuais a nível de binários; a
 Seção~\ref{sec:infraestrutura} e a Seção~\ref{sec:resultados} descrevem a
 infraestrutura utilizada na realização do projeto e os resultados obtidos,
-respectivamente; por fim a Seção~\ref{sec:conclusao} apresenta a conclusão do
+respectivamente; por fim, a Seção~\ref{sec:conclusao} apresenta a conclusão do
 trabalho.
   
 \section{Fundamentação Teórica} \label{sec:fundamentacao}
@@ -399,7 +399,7 @@ bibliotecas de runtime utilizadas por estes benchmarks.
 O Bochs é uma máquina virtual que utiliza interpretação como técnica de emulação
 das instruções. Por ser uma máquina virtual de sistema o Bochs faz a emulação de
 diversos componentes como: placa de vídeo, rede, som, dispositivos de disco,
-cdrom, mouse e teclado além de dispositivos de componentes internos da
+cdrom, mouse e teclado, além de dispositivos de componentes internos da
 arquitetura como cache de instruções, segmentação, paginação, TLB, etc.
 
 O Bochs utiliza diversos mecanismos para acelerar a interpretação das
@@ -430,25 +430,25 @@ seis partes, detalhadas a seguir:
 
 	\item \textbf{Decode:} Nesse estágio ocorre a busca e decodificação da
           instrução a ser emulada. O Bochs possui uma cache interna das
-          instruções mais recentemente decodificadas, se a instrução a ser
-          interpretada estiver na cache as informações são reutilizadas caso
-          contrário a instrução é decodificada.
+          instruções mais recentemente decodificadas. Se a instrução a ser
+          interpretada estiver na cache, as informações são reutilizadas. Caso
+          contrário, a instrução é decodificada.
 
 	\item \textbf{Instrumentation:} Nesse estágio o Bochs verifica se a
           instrução a ser interpretada é alvo de alguma rotina de
-          instrumentação. Em caso afirmativo a rotina de instrumentação é
+          instrumentação. Em caso afirmativo, a rotina de instrumentação é
           invocada antes da interpretação da instrução.
 
-	\item \textbf{Memory Addresses:} Nesse estágio endereços de memória
+	\item \textbf{Memory Addresses:} Nesse estágio, endereços de memória
           utilizados pela instrução a ser interpretada são resolvidos.  Em
           outras palavras, este passo é o responsável por tratar as várias
           formas de endereçamento presentes na família x86.
 
 	\item \textbf{Execution:} Nesse estágio ocorre de fato a interpretação
           da instrução. Durante a decodificação da instrução, a rotina que deve
-          efetuar a interpretação é anotada como meta-informação da instrução,
-          este estágio utiliza essa informação para fazer uma chamada indireta
-          para essa rotina.
+          efetuar a interpretação é anotada como meta-informação da
+          instrução e este estágio utiliza essa informação para fazer
+          uma chamada indireta para essa rotina.
 
 	\item \textbf{Commit:} Esse estágio faz a consolidação da execução da
           instrução, isto é, atualiza o registrador EIP.
@@ -464,7 +464,7 @@ Box e os maiores desafios enfrentados durante o seu desenvolvimento.
 Como citado anteriormente, o desenvolvimento da máquina virtual de processos Box
 baseou-se no código do Bochs, e embora ambas ainda compartilhem diversas
 características em comum, principalmente relacionadas à interpretação de
-instruções, ao final da implementação, suas arquiteturas ficaram drasticamente
+instruções, ao final da implementação suas arquiteturas ficaram drasticamente
 diferentes. Por exemplo, uma vez que o Bochs faz a execução de um sistema
 operacional ele não precisa se preocupar com detalhes de criação de processos ou
 chamadas de sistema, porém uma máquina de processos geralmente precisa. 
@@ -482,7 +482,7 @@ som, mouse, teclado, cdrom, disco rígido, disquete, portas USB, barramento PCI,
 COM, etc.
 
 O subsistema de memória também sofreu grandes mudanças, pois originalmente o
-Bochs emulava mecanismos de caches de instrução, dados, e \emph{translation
+Bochs emulava mecanismos de caches de instrução, dados e \emph{translation
 lookaside buffer} (TLB). Todos esses recursos foram removidos por serem
 transparentes ao processo durante a execução.
 
@@ -491,7 +491,7 @@ transparentes ao processo durante a execução.
 A implementação do Box não conta com nenhum auxílio do sistema operacional para
 preparar o ambiente de execução do processo sendo emulado. Por esse motivo, foi
 necessário implementar mecanismos para permitir a emulação de toda a etapa de
-carregamento e execução do processo, isso trouxe uma série de complicações para
+carregamento e execução do processo. Isso trouxe uma série de complicações para
 o desenvolvimento do projeto.
 
 Não contar com o suporte do kernel significa que foi necessário implementar toda
@@ -560,11 +560,11 @@ Sempre que a aplicação guest faz uma chamada ao sistema operacional o Box deve
 interceptar essa chamada e decidir entre duas opções: 1) apenas ``redirecionar''
 a chamada ao sistema nativo ou 2) implementar a execução da syscall. A
 interceptação das chamadas é feita porque todas as instruções executadas pela
-aplicação guest são interpretadas e porque pode ser necessário alguma tradução
+aplicação guest são interpretadas e porque pode ser necessária alguma tradução
 dos endereços gerados pela aplicação.
 
 Todas as instruções que não modificam o espaço de endereçamento da aplicação
-guest, são redirecionadas para o S.O. nativo. Exemplos de chamadas que são
+guest são redirecionadas para o S.O. nativo. Exemplos de chamadas que são
 tratadas dessa forma são: mkdir, fstat, getpid, getuid, uname, rename, rmdir,
 nanosleep, utime, ioctl e chmod.
 
@@ -573,7 +573,7 @@ ou que retornam informações que podem vir a ser usadas posteriormente para
 controlar alguma alteração são implementadas pelo Box.  Exemplos de chamadas que
 precisaram ser implementadas são: open, close, creat, brk, mmap e munmap. Estas
 chamadas, com exceção da brk, estão relacionadas pelo fato de poderem ser
-utilizadas para fazer ``\emph{memory mapped I/O}'' e portanto precisam de atenção
+utilizadas para fazer ``\emph{memory mapped I/O}'', e portanto precisam de atenção
 especial para fazer o mapeamento das entradas de dados diretamente para a
 memória da aplicação sendo emulada. A chamada brk precisa ser implementada
 porque ela é utilizada para aumentar o tamanho do segmento de dados do programa,
