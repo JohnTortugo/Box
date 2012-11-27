@@ -468,13 +468,12 @@ número de instruções no bloco.
 
 Durante a execução da CPU virtual, o laço de interpretação solicita à cache a
 próxima instrução a ser executada, neste ponto a cache verifica se a instrução
-já foi decodificada anteriormente, em caso afirmativo, o endereço da
-entrada no cache que contém a instrução é devolvido ao laço. Caso a instrução
-não tenha sido decodificada anteriormente, a cache faz o \emph{fetch} da página
-de memória onde a instrução a ser executada está contida e inicia a
-decodificação de um bloco de instruções que pode conter até 32
-instruções. Através desse processo, o Bochs reduz o tempo gasto com chamadas à
-rotina de decodificação de instruções.
+já foi decodificada anteriormente, em caso afirmativo, o endereço da entrada no
+cache que contém a instrução é devolvido ao laço. Caso a instrução não tenha
+sido decodificada anteriormente, a cache faz o \emph{fetch} da página de memória
+onde a instrução a ser executada está contida e inicia a decodificação de um
+bloco de instruções que pode conter até 32 instruções. Através desse processo, o
+Bochs reduz o tempo gasto com chamadas à rotina de decodificação de instruções.
 
 Com as informações contidas na entrada de cache, o laço executa sequencialmente
 todas as instruções existentes no bloco simplesmente incrementando o endereço da
