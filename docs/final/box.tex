@@ -846,37 +846,39 @@ execuções de cada benchmark/entrada.
 \begin{table}[!h]
  \caption{Tempo médio de execução nativa, Box-NoCache, Box-DiCache, Bochs e Box-ICache.}
  \begin{center}
- \begin{tabular}{|l|r|r|r|}
-        \bf{Benchmark} & \bf{Nativo} & \bf{NoCache} & \bf{DiCache} & \bf{Bochs}  & \bf{ICache} \\ \hline
-        basicmath & 1.023 & 233.463 & 179.211 & 58.402 & 74.511\\ \hline
-        bitcnts & 0.183 & 53.376 & 23.985 & 8.277 & 9.332\\ \hline
-        qsort & 0.250 & 68.704 & 46.879 & 16.224 & 20.299\\ \hline
-        susan-smoothing & 0.134 & 3.374 & 1.617 & 11.175 & 0.983\\ \hline
-        susan-edges & 0.037 & 9.182 & 7.627 & 1.904 & 2.558\\ \hline
-        susan-corners & 0.012 & 2.823 & 2.044 & 0.653 & 0.803\\ \hline
-        tiff2rgba & 0.335 & 16.606 & 7.887 & 8.053 & 4.701\\ \hline
-        tiffmedian & 0.278 & 50.930 & 25.397 & 12.389 & 13.447\\ \hline
-        tiffdither & 0.280 & 95.966 & 57.333 & 18.348 & 21.579\\ \hline
-        tiff2bw & 0.085 & 15.562 & 6.925 & 4.331 & 3.713\\ \hline
-        cjpeg & 0.050 & 9.294 & 4.845 & 2.003 & 2.525\\ \hline
-        djpeg & 0.017 & 2.964 & 1.746 & 0.777 & 0.921\\ \hline
-        patricia & 0.222 & 54.226 & 44.347 & 13.230 & 17.006\\ \hline
-        dijkstra & 0.057 & 15.967 & 7.686 & 2.809 & 2.968\\ \hline
-        ispell & 0.301 & 81.081 & 60.786 & 18.511 & 24.859\\ \hline
-        search & 0.010 & 0.859 & 0.636 & 0.238 & 0.279\\ \hline
-        say & 0.823 & 14.113 & 12.151 & 49.562 & 6.946\\ \hline
-        blowfish-e & 0.196 & 57.234 & 44.264 & 12.952 & 15.022\\ \hline
-        blowfish-d & 0.197 & 58.386 & 44.707 & 13.045 & 15.157\\ \hline
-        rijndael-e & 0.266 & 29.349 & 36.451 & 14.557 & 9.246\\ \hline
-        rijndael-d & 0.254 & 30.866 & 37.343 & 14.636 & 9.442\\ \hline
-        sha & 0.042 & 13.453 & 7.723 & 2.571 & 3.602\\ \hline
-        pgp-sa & 0.051 & 0.670 & 0.447 & 0.231 & 0.286\\ \hline
-        pgp-z & 0.039 & 1.220 & 0.714 & 0.361 & 0.445\\ \hline
-        rawcaudio & 0.339 & 72.592 & 33.437 & 12.855 & 15.301\\ \hline
-        rawdaudio & 0.279 & 59.891 & 27.648 & 10.383 & 13.387\\ \hline
-        crc & 0.305 & 95.995 & 50.293 & 20.076 & 27.880\\ \hline
-        toast & 0.501 & 184.047 & 110.080 & 34.731 & 38.157\\ \hline
-        untoast & 0.228 & 71.222 & 33.199 & 14.685 & 14.171\\ \hline
+ \begin{tabular}{|l|r|r|r|r|r|r|}
+   \cline{4-6}
+   \multicolumn{3}{c|}{}& \multicolumn{3}{|c|}{Box} \\ \hline
+   \bf{Benchmark} & \bf{Nativo} & \bf{Bochs} &  \bf{NoCache} & \bf{DICache} & \bf{ICache} \\ \hline
+    basicmath & 1.023 & 58.402 & 233.463 & 179.211 & 74.511 \\ \hline
+    bitcnts & 0.183 & 8.277 & 53.376 & 23.985 & 9.332 \\ \hline
+    qsort & 0.25 & 16.224 & 68.704 & 46.879 & 20.299 \\ \hline
+    susan-smoothing & 0.134 & 11.175 & 3.374 & 1.617 & 0.983 \\ \hline
+    susan-edges & 0.037 & 1.904 & 9.182 & 7.627 & 2.558 \\ \hline
+    susan-corners & 0.012 & 0.653 & 2.823 & 2.044 & 0.803 \\ \hline
+    tiff2rgba & 0.335 & 8.053 & 16.606 & 7.887 & 4.701 \\ \hline
+    tiffmedian & 0.278 & 12.389 & 50.93 & 25.397 & 13.447 \\ \hline
+    tiffdither & 0.28 & 18.348 & 95.966 & 57.333 & 21.579 \\ \hline
+    tiff2bw & 0.085 & 4.331 & 15.562 & 6.925 & 3.713 \\ \hline
+    cjpeg & 0.05 & 2.003 & 9.294 & 4.845 & 2.525 \\ \hline
+    djpeg & 0.017 & 0.777 & 2.964 & 1.746 & 0.921 \\ \hline
+    patricia & 0.222 & 13.23 & 54.226 & 44.347 & 17.006 \\ \hline
+    dijkstra & 0.057 & 2.809 & 15.967 & 7.686 & 2.968 \\ \hline
+    ispell & 0.301 & 18.511 & 81.081 & 60.786 & 24.859 \\ \hline
+    search & 0.01 & 0.238 & 0.859 & 0.636 & 0.279 \\ \hline
+    say & 0.823 & 49.562 & 14.113 & 12.151 & 6.946 \\ \hline
+    blowfish-e & 0.196 & 12.952 & 57.234 & 44.264 & 15.022 \\ \hline
+    blowfish-d & 0.197 & 13.045 & 58.386 & 44.707 & 15.157 \\ \hline
+    rijndael-e & 0.266 & 14.557 & 29.349 & 36.451 & 9.246 \\ \hline
+    rijndael-d & 0.254 & 14.636 & 30.866 & 37.343 & 9.442 \\ \hline
+    sha & 0.042 & 2.571 & 13.453 & 7.723 & 3.602 \\ \hline
+    pgp-sa & 0.051 & 0.231 & 0.67 & 0.447 & 0.286 \\ \hline
+    pgp-z & 0.039 & 0.361 & 1.22 & 0.714 & 0.445 \\ \hline
+    rawcaudio & 0.339 & 12.855 & 72.592 & 33.437 & 15.301 \\ \hline
+    rawdaudio & 0.279 & 10.383 & 59.891 & 27.648 & 13.387 \\ \hline
+    crc & 0.305 & 20.076 & 95.995 & 50.293 & 27.88 \\ \hline
+    toast & 0.501 & 34.731 & 184.047 & 110.08 & 38.157 \\ \hline
+    untoast & 0.228 & 14.685 & 71.222 & 33.199 & 14.171 \\ \hline
   \end{tabular}
   \label{tab:tempos_medios}
  \end{center}
