@@ -132,7 +132,7 @@ de memória, placa gráfica e etc.  Para tarefas como \emph{cross-platform
   emulation} e perfilamento da execução do código de uma aplicação em
 específico, o uso de uma MV de sistema também agrega ao \emph{overhead} de
 emulação da aplicação o \emph{overhead} de emulação destes dispositivos e do
-sistema operacional.  Portanto frequentemente nestes cenários uma máquina
+sistema operacional.  Portanto, frequentemente nestes cenários uma máquina
 virtual de processo é preferível em relação a uma MV de sistema.
 
 Nesse texto apresentamos uma proposta de avaliação do \emph{overhead} de
@@ -201,7 +201,7 @@ diferentes. Por exemplo, para criar uma máquina virtual que executa um sistema
 compilado para o x86 em uma arquitetura PowerPC será necessário emular tanto a
 interface do x86 (instruções) quanto funcionalidades (ex: \emph{calling
   convention}) utilizando instruções disponíveis na arquitetura PowerPC. O
-processo de emulação é central em uma máquina virtual e a técnica utilizada para
+processo de emulação é central em uma máquina virtual, e a técnica utilizada para
 implementá-lo é fundamental para o desempenho do sistema. Entre as técnicas
 frequentemente utilizadas para implementar emulação em uma máquina virtual
 estão:
@@ -214,11 +214,11 @@ estão:
     (\emph{fetch}), sua decodificação (\emph{decode}) e finalmente a execução da
     operação equivalente.
  
-  \item \textbf{Tradução de binários:} Neste processo um código nativo na
+  \item \textbf{Tradução de binários:} Neste processo, um código nativo na
     arquitetura destino é gerado dinamicamente (\emph{Just-in-time}) a partir do
     código original da aplicação e tem como função reproduzir o comportamento do
     código da aplicação original \cite{Sites1993}. Esta forma de implementação
-    assemelha-se ao processo de compilação estático onde um código fonte é
+    assemelha-se ao processo de compilação estático, onde um código fonte é
     decodificado e traduzido para uma linguagem destino.
  
   \item \textbf{Tradução em duas etapas:} Nesta forma de implementação, o
@@ -467,8 +467,8 @@ endereço da estrutura que representa a primeira instrução decodificada e o
 número de instruções no bloco.
 
 Durante a execução da CPU virtual, o laço de interpretação solicita à cache a
-próxima instrução a ser executada, neste ponto a cache verifica se a instrução
-já foi decodificada anteriormente, em caso afirmativo, o endereço da entrada no
+próxima instrução a ser executada. Neste ponto, a cache verifica se a instrução
+já foi decodificada anteriormente. Em caso afirmativo, o endereço da entrada no
 cache que contém a instrução é devolvido ao laço. Caso a instrução não tenha
 sido decodificada anteriormente, a cache faz o \emph{fetch} da página de memória
 onde a instrução a ser executada está contida e inicia a decodificação de um
