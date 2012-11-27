@@ -410,7 +410,7 @@ seis partes, detalhadas a seguir:
 
 \begin{figure}[!h]
   	\begin{center}
-    	\includegraphics[scale=0.5]{figures/bochs_loop}
+    	\includegraphics[scale=0.5]{figures/bochs_loop.eps}
 	\end{center}
 	\caption{Laço principal de interpretação de instruções do Bochs.}
 	\label{fig:bochs_loop}
@@ -529,7 +529,7 @@ Figura~\ref{fig:esp_end} para os casos com linkagem dinâmica e estática.
 
 \begin{figure}[!h]
         \begin{center}
-        \includegraphics[scale=0.5]{figures/esp_end}
+        \includegraphics[scale=0.5]{figures/esp_end.eps}
         \end{center}
         \caption{Espaço de endereçamento inicial da aplicação.}
         \label{fig:esp_end}
@@ -548,7 +548,7 @@ programa.
 
 \begin{figure}[!h]
   	\begin{center}
-    	\includegraphics[scale=0.5]{figures/stack_ini}
+    	\includegraphics[scale=0.5]{figures/stack_ini.eps}
 	\end{center}
 	\caption{Formato da pilha inicial de execução de um programa.}
 	\label{fig:stack_ini}
@@ -778,7 +778,7 @@ modificações necessárias para permitir que ambas fosse utilizadas em conjunto
 \begin{figure}[h]
         \centering
         \includegraphics[width=1.0\textwidth]{figures/bochs_icache}
-        \caption{Tempos de execução do Mibench no Bochs e Box com instruction cache.}
+        \caption{Tempos de execução do Mibench no Bochs e Box com cache de instruções.}
         \label{fig:bochs_icache}
 \end{figure}
 
@@ -817,10 +817,11 @@ Box numa poderosa ferramenta para teste e análise de execução de
 aplicativos. Para isso, estão previstos como trabalhos futuros:
 
 \begin{itemize}
-	\item Aumentar a compatibilidade com ambientes reais através da utilização de carregadores nativos.
-	\item Implementação de novas chamadas de sistema.
+	\item Aprimorar o subsistema de memória, melhorando o controle de segmentação e fornecendo suporte a paginação de memória.
+        \item Implementação de suporte a execução carregadores externos (não pertencente ao Box).
+	\item Implementação de novas chamadas de sistema (\emph{syscalls}).
 	\item Implementação de mecanismos de instrumentação de código.
-	\item Execução multiplataforma.
+	\item Suporte a execução em diferentes plataformas e ou sistemas operacionais.
 \end{itemize}
 
 \newpage
