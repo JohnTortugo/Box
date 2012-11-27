@@ -608,6 +608,16 @@ todos os acessos a memória são traduzidos utilizando esse endereço base.
 
 O Box atualmente não trata proteção de páginas.
 
+\subsubsection{Implementação da DICache}
+
+Foi feita a implementação da técnica de DICache~\cite{dicache} no Box. Para 
+fazer essa implementação o laço principal do módulo CPU foi modificado para
+fazer a verificação da existência, na DICache, das informações decodificadas
+da instrução que está prestes a ser executada. O acesso as linhas da DICache
+é feito através do resultado de uma função \textit{hash} aplicada no endereço virtual
+da instrução em consideração. A implementação desenvolvida utiliza mapeamento
+direto e possui 512 entradas. 
+
 \subsection{Mibench}
 
 \begin{table}                                                                                                                                                                                              
