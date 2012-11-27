@@ -735,15 +735,15 @@ Utilizamos o Bochs-2.6 nos experimentos, atualmente esta é a versão mais recen
 
 \subsection{Overhead de Emulação de Sistema}
 
-A Figura~\ref{fig:bochs_nocache_nativo} apresenta os tempos de execução dos 
-aplicativos do Mibench executados nativamente, no Bochs e no Box sem nenhum 
-tipo de otimização. De modo geral, a comparação entre os tempos de execução das 
-máquinas virtuais de sistema e processo mostrou que a versão de sistema apresentou 
-tempos significativamente menores. Tal diferença pode ser justificada pelo fato do
-Bochs contar com otimizações que são direcionadas à implementação do subsistema de 
-memória e a utilização da cache de instruções pré decodificadas. Os resultados 
-indicam que essas otimizações foram suficientes para superar qualquer redução de 
-tempo obtido pela eliminação de emulação da parte de sistema operacional. 
+A Figura~\ref{fig:bochs_nocache_nativo} apresenta os tempos de execução dos
+aplicativos do Mibench executados nativamente, no Bochs e no Box sem nenhum tipo
+de otimização. De modo geral, a comparação entre os tempos de execução das
+máquinas virtuais de sistema e processo mostrou que a versão de sistema
+apresentou tempos significativamente menores. Tal diferença pode ser justificada
+pelo fato do Bochs contar com otimizações que são direcionadas à implementação
+do subsistema de memória e a utilização da cache de instruções pré-decodificadas. Os resultados indicam que essas otimizações foram suficientes
+para superar qualquer redução de tempo obtido pela eliminação de emulação da
+parte de sistema operacional.
 
 \begin{figure}[h]
 	\centering
@@ -754,15 +754,14 @@ tempo obtido pela eliminação de emulação da parte de sistema operacional.
 
 Através dos resultados obtidos é possível observar o impacto causado pela
 decodificação contínua de instruções (usada pelo Box) comparada com a 
-abordagem de pré decodificação utilizada pelo Bochs.
+abordagem de pré-decodificação utilizada pelo Bochs.
 
 \subsection{Otimizando a Interpretação}
 
 Como forma de minimizar o impacto causado pela decodificação repetida de
 instruções já executada, duas abordagens foram adotadas. Na primeira, foi
-implementada a técnica DICache \cite{dicache}, na segunda, o código de
-pré decodificação de instruções do Bochs foi incluído no Box. Para isso
-modificações tiveram que ser feitas no código original do Bochs para garantir a
+implementada a técnica DICache \cite{dicache}, na segunda, o código de pré-decodificação de instruções do Bochs foi incluído no Box. Para isso modificações
+tiveram que ser feitas no código original do Bochs para garantir a
 compatibilidade com o subsistema de memória utilizado no Box. Alterações também
 foram necessárias no laço de interpretação de instruções do Box de modo a
 integrar a novas funcionalidade. A Figura~\ref{fig:dicache_nocache} apresenta os
@@ -798,26 +797,27 @@ Este relatório apresentou as descobertas encontradas durante a análise
 comparativa entre máquinas virtuais de sistema e de processo.  Para a realização
 desta análise, foi desenvolvida uma máquina virtual de processos interpretada
 para execução de aplicativos Linux IA-32, baseado no código da máquina virtual
-de sistema Bochs.  
-Os resultados obtidos nos testes não sustentaram a hipótese da
-existência de \emph{overhead} causado pela interpretação de todo o sistema operacional
-em máquinas virtuais de sistema. Tal fato pode ser justificado pelos seguintes
-fatores:
+de sistema Bochs.  Os resultados obtidos nos testes não sustentaram a hipótese
+da existência de \emph{overhead} causado pela interpretação de todo o sistema
+operacional em máquinas virtuais de sistema. Tal fato pode ser justificado pelos
+seguintes fatores:
 
 \begin{itemize}
  \item Não foi possível desativar totalmente as otimizações existentes no Bochs,
    visto que muitas delas estão fortemente associadas a subsistemas que integram
    a máquina virtual;
  \item Em condições normais, a execução de um sistema operacional deve produzir
-   um baixo impacto no tempo de execução da aplicação, uma vez que na maior parte do tempo o código em execução é da aplicação, e não do sistema operacional.
+   um baixo impacto no tempo de execução da aplicação, uma vez que na maior
+   parte do tempo o código em execução é da aplicação, e não do sistema
+   operacional.
 \end{itemize}
 
 Embora não tenha sido possível provar a existência de \emph{overhead} de
 execução de máquinas virtuais de sistema, foi comprovado o impacto causado pela
-aplicação de técnicas de otimização em uma MV. A redução no tempo
-de execução das aplicações executada no Box utilizando otimizações mostra o
-quanto a interpretação pode ser beneficiada com a utilização de técnicas de
-otimização como DICache e pré-decodificação.
+aplicação de técnicas de otimização em uma MV. A redução no tempo de execução
+das aplicações executada no Box utilizando otimizações mostra o quanto a
+interpretação pode ser beneficiada com a utilização de técnicas de otimização
+como DICache e pré-decodificação.
 
 Os resultados obtidos nos testes com otimização mostram que a MV desenvolvida
 tem potencial para executar aplicações com tempos inferiores aos tempos de uma
@@ -827,20 +827,23 @@ Box numa poderosa ferramenta para teste e análise de execução de
 aplicativos. Para isso, estão previstos como trabalhos futuros:
 
 \begin{itemize}
-	\item Aprimorar o subsistema de memória, melhorando o controle de segmentação e fornecendo suporte a paginação de memória.
-        \item Implementação de suporte a execução carregadores externos (não pertencente ao Box).
+	\item Aprimorar o subsistema de memória, melhorando o controle de
+          segmentação e fornecendo suporte a paginação de memória.
+        \item Implementação de suporte a execução carregadores externos (não
+          pertencente ao Box).
 	\item Implementação de novas chamadas de sistema (\emph{syscalls}).
 	\item Implementação de mecanismos de instrumentação de código.
-	\item Suporte a execução em diferentes plataformas e ou sistemas operacionais.
+	\item Suporte a execução em diferentes plataformas e ou sistemas
+          operacionais.
 \end{itemize}
 
 \newpage
 
 \section*{Apêndice A} \label{ap:results}
 
-As Tabelas~\ref{tab:tempos_medios} à \ref{tab:tempos_boxicache} mostram os 
-resultados que obtivemos com o conjunto de aplicativos Mibench executando a 
-entrada de dados grande. Os resultados apresentados são derivados de 10 
+As Tabelas~\ref{tab:tempos_medios} à \ref{tab:tempos_boxicache} mostram os
+resultados que obtivemos com o conjunto de aplicativos Mibench executando a
+entrada de dados grande. Os resultados apresentados são derivados de 10
 execuções de cada benchmark/entrada.
 
 \begin{table}[!h]
